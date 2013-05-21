@@ -3,10 +3,14 @@ package com.joffrey_bion.csv_epoch_synchronizer;
 import java.io.IOException;
 import java.util.Arrays;
 
+import javax.swing.UIManager;
+
 import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.Csv;
 import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.CsvMerger;
 import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv_epoch_synchronizer.row_statistics.FlowStats;
+import com.joffrey_bion.file_processor_window.JFilePickersPanel;
+import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 
 public class Main {
 
@@ -38,6 +42,7 @@ public class Main {
         long timerStart = System.currentTimeMillis();
         String destFilename = null;
         if (args.length == 0) {
+            openWindow();
             System.err.println("Too few arguments.");
             printUsage();
             return;
@@ -59,6 +64,26 @@ public class Main {
         System.out.println("Total processing time: " + (System.currentTimeMillis() - timerStart)
                 + "ms");
         System.out.println("Output file: " + destFilename);
+    }
+    
+    private static void openWindow() {
+     // windows system look and feel for the window
+        try {
+            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        // file pickers source and destination
+        JFilePickersPanel filePickers = new JFilePickersPanel("Input file", "Output file");
+        @SuppressWarnings("serial")
+        JFileProcessorWindow frame = new JFileProcessorWindow("Pseq File Processor", "Process",
+                filePickers, null) {
+            @Override
+            public void process(String[] inPaths, String[] outPaths) {
+                // TODO
+            }
+        };
+        frame.setVisible(true);
     }
 
     private static String merge(String[] args) {
