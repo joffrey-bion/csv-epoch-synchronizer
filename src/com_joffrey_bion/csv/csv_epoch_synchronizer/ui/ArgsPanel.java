@@ -27,7 +27,6 @@ public class ArgsPanel extends JPanel {
     private JTextField[] tfSpikePhone;
     private JTextField[] tfSpikeActig;
 
-    @SuppressWarnings("serial")
     public class IncompleteSpikeException extends Exception {
         public IncompleteSpikeException(String message) {
             super(message);
