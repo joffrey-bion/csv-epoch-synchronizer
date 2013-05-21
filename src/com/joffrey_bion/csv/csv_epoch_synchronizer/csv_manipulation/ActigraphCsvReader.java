@@ -1,7 +1,7 @@
-package com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 
 public class ActigraphCsvReader extends TimestampedCsvReader {
 
@@ -11,7 +11,7 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
     private static final String DATE_FORMAT = "M/d/yyyy";
     private static final String TIME_FORMAT = "hh:mm:ss a";
 
-    public ActigraphCsvReader(String filename) throws FileNotFoundException {
+    public ActigraphCsvReader(String filename) throws FileNotFoundException, NotACsvFileException {
         super(filename);
     }
 

@@ -1,13 +1,13 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv.csv_epoch_synchronizer;
+
 import java.io.IOException;
 import java.util.LinkedList;
 
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.CsvWriter;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.DateHelper;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
-import com.joffrey_bion.csv_epoch_synchronizer.row_statistics.StatsLineSkipSome;
-
-
+import com.joffrey_bion.csv.Csv.NotACsvFileException;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics.StatsLineSkipSome;
+import com.joffrey_bion.csv.CsvWriter;
 
 public class RawToEpConverter {
     private static final int NB_STATS_PER_COL = 2;
@@ -27,7 +27,7 @@ public class RawToEpConverter {
         }
     }
 
-    public RawToEpConverter(String sourceName, String destName) throws IOException {
+    public RawToEpConverter(String sourceName, String destName) throws IOException, NotACsvFileException {
         reader = new PhoneCsvReader(sourceName);
         writer = new CsvWriter(destName);
     }

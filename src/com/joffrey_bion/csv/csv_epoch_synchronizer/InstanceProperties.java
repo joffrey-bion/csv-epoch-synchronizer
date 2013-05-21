@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv.csv_epoch_synchronizer;
 public class InstanceProperties {
 
     private static final long WINDOW_WIDTH_SEC = 1;

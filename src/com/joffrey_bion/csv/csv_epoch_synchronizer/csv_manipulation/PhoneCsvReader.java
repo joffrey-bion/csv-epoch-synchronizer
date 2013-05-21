@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -8,7 +8,7 @@ public class PhoneCsvReader extends TimestampedCsvReader {
     private static final int TIMESTAMP_COL = 0;
     private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    public PhoneCsvReader(String filename) throws FileNotFoundException {
+    public PhoneCsvReader(String filename) throws FileNotFoundException, NotACsvFileException {
         super(filename);
     }
 

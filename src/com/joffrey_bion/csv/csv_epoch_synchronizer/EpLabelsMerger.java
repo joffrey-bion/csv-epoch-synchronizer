@@ -1,11 +1,12 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv.csv_epoch_synchronizer;
 import java.io.IOException;
 import java.util.Arrays;
 
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.ActigraphCsvReader;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.CsvWriter;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.DateHelper;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
+import com.joffrey_bion.csv.Csv.NotACsvFileException;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.ActigraphCsvReader;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
+import com.joffrey_bion.csv.CsvWriter;
 
 
 public class EpLabelsMerger {
@@ -15,7 +16,7 @@ public class EpLabelsMerger {
     private CsvWriter writer;
 
     public EpLabelsMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename)
-            throws IOException {
+            throws IOException, NotACsvFileException {
         phone = new PhoneCsvReader(phoneEpFilename);
         actigraph = new ActigraphCsvReader(actigraphEpFilename);
         writer = new CsvWriter(destFilename);

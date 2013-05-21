@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer.row_statistics;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics;
 public class StatsLine {
 
     private FlowStats[] columns;

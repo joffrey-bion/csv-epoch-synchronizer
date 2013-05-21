@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer.row_statistics;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics;
 
 /**
  * This class provide statistics methods such as mean, standard deviation and

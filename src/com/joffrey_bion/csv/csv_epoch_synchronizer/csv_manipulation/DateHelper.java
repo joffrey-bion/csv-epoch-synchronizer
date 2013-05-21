@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;

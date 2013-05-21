@@ -1,16 +1,22 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv.csv_epoch_synchronizer;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import javax.swing.UIManager;
 
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.Csv;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.CsvMerger;
-import com.joffrey_bion.csv_epoch_synchronizer.csv_manipulation.DateHelper;
-import com.joffrey_bion.csv_epoch_synchronizer.row_statistics.FlowStats;
+import sun.security.krb5.internal.crypto.dk.ArcFourCrypto;
+
+import com.joffrey_bion.csv.Csv;
+import com.joffrey_bion.csv.CsvMerger;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics.FlowStats;
+import com.joffrey_bion.file_processor_window.DefaultPrinterLogger;
 import com.joffrey_bion.file_processor_window.JFilePickersPanel;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
+import com.joffrey_bion.file_processor_window.Logger;
+
+import com_joffrey_bion.csv.csv_epoch_synchronizer.ui.ArgsPanel;
 
 public class Main {
 
@@ -49,7 +55,7 @@ public class Main {
         } else if (args[ARG_MODE].equals("merge")) {
             destFilename = merge(args);
         } else if (args[ARG_MODE].equals("epc")) {
-            destFilename = createDataset(args);
+            destFilename = createDataset(args, new DefaultPrinterLogger());
         } else {
             System.err.println("Invalid mode.");
             printUsage();
@@ -73,16 +79,18 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        ArgsPanel args = new ArgsPanel();
         // file pickers source and destination
-        JFilePickersPanel filePickers = new JFilePickersPanel("Input file", "Output file");
+        JFilePickersPanel filePickers = new JFilePickersPanel(new String[]{"Phone raw file", "Actigraph epoch file"}, "Output file");
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Pseq File Processor", "Process",
-                filePickers, null) {
+        JFileProcessorWindow frame = new JFileProcessorWindow("Epoch Synchronizer", "Process",
+                filePickers, args) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 // TODO
             }
         };
+        frame.pack();
         frame.setVisible(true);
     }
 
@@ -104,23 +112,23 @@ public class Main {
         return destFilename;
     }
 
-    private static String createDataset(String[] args) {
+    private static String createDataset(String[] args, Logger log) {
         if (args.length < NB_ARGS_BEFORE_SPIKES) {
-            System.err.println("Too few arguments.");
+            log.printErr("Too few arguments.");
             printUsage();
             return null;
         } else if (args.length == NB_ARGS_BEFORE_SPIKES) {
-            System.err.println("Spikes time are necessary to compute clocks delay.");
+            log.printErr("Spikes time are necessary to compute clocks delay.");
             printUsage();
             return null;
         }
         String[] spikeArgs = Arrays.copyOfRange(args, NB_ARGS_BEFORE_SPIKES, args.length);
         if (spikeArgs.length % 2 != 0) {
-            System.err.println("Wrong number of spikes times: it has to be even.");
+            log.printErr("Wrong number of spikes times: it has to be even.");
             printUsage();
             return null;
         }
-        printSpikes(spikeArgs);
+        printSpikes(spikeArgs, log);
         String phoneRawFilename = args[ARG_E_PHONE_RAW_FILE];
         String actigraphEpFilename = args[ARG_E_ACTIGRAPH_EPOCH_FILE];
         String phoneEpFilename = Csv.removeCsvExtension(phoneRawFilename) + "-epochs.csv";
@@ -128,24 +136,24 @@ public class Main {
         InstanceProperties props = new InstanceProperties();
         try {
             props.delay = getTimeDelayAverage(spikeArgs);
-            System.out.println("> Phone-to-actigraph delay average: " + props.delay / 1000000
+            log.println("> Phone-to-actigraph delay average: " + props.delay / 1000000
                     + "ms");
-            System.out.println();
+            log.println("");
             props.startTime = Csv.timestampStrToNanos(args[ARG_E_START_TIME],
                     START_STOP_TIMESTAMP_FORMAT);
             props.stopTime = Csv.timestampStrToNanos(args[ARG_E_STOP_TIME],
                     START_STOP_TIMESTAMP_FORMAT);
             DateHelper.displayTimestamp("Actigraph start time", props.startTime);
-            System.out.println("Accumulating phone raw data into actigraph-timestamped epochs...");
+            log.println("Accumulating phone raw data into actigraph-timestamped epochs...");
             RawToEpConverter conv = new RawToEpConverter(phoneRawFilename, phoneEpFilename);
             conv.createEpochsFile(props);
-            System.out.println("> Intermediate file " + phoneEpFilename + " successfully created.");
-            System.out.println();
-            System.out.println("Merging phone epochs with actigraph labels...");
+            log.println("> Intermediate file " + phoneEpFilename + " successfully created.");
+            log.println("");
+            log.println("Merging phone epochs with actigraph labels...");
             EpLabelsMerger merger = new EpLabelsMerger(phoneEpFilename, actigraphEpFilename,
                     destFilename);
             merger.createLabeledFile(props);
-            System.out.println("> Dataset file " + destFilename + " successfully created.");
+            log.println("> Dataset file " + destFilename + " successfully created.");
             /*
              * if (new File(phoneEpFilename).delete()) {
              * System.out.println("> Intermediate file " + file.getName() +
@@ -153,13 +161,13 @@ public class Main {
              * System.out.println("> Delete operation has failed."); }
              */
         } catch (IOException e) {
-            System.err.println(e.getMessage());
+            log.printErr(e.getMessage());
             return null;
         }
         return destFilename;
     }
 
-    private static void printSpikes(String[] spikes) {
+    private static void printSpikes(String[] spikes, Logger log) {
         System.out.println("spikes (phone - actigraph): ");
         for (int i = 0; i < spikes.length; i++) {
             System.out.println(spikes[i++] + " - " + spikes[i]);

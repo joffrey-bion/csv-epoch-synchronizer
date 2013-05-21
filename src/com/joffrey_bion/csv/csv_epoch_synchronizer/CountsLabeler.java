@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv.csv_epoch_synchronizer;
 import java.util.LinkedList;
 
 public class CountsLabeler {
