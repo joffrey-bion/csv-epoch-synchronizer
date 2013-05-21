@@ -2,6 +2,7 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 
 public class ActigraphCsvReader extends TimestampedCsvReader {
 
@@ -19,7 +20,11 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
     public long extractTimestamp(String[] line) throws IOException {
         String timestamp = line[DATE_COL] + " " + line[TIME_COL];
         String format = DATE_FORMAT + " " + TIME_FORMAT;
-        return timestampStrToNanos(timestamp, format);
+        try {
+            return timestampStrToNanos(timestamp, format);
+        } catch (ParseException e) {
+            throw new IOException(e.getMessage());
+        }
     }
     
     public static double extractCountsPerMinutes(String[] line, long epochWidthNanos) {

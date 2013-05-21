@@ -2,6 +2,7 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.text.ParseException;
 
 public class PhoneCsvReader extends TimestampedCsvReader {
 
@@ -14,7 +15,11 @@ public class PhoneCsvReader extends TimestampedCsvReader {
 
     @Override
     public long extractTimestamp(String[] line) throws IOException {
-        return timestampStrToNanos(line[TIMESTAMP_COL], TIMESTAMP_FORMAT);
+        try {
+            return timestampStrToNanos(line[TIMESTAMP_COL], TIMESTAMP_FORMAT);
+        } catch (ParseException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
 }

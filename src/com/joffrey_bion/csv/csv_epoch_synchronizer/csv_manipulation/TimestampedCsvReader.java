@@ -2,7 +2,6 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
 import com.joffrey_bion.csv.CsvReader;
 
 public abstract class TimestampedCsvReader extends CsvReader {
