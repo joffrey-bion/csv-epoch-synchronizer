@@ -68,16 +68,15 @@ public class RawToEpConverter {
         long phoneStopTime = props.stopTime - props.delay;
         reader.skipToReachTimestamp(phoneStartTime);
         long beginning = phoneStartTime;
-        long timestamp;
         String[] line;
         while ((line = reader.readRow()) != null) {
-            timestamp = reader.extractTimestamp(line);
+            long timestamp = reader.extractTimestamp(line);
             if (timestamp > beginning + InstanceProperties.EPOCH_WIDTH_NANO) {
                 writer.writeRow(stats.getEpochLine(beginning + props.delay));
                 stats.clear();
-                if (beginning + InstanceProperties.EPOCH_WIDTH_NANO >= phoneStopTime)
-                    break;
                 beginning += InstanceProperties.EPOCH_WIDTH_NANO;
+                if (beginning >= phoneStopTime)
+                    break;
             }
             stats.add(line);
         }
@@ -86,20 +85,19 @@ public class RawToEpConverter {
     }
 
     private void writeSmoothEpochs(int nbOfColumns, InstanceProperties props) throws IOException {
-        long phoneStartTime = props.startTime - props.delay;
-        long phoneStopTime = props.stopTime - props.delay;
-        long beginning = phoneStartTime - InstanceProperties.WINBEGIN_TO_EPBEGIN;
-        reader.skipToReachTimestamp(beginning);
-        long timestamp;
+        final long phoneStartTime = props.startTime - props.delay;
+        final long phoneStopTime = props.stopTime - props.delay;
+        final Window win = new Window(phoneStartTime, nbOfColumns);
+        reader.skipToReachTimestamp(phoneStartTime - InstanceProperties.WINBEGIN_TO_EPBEGIN);
         String[] line;
-        Window win = new Window(phoneStartTime, nbOfColumns);
         while ((line = reader.readRow()) != null) {
-            timestamp = reader.extractTimestamp(line);
+            long timestamp = reader.extractTimestamp(line);
             win.add(timestamp, line);
             if (win.hasMovedEnough()) {
                 writer.writeRow(win.accumulate(props.delay));
-                if (win.getEpEndAfterAccumulation() >= phoneStopTime)
+                if (win.getLastEpEnd() >= phoneStopTime) {
                     break;
+                }
             }
         }
         reader.close();
@@ -109,32 +107,38 @@ public class RawToEpConverter {
     private class Window {
         private long winBeginning;
         private long lastEpBeginning;
+        private boolean full;
 
         private LinkedList<Long> timestamps;
         private LinkedList<String[]> samples;
         private EpochStatsLine stats;
 
         public Window(long firstEpBeginningTime, int nbOfColumns) {
+            stats = new EpochStatsLine(nbOfColumns);
             timestamps = new LinkedList<>();
             samples = new LinkedList<>();
-            winBeginning = firstEpBeginningTime - InstanceProperties.WINBEGIN_TO_EPBEGIN;
-            lastEpBeginning = firstEpBeginningTime;
-            stats = new EpochStatsLine(nbOfColumns);
+            winBeginning = 0;
+            full = false;
+            lastEpBeginning = firstEpBeginningTime - InstanceProperties.EPOCH_WIDTH_NANO;
         }
 
         public void add(long timestamp, String[] line) {
+            if (samples.isEmpty()) {
+                winBeginning = timestamp;
+            }
             timestamps.add(timestamp);
             samples.add(line);
             stats.add(line);
+            //System.out.println("add " + timestamp);
             while (timestamp > winBeginning + InstanceProperties.WINDOW_WIDTH_NANO) {
+                full = true;
                 removeFirst();
             }
         }
 
         private String[] removeFirst() {
-            Long timestamp = timestamps.removeFirst();
-            if (timestamp == null)
-                return null;
+            //System.out.println("remove " + timestamps.getFirst());
+            timestamps.removeFirst();
             String[] line = samples.removeFirst();
             stats.remove(line);
             winBeginning = timestamps.getFirst();
@@ -142,17 +146,17 @@ public class RawToEpConverter {
         }
 
         public String[] accumulate(long phoneToActigDelay) {
-            String[] accLine = stats.getEpochLine(lastEpBeginning + phoneToActigDelay);
             lastEpBeginning += InstanceProperties.EPOCH_WIDTH_NANO;
+            String[] accLine = stats.getEpochLine(lastEpBeginning + phoneToActigDelay);
             return accLine;
         }
         
         public boolean hasMovedEnough() {
-            return winBeginning + InstanceProperties.WINBEGIN_TO_EPBEGIN - lastEpBeginning >= InstanceProperties.EPOCH_WIDTH_NANO;
+            return full && (winBeginning + InstanceProperties.WINBEGIN_TO_EPBEGIN - lastEpBeginning >= InstanceProperties.EPOCH_WIDTH_NANO);
         }
         
-        public long getEpEndAfterAccumulation() {
-            return lastEpBeginning;
+        public long getLastEpEnd() {
+            return lastEpBeginning + InstanceProperties.EPOCH_WIDTH_NANO;
         }
     }
 }

@@ -58,7 +58,7 @@ public class ArgsPanel extends JPanel {
         tfStartTime = new JTextField();
         tfStartTime.setHorizontalAlignment(SwingConstants.CENTER);
         panelLimits.add(tfStartTime, "3, 3, fill, center");
-        tfStartTime.setColumns(23);
+        tfStartTime.setColumns(18);
 
         JLabel lblStopTime = new JLabel("Stop time:");
         panelLimits.add(lblStopTime, "1, 5, left, center");
@@ -66,7 +66,7 @@ public class ArgsPanel extends JPanel {
         tfStopTime = new JTextField();
         tfStopTime.setHorizontalAlignment(SwingConstants.CENTER);
         panelLimits.add(tfStopTime, "3, 5, fill, center");
-        tfStopTime.setColumns(23);
+        tfStopTime.setColumns(18);
 
         JLabel lblFormat = new JLabel("(yyyy-MM-dd HH:mm:ss.SSS)");
         panelLimits.add(lblFormat, "3, 7, center, center");
@@ -108,12 +108,13 @@ public class ArgsPanel extends JPanel {
             panelSpikes.add(tfSpikeLabel[i], "1, " + (2 * i + 5) + ", right, default");
 
             tfSpikePhone[i] = new JTextField();
+            tfSpikePhone[i].setColumns(10);
             tfSpikePhone[i].setHorizontalAlignment(SwingConstants.CENTER);
             panelSpikes.add(tfSpikePhone[i], "3, " + (2 * i + 5) + ", fill, default");
-            tfSpikePhone[i].setColumns(12);
 
             tfSpikeActig[i] = new JTextField();
-            tfSpikeActig[i].setColumns(12);
+            tfSpikeActig[i].setColumns(10);
+            tfSpikeActig[i].setHorizontalAlignment(SwingConstants.CENTER);
             panelSpikes.add(tfSpikeActig[i], "5, " + (2 * i + 5) + ", fill, default");
         }
     }
@@ -135,6 +136,8 @@ public class ArgsPanel extends JPanel {
                         "Each phone spike must have a corresponding actigraph spike");
             }
         }
+        if (nbSpikes == 0)
+            return new String[0];
         return Arrays.copyOfRange(spikes, 0, nbSpikes - 1);
     }
 
