@@ -50,7 +50,7 @@ public class EpLabelsMerger {
                         "Internal error, epoch beyond stoptime in intermediate file");
             }
             double cpm = ActigraphCsvReader.extractCountsPerMinutes(lineActigraph,
-                    InstanceProperties.EPOCH_WIDTH_NANO);
+                    props.getEpochWidthNano());
             String[] row = shiftLeftAndAppend(linePhone, labeler.countsToLabel(cpm));
             writer.writeRow(row);
         }

@@ -134,28 +134,30 @@ public class ArgsPanel extends JPanel {
         chckbxDeleteTemp.setHorizontalAlignment(SwingConstants.TRAILING);
         panel_4.add(chckbxDeleteTemp);
 
-        JPanel panel_1 = new JPanel();
-        panel.add(panel_1, BorderLayout.SOUTH);
+        JPanel savePanel = new JPanel();
+        panel.add(savePanel, BorderLayout.SOUTH);
 
         JButton btnSave = new JButton("Save params...");
-        @SuppressWarnings("unused")
+        
         FilePicker saveFilePicker = new FilePicker(this, btnSave, FilePicker.MODE_SAVE) {
             @Override
             protected void onSelect() {
                 saver.save(getSelectedFilePath(), ArgsPanel.this.filePickers);
             }
         };
-        panel_1.add(btnSave);
+        saveFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
+        savePanel.add(btnSave);
 
         JButton btnLoad = new JButton("Load params...");
-        @SuppressWarnings("unused")
+        
         FilePicker loadFilePicker = new FilePicker(this, btnLoad, FilePicker.MODE_OPEN) {
             @Override
             protected void onSelect() {
                 saver.load(getSelectedFilePath(), ArgsPanel.this.filePickers);
             }
         };
-        panel_1.add(btnLoad);
+        loadFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
+        savePanel.add(btnLoad);
 
         add(Box.createHorizontalStrut(5));
         JSeparator separator = new JSeparator();
@@ -234,5 +236,17 @@ public class ArgsPanel extends JPanel {
 
     public String getStopTime() {
         return tfStopTime.getText();
+    }
+    
+    public boolean shouldDeleteTempFile() {
+        return chckbxDeleteTemp.isSelected();
+    }
+    
+    public int getEpochWidth() throws NumberFormatException {
+        return Integer.parseInt(tfEpochWidth.getText());
+    }
+    
+    public int getWindowWidth() throws NumberFormatException {
+        return Integer.parseInt(tfWindowWidth.getText());
     }
 }

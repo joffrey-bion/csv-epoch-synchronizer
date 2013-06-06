@@ -32,7 +32,8 @@ public class Main {
 
     private static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final String SPIKE_TIMESTAMP_FORMAT = "HH:mm:ss.SSS";
-    private static final boolean DELETE_INTERMEDIATE_FILE = true;
+    
+    private static boolean deleteIntermediateFile = true;
 
     private static void printUsage() {
         System.out
@@ -125,6 +126,20 @@ public class Main {
             return null;
         }
         try {
+            int epochWidth = argsPanel.getEpochWidth();
+            int windowWidth = argsPanel.getWindowWidth();
+            if (epochWidth > windowWidth) {
+                log.printErr("The epoch cannot be longer than the window.");
+                return null;
+            }
+            props.setEpochWidth(epochWidth);
+            props.setWindowWidth(windowWidth);
+        } catch (NumberFormatException e) {
+            log.printErr("Incorrect format for epoch or window width, integer expected.");
+            return null;
+        }
+        deleteIntermediateFile = argsPanel.shouldDeleteTempFile();
+        try {
             props.delay = getTimeDelayAverage(argsPanel.getSpikes());
         } catch (IncompleteSpikeException e) {
             log.printErr(e.getMessage());
@@ -188,7 +203,7 @@ public class Main {
                     props.outputFilename);
             merger.createLabeledFile(props);
             log.println("> Dataset file " + props.outputFilename + " successfully created.");
-            if (DELETE_INTERMEDIATE_FILE) {
+            if (deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
                     log.println("> Intermediate file deleted(" + phoneEpFilename + ").");
                 } else {

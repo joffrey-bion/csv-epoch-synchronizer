@@ -71,10 +71,10 @@ public class RawToEpConverter {
         String[] line;
         while ((line = reader.readRow()) != null) {
             long timestamp = reader.extractTimestamp(line);
-            if (timestamp > beginning + InstanceProperties.EPOCH_WIDTH_NANO) {
+            if (timestamp > beginning + props.getEpochWidthNano()) {
                 writer.writeRow(stats.getEpochLine(beginning + props.delay));
                 stats.clear();
-                beginning += InstanceProperties.EPOCH_WIDTH_NANO;
+                beginning += props.getEpochWidthNano();
                 if (beginning >= phoneStopTime)
                     break;
             }
@@ -87,8 +87,8 @@ public class RawToEpConverter {
     private void writeSmoothEpochs(int nbOfColumns, InstanceProperties props) throws IOException {
         final long phoneStartTime = props.startTime - props.delay;
         final long phoneStopTime = props.stopTime - props.delay;
-        final Window win = new Window(phoneStartTime, nbOfColumns);
-        reader.skipToReachTimestamp(phoneStartTime - InstanceProperties.WINBEGIN_TO_EPBEGIN);
+        final Window win = new Window(phoneStartTime, nbOfColumns, props);
+        reader.skipToReachTimestamp(phoneStartTime - props.getWinBeginToEpBegin());
         String[] line;
         while ((line = reader.readRow()) != null) {
             long timestamp = reader.extractTimestamp(line);
@@ -105,6 +105,10 @@ public class RawToEpConverter {
     }
 
     private class Window {
+        private final long WINDOW_WIDTH_NANO;
+        private final long EPOCH_WIDTH_NANO;
+        private final long WIN_BEGIN_TO_EP_BEGIN;
+        
         private long winBeginning;
         private long lastEpBeginning;
         private boolean full;
@@ -113,13 +117,16 @@ public class RawToEpConverter {
         private LinkedList<String[]> samples;
         private EpochStatsLine stats;
 
-        public Window(long firstEpBeginningTime, int nbOfColumns) {
+        public Window(long firstEpBeginningTime, int nbOfColumns, InstanceProperties props) {
+            WINDOW_WIDTH_NANO = props.getWindowWidthNano();
+            EPOCH_WIDTH_NANO = props.getEpochWidthNano();
+            WIN_BEGIN_TO_EP_BEGIN = props.getWinBeginToEpBegin();
             stats = new EpochStatsLine(nbOfColumns);
             timestamps = new LinkedList<>();
             samples = new LinkedList<>();
             winBeginning = 0;
             full = false;
-            lastEpBeginning = firstEpBeginningTime - InstanceProperties.EPOCH_WIDTH_NANO;
+            lastEpBeginning = firstEpBeginningTime - props.getEpochWidthNano();
         }
 
         public void add(long timestamp, String[] line) {
@@ -130,7 +137,7 @@ public class RawToEpConverter {
             samples.add(line);
             stats.add(line);
             //System.out.println("add " + timestamp);
-            while (timestamp > winBeginning + InstanceProperties.WINDOW_WIDTH_NANO) {
+            while (timestamp > winBeginning + WINDOW_WIDTH_NANO) {
                 full = true;
                 removeFirst();
             }
@@ -146,17 +153,17 @@ public class RawToEpConverter {
         }
 
         public String[] accumulate(long phoneToActigDelay) {
-            lastEpBeginning += InstanceProperties.EPOCH_WIDTH_NANO;
+            lastEpBeginning += EPOCH_WIDTH_NANO;
             String[] accLine = stats.getEpochLine(lastEpBeginning + phoneToActigDelay);
             return accLine;
         }
         
         public boolean hasMovedEnough() {
-            return full && (winBeginning + InstanceProperties.WINBEGIN_TO_EPBEGIN - lastEpBeginning >= InstanceProperties.EPOCH_WIDTH_NANO);
+            return full && (winBeginning + WIN_BEGIN_TO_EP_BEGIN - lastEpBeginning >= EPOCH_WIDTH_NANO);
         }
         
         public long getLastEpEnd() {
-            return lastEpBeginning + InstanceProperties.EPOCH_WIDTH_NANO;
+            return lastEpBeginning + EPOCH_WIDTH_NANO;
         }
     }
 }
