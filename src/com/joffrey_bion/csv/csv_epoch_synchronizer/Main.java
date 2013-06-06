@@ -196,16 +196,16 @@ public class Main {
             String phoneEpFilename = Csv.removeCsvExtension(props.phoneRawFilename) + "-epochs.csv";
             RawToEpConverter conv = new RawToEpConverter(props.phoneRawFilename, phoneEpFilename);
             conv.createEpochsFile(props);
-            log.println("> Intermediate file " + phoneEpFilename + " successfully created.");
+            log.println("> Intermediate file successfully created (" + phoneEpFilename + ")");
             log.println("");
             log.println("Merging phone epochs with actigraph labels...");
             EpLabelsMerger merger = new EpLabelsMerger(phoneEpFilename, props.actigraphEpFilename,
                     props.outputFilename);
             merger.createLabeledFile(props);
-            log.println("> Dataset file " + props.outputFilename + " successfully created.");
+            log.println("> Dataset file successfully created (" + props.outputFilename + ").");
             if (deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
-                    log.println("> Intermediate file deleted(" + phoneEpFilename + ").");
+                    log.println("> Intermediate file deleted (" + phoneEpFilename + ").");
                 } else {
                     log.printErr("> Delete operation has failed.");
                 }
