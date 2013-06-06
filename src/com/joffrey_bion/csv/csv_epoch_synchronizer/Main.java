@@ -12,6 +12,7 @@ import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics.FlowStats;
 import com.joffrey_bion.file_processor_window.ConsoleLogger;
+import com.joffrey_bion.file_processor_window.FilePicker;
 import com.joffrey_bion.file_processor_window.JFilePickersPanel;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.Logger;
@@ -64,10 +65,16 @@ public class Main {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        final ArgsPanel argsPanel = new ArgsPanel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
                 "Phone raw file", "Actigraph epoch file" }, "Output file");
+        for (FilePicker fp : filePickers.getInputFilePickers()) {
+            fp.addFileTypeFilter(".csv", "Comma-Separated Values file");
+        }
+        for (FilePicker fp : filePickers.getOutputFilePickers()) {
+            fp.addFileTypeFilter(".csv", "Comma-Separated Values file");
+        }
+        final ArgsPanel argsPanel = new ArgsPanel(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("Epoch Synchronizer", "Process",
                 filePickers, argsPanel) {
