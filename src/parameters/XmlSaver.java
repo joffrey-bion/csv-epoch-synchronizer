@@ -1,4 +1,4 @@
-package com_joffrey_bion.csv.csv_epoch_synchronizer.ui;
+package parameters;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -19,18 +19,9 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.joffrey_bion.file_processor_window.FilePicker;
-import com.joffrey_bion.file_processor_window.JFilePickersPanel;
-
 public class XmlSaver {
 
-    private ArgsPanel args;
-
-    public XmlSaver(ArgsPanel panel) {
-        this.args = panel;
-    }
-
-    public void save(String selectedFilePath, JFilePickersPanel filePickersPanel) {
+    public static void save(String xmlFilePath, RawParameters params) {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -39,23 +30,22 @@ public class XmlSaver {
             doc.appendChild(root);
             Element files = doc.createElement("files");
             root.appendChild(files);
-            appendFilePickers(doc, files, filePickersPanel.getInputFilePickers(), "input-file");
-            appendFilePickers(doc, files, filePickersPanel.getOutputFilePickers(), "output-file");
-            appendField(doc, root, "start", args.tfStartTime.getText());
-            appendField(doc, root, "stop", args.tfStopTime.getText());
-            appendField(doc, root, "epoch-width", args.tfEpochWidth.getText());
-            appendField(doc, root, "window-width", args.tfWindowWidth.getText());
-            appendField(doc, root, "delete-temp", "" + args.chckbxDeleteTemp.isSelected());
+            appendFilePickers(doc, files, new String[]{params.phoneRawFile, params.actigEpFile}, "input-file");
+            appendFilePickers(doc, files, new String[]{params.outputFile}, "output-file");
+            appendField(doc, root, "start", params.startTime);
+            appendField(doc, root, "stop", params.stopTime);
+            appendField(doc, root, "epoch-width", params.epochWidthSec);
+            appendField(doc, root, "window-width", params.windowWidthSec);
+            appendField(doc, root, "delete-temp", "" + params.deleteIntermediateFile);
             Element spikes = doc.createElement("spikes");
             root.appendChild(spikes);
-            for (int i = 0; i < ArgsPanel.NB_MAX_SPIKES; i++) {
+            for (int i = 0; i < RawParameters.NB_MAX_SPIKES; i++) {
                 Element spike = doc.createElement("spike");
-                spike.setAttribute("index", i + "");
-                spike.setAttribute("phone", args.tfSpikePhone[i].getText());
-                spike.setAttribute("actig", args.tfSpikeActig[i].getText());
+                spike.setAttribute("phone", params.phoneSpikes[i]);
+                spike.setAttribute("actig", params.actigraphSpikes[i]);
                 spikes.appendChild(spike);
             }
-            writeXml(selectedFilePath, doc);
+            writeXml(xmlFilePath, doc);
         } catch (ParserConfigurationException e) {
             e.printStackTrace();
         }
@@ -103,41 +93,48 @@ public class XmlSaver {
         }
     }
 
-    public void load(String selectedFilePath, JFilePickersPanel filePickers) {
+    public static RawParameters load(String xmlFilePath) {
+        RawParameters raw = new RawParameters();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
             // use the factory to take an instance of the document builder
             DocumentBuilder db = dbf.newDocumentBuilder();
             // parse using the builder to get the DOM mapping of the
             // XML file
-            Document dom = db.parse(fixURI(selectedFilePath));
+            Document dom = db.parse(fixURI(xmlFilePath));
             Element root = dom.getDocumentElement();
             Element files = (Element) root.getElementsByTagName("files").item(0);
-            fillFilePickers(files, filePickers.getInputFilePickers(), "input-file");
-            fillFilePickers(files, filePickers.getOutputFilePickers(), "output-file");
-            args.tfStartTime.setText(getField(root, "start"));
-            args.tfStopTime.setText(getField(root, "stop"));
-            args.tfEpochWidth.setText(getField(root, "epoch-width"));
-            args.tfWindowWidth.setText(getField(root, "window-width"));
-            args.chckbxDeleteTemp.setSelected(Boolean.parseBoolean(getField(root, "delete-temp")));
+            String[] inFiles = getFilesPaths(files, "input-file");
+            raw.phoneRawFile = inFiles[0];
+            raw.actigEpFile = inFiles[1];
+            String[] outFiles = getFilesPaths(files, "output-file");
+            raw.outputFile = outFiles[0];
+            raw.startTime = getField(root, "start");
+            raw.stopTime = getField(root, "stop");
+            raw.epochWidthSec = getField(root, "epoch-width");
+            raw.windowWidthSec = getField(root, "window-width");
+            raw.deleteIntermediateFile = Boolean.parseBoolean(getField(root, "delete-temp"));
             Element spikes = (Element) root.getElementsByTagName("spikes").item(0);
             NodeList spikesList = spikes.getElementsByTagName("spike");
-            for (int i = 0; i < spikesList.getLength(); i++) {
+            int nbSpikes = spikesList.getLength();
+            raw.phoneSpikes = new String[nbSpikes];
+            raw.actigraphSpikes = new String[nbSpikes];
+            for (int i = 0; i < nbSpikes; i++) {
                 Element spike = (Element) spikesList.item(i);
-                int index = Integer.parseInt(spike.getAttribute("index"));
-                args.tfSpikePhone[index].setText(spike.getAttribute("phone"));
-                args.tfSpikeActig[index].setText(spike.getAttribute("actig"));
+                raw.phoneSpikes[i] = spike.getAttribute("phone");
+                raw.actigraphSpikes[i] = spike.getAttribute("actig");
             }
         } catch (ParserConfigurationException pce) {
-            System.out.println(pce.getMessage());
+            System.err.println(pce.getMessage());
             pce.printStackTrace();
         } catch (SAXException se) {
-            System.out.println(se.getMessage());
+            System.err.println(se.getMessage());
             se.printStackTrace();
         } catch (IOException ioe) {
             System.err.println(ioe.getMessage());
             ioe.printStackTrace();
         }
+        return raw;
     }
 
     private static String getField(Element root, String tag) {
@@ -147,22 +144,23 @@ public class XmlSaver {
         return children.item(0).getFirstChild().getNodeValue();
     }
 
-    private static void appendFilePickers(Document doc, Element parent, FilePicker[] fPickers,
+    private static void appendFilePickers(Document doc, Element parent, String[] files,
             String tag) {
-        for (int i = 0; i < fPickers.length; i++) {
-            FilePicker fp = fPickers[i];
-            Element file = appendField(doc, parent, tag, fp.getSelectedFilePath());
+        for (int i = 0; i < files.length; i++) {
+            Element file = appendField(doc, parent, tag, files[i]);
             file.setAttribute("index", i + "");
         }
     }
 
-    private static void fillFilePickers(Element files, FilePicker[] fPickers, String tag) {
-        NodeList inFiles = files.getElementsByTagName(tag);
-        for (int i = 0; i < inFiles.getLength(); i++) {
-            Element file = (Element) inFiles.item(i);
+    private static String[] getFilesPaths(Element files, String tag) {
+        NodeList childrenFiles = files.getElementsByTagName(tag);
+        String[] filesPaths = new String[childrenFiles.getLength()];
+        for (int i = 0; i < childrenFiles.getLength(); i++) {
+            Element file = (Element) childrenFiles.item(i);
             int index = Integer.parseInt(file.getAttribute("index"));
-            fPickers[index].setSelectedFilePath(file.getFirstChild().getNodeValue());
+            filesPaths[index] = file.getFirstChild().getNodeValue();
         }
+        return filesPaths;
     }
 
     private static String fixURI(String uri) {

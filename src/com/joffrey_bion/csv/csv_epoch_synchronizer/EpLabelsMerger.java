@@ -2,6 +2,8 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer;
 import java.io.IOException;
 import java.util.Arrays;
 
+import parameters.Parameters;
+
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.ActigraphCsvReader;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
@@ -22,7 +24,7 @@ public class EpLabelsMerger {
         writer = new CsvWriter(destFilename);
     }
 
-    public void createLabeledFile(InstanceProperties props) throws IOException {
+    public void createLabeledFile(Parameters props) throws IOException {
         // write new columns headers
         String[] headers = shiftLeftAndAppend(phone.readRow(), "Activity Level");
         writer.writeRow(headers);

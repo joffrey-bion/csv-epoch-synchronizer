@@ -24,13 +24,15 @@ public class CountsLabeler {
     private void setCutPoints(int setIndex) {
         cutPoints = new LinkedList<>();
         if (setIndex == FREEDSON_ADULT_VM3) {
+            // the names have to match the camelcase value of the Level enum in the phone app
+            cutPoints.add(new CutPoint("Sedentary", 150.0));
             cutPoints.add(new CutPoint("Light", 2690.0));
             cutPoints.add(new CutPoint("Moderate", 6166.0));
             cutPoints.add(new CutPoint("Vigorous", 9642.0));
+            cutPoints.add(new CutPoint("VeryVigorous", Double.MAX_VALUE));
         } else {
             throw new RuntimeException("unknown cut points set");
         }
-        cutPoints.add(new CutPoint("Very vigorous", Double.MAX_VALUE));
     }
 
     public String countsToLabel(double countsPerMin) {

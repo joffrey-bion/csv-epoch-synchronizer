@@ -3,6 +3,8 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer;
 import java.io.IOException;
 import java.util.LinkedList;
 
+import parameters.Parameters;
+
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
@@ -32,7 +34,7 @@ public class RawToEpConverter {
         writer = new CsvWriter(destName);
     }
 
-    public int createEpochsFile(InstanceProperties props) throws IOException {
+    public int createEpochsFile(Parameters props) throws IOException {
         // read the columns headers
         String[] line;
         if ((line = reader.readRow()) != null) {
@@ -62,17 +64,17 @@ public class RawToEpConverter {
     }
 
     @SuppressWarnings("unused")
-    private void writeEpochs(int nbOfColumns, InstanceProperties props) throws IOException {
+    private void writeEpochs(int nbOfColumns, Parameters props) throws IOException {
         EpochStatsLine stats = new EpochStatsLine(nbOfColumns);
-        long phoneStartTime = props.startTime - props.delay;
-        long phoneStopTime = props.stopTime - props.delay;
+        long phoneStartTime = props.startTime - props.getDelay();
+        long phoneStopTime = props.stopTime - props.getDelay();
         reader.skipToReachTimestamp(phoneStartTime);
         long beginning = phoneStartTime;
         String[] line;
         while ((line = reader.readRow()) != null) {
             long timestamp = reader.extractTimestamp(line);
             if (timestamp > beginning + props.getEpochWidthNano()) {
-                writer.writeRow(stats.getEpochLine(beginning + props.delay));
+                writer.writeRow(stats.getEpochLine(beginning + props.getDelay()));
                 stats.clear();
                 beginning += props.getEpochWidthNano();
                 if (beginning >= phoneStopTime)
@@ -84,9 +86,9 @@ public class RawToEpConverter {
         writer.close();
     }
 
-    private void writeSmoothEpochs(int nbOfColumns, InstanceProperties props) throws IOException {
-        final long phoneStartTime = props.startTime - props.delay;
-        final long phoneStopTime = props.stopTime - props.delay;
+    private void writeSmoothEpochs(int nbOfColumns, Parameters props) throws IOException {
+        final long phoneStartTime = props.startTime - props.getDelay();
+        final long phoneStopTime = props.stopTime - props.getDelay();
         final Window win = new Window(phoneStartTime, nbOfColumns, props);
         reader.skipToReachTimestamp(phoneStartTime - props.getWinBeginToEpBegin());
         String[] line;
@@ -94,7 +96,7 @@ public class RawToEpConverter {
             long timestamp = reader.extractTimestamp(line);
             win.add(timestamp, line);
             if (win.hasMovedEnough()) {
-                writer.writeRow(win.accumulate(props.delay));
+                writer.writeRow(win.accumulate(props.getDelay()));
                 if (win.getLastEpEnd() >= phoneStopTime) {
                     break;
                 }
@@ -117,7 +119,7 @@ public class RawToEpConverter {
         private LinkedList<String[]> samples;
         private EpochStatsLine stats;
 
-        public Window(long firstEpBeginningTime, int nbOfColumns, InstanceProperties props) {
+        public Window(long firstEpBeginningTime, int nbOfColumns, Parameters props) {
             WINDOW_WIDTH_NANO = props.getWindowWidthNano();
             EPOCH_WIDTH_NANO = props.getEpochWidthNano();
             WIN_BEGIN_TO_EP_BEGIN = props.getWinBeginToEpBegin();

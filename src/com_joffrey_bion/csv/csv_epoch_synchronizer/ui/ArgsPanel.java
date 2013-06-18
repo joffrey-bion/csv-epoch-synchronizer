@@ -20,39 +20,35 @@ import javax.swing.Box;
 import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+
+import parameters.RawParameters;
+import parameters.XmlSaver;
+
 import java.awt.Component;
 
 @SuppressWarnings("serial")
 public class ArgsPanel extends JPanel {
 
-    static final int NB_MAX_SPIKES = 6;
-    
-    private final XmlSaver saver;
     private final JFilePickersPanel filePickers;
-    JTextField tfStartTime;
-    JTextField tfStopTime;
-
-    JLabel[] tfSpikeLabel;
-    JTextField[] tfSpikePhone;
-    JTextField[] tfSpikeActig;
-    JTextField tfEpochWidth;
-    JTextField tfWindowWidth;
-    JCheckBox chckbxDeleteTemp;
     
-    public class IncompleteSpikeException extends Exception {
-        public IncompleteSpikeException(String message) {
-            super(message);
-        }
-    }
+    private JTextField tfStartTime;
+    private JTextField tfStopTime;
+
+    private JLabel[] tfSpikeLabel;
+    private JTextField[] tfSpikePhone;
+    private JTextField[] tfSpikeActig;
+    private JTextField tfEpochWidth;
+    private JTextField tfWindowWidth;
+    private JCheckBox chckbxDeleteTemp;
 
     /**
      * Create the panel.
-     * @param filePickers 
+     * 
+     * @param filePickers
      */
     public ArgsPanel(JFilePickersPanel filePickers) {
-        this.saver = new XmlSaver(this);
         this.filePickers = filePickers;
-        
+
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
         JPanel panel = new JPanel();
@@ -138,22 +134,31 @@ public class ArgsPanel extends JPanel {
         panel.add(savePanel, BorderLayout.SOUTH);
 
         JButton btnSave = new JButton("Save params...");
-        
+
         FilePicker saveFilePicker = new FilePicker(this, btnSave, FilePicker.MODE_SAVE) {
             @Override
             protected void onSelect() {
-                saver.save(getSelectedFilePath(), ArgsPanel.this.filePickers);
+                String[] inFiles = ArgsPanel.this.filePickers.getInputFilePaths();
+                String[] outFiles = ArgsPanel.this.filePickers.getOutputFilePaths();
+                RawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
+                XmlSaver.save(getSelectedFilePath(), rawParams);
             }
         };
         saveFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
         savePanel.add(btnSave);
 
         JButton btnLoad = new JButton("Load params...");
-        
+
         FilePicker loadFilePicker = new FilePicker(this, btnLoad, FilePicker.MODE_OPEN) {
             @Override
             protected void onSelect() {
-                saver.load(getSelectedFilePath(), ArgsPanel.this.filePickers);
+                RawParameters raw = XmlSaver.load(getSelectedFilePath());
+                setParameters(raw);
+                FilePicker[] inFp = ArgsPanel.this.filePickers.getInputFilePickers();
+                inFp[0].setSelectedFilePath(raw.phoneRawFile);
+                inFp[1].setSelectedFilePath(raw.actigEpFile);
+                FilePicker[] outFp = ArgsPanel.this.filePickers.getOutputFilePickers();
+                outFp[0].setSelectedFilePath(raw.outputFile);
             }
         };
         loadFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
@@ -189,10 +194,10 @@ public class ArgsPanel extends JPanel {
         JLabel lblActigraph = new JLabel("Actigraph");
         panelSpikes.add(lblActigraph, "5, 3, center, default");
 
-        tfSpikeLabel = new JLabel[NB_MAX_SPIKES];
-        tfSpikePhone = new JTextField[NB_MAX_SPIKES];
-        tfSpikeActig = new JTextField[NB_MAX_SPIKES];
-        for (int i = 0; i < NB_MAX_SPIKES; i++) {
+        tfSpikeLabel = new JLabel[RawParameters.NB_MAX_SPIKES];
+        tfSpikePhone = new JTextField[RawParameters.NB_MAX_SPIKES];
+        tfSpikeActig = new JTextField[RawParameters.NB_MAX_SPIKES];
+        for (int i = 0; i < RawParameters.NB_MAX_SPIKES; i++) {
             tfSpikeLabel[i] = new JLabel(Integer.toString(i + 1));
             panelSpikes.add(tfSpikeLabel[i], "1, " + (2 * i + 5) + ", right, default");
 
@@ -208,45 +213,40 @@ public class ArgsPanel extends JPanel {
         }
     }
 
-    public String[] getSpikes() throws IncompleteSpikeException {
-        String[] spikes = new String[NB_MAX_SPIKES * 2];
+    public void setParameters(RawParameters raw) {
+        tfStartTime.setText(raw.startTime);
+        tfStopTime.setText(raw.stopTime);
+        tfEpochWidth.setText(raw.epochWidthSec);
+        tfWindowWidth.setText(raw.windowWidthSec);
+        chckbxDeleteTemp.setSelected(raw.deleteIntermediateFile);
+        for (int i = 0; i < raw.phoneSpikes.length; i++) {
+            tfSpikePhone[i].setText(raw.phoneSpikes[i]);
+            tfSpikeActig[i].setText(raw.actigraphSpikes[i]);
+        }
+    }
+
+    public RawParameters getRawParameters(String phoneRawFile, String actigEpFile, String outputFile) {
+        RawParameters params = new RawParameters();
+        params.phoneRawFile = phoneRawFile;
+        params.actigEpFile = actigEpFile;
+        params.outputFile = outputFile;
+        params.startTime = tfStartTime.getText();
+        params.stopTime = tfStopTime.getText();
+        params.epochWidthSec = tfEpochWidth.getText();
+        params.windowWidthSec = tfWindowWidth.getText();
+        params.deleteIntermediateFile = chckbxDeleteTemp.isSelected();
+        String[] phoneSpikes = new String[RawParameters.NB_MAX_SPIKES];
+        String[] actigraphSpikes = new String[RawParameters.NB_MAX_SPIKES];
         int nbSpikes = 0;
-        for (int i = 0; i < NB_MAX_SPIKES; i++) {
-            String phone = tfSpikePhone[i].getText();
-            String actig = tfSpikeActig[i].getText();
-            if (!phone.equals("") && !actig.equals("")) {
-                spikes[2 * nbSpikes] = phone;
-                spikes[2 * nbSpikes + 1] = actig;
+        for (int i = 0; i < RawParameters.NB_MAX_SPIKES; i++) {
+            phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
+            actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
+            if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {
                 nbSpikes++;
-            } else if (phone.equals("") && actig.equals("")) {
-                continue;
-            } else {
-                throw new IncompleteSpikeException(
-                        "Each phone spike must have a corresponding actigraph spike");
             }
         }
-        if (nbSpikes == 0)
-            return new String[0];
-        return Arrays.copyOfRange(spikes, 0, nbSpikes * 2 - 1); // TODO check the *2
-    }
-
-    public String getStartTime() {
-        return tfStartTime.getText();
-    }
-
-    public String getStopTime() {
-        return tfStopTime.getText();
-    }
-    
-    public boolean shouldDeleteTempFile() {
-        return chckbxDeleteTemp.isSelected();
-    }
-    
-    public int getEpochWidth() throws NumberFormatException {
-        return Integer.parseInt(tfEpochWidth.getText());
-    }
-    
-    public int getWindowWidth() throws NumberFormatException {
-        return Integer.parseInt(tfWindowWidth.getText());
+        params.phoneSpikes = Arrays.copyOfRange(phoneSpikes, 0, nbSpikes - 1);
+        params.actigraphSpikes = Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes - 1);
+        return params;
     }
 }
