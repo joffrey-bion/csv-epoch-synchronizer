@@ -1,4 +1,4 @@
-package parameters;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.parameters;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -21,7 +21,7 @@ import org.xml.sax.SAXException;
 
 public class XmlSaver {
 
-    public static void save(String xmlFilePath, RawParameters params) {
+    public static void save(String xmlFilePath, RawParameters params) throws IOException {
         DocumentBuilderFactory documentBuilderFactory = DocumentBuilderFactory.newInstance();
         try {
             DocumentBuilder documentBuilder = documentBuilderFactory.newDocumentBuilder();
@@ -30,8 +30,9 @@ public class XmlSaver {
             doc.appendChild(root);
             Element files = doc.createElement("files");
             root.appendChild(files);
-            appendFilePickers(doc, files, new String[]{params.phoneRawFile, params.actigEpFile}, "input-file");
-            appendFilePickers(doc, files, new String[]{params.outputFile}, "output-file");
+            appendFilePickers(doc, files, new String[] { params.phoneRawFile, params.actigEpFile },
+                    "input-file");
+            appendFilePickers(doc, files, new String[] { params.outputFile }, "output-file");
             appendField(doc, root, "start", params.startTime);
             appendField(doc, root, "stop", params.stopTime);
             appendField(doc, root, "epoch-width", params.epochWidthSec);
@@ -39,7 +40,7 @@ public class XmlSaver {
             appendField(doc, root, "delete-temp", "" + params.deleteIntermediateFile);
             Element spikes = doc.createElement("spikes");
             root.appendChild(spikes);
-            for (int i = 0; i < RawParameters.NB_MAX_SPIKES; i++) {
+            for (int i = 0; i < params.phoneSpikes.length; i++) {
                 Element spike = doc.createElement("spike");
                 spike.setAttribute("phone", params.phoneSpikes[i]);
                 spike.setAttribute("actig", params.actigraphSpikes[i]);
@@ -72,7 +73,7 @@ public class XmlSaver {
         return elem;
     }
 
-    private static void writeXml(String filePath, Document doc) {
+    private static void writeXml(String filePath, Document doc) throws IOException {
         try {
             Transformer tr = TransformerFactory.newInstance().newTransformer();
             tr.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -85,15 +86,12 @@ public class XmlSaver {
             FileOutputStream fos = new FileOutputStream(filePath);
             tr.transform(new DOMSource(doc), new StreamResult(fos));
             fos.close();
-            System.out.println("Parameters saved.");
-        } catch (TransformerException te) {
-            System.out.println(te.getMessage());
-        } catch (IOException ioe) {
-            System.out.println(ioe.getMessage());
+        } catch (TransformerException e) {
+            e.printStackTrace();
         }
     }
 
-    public static RawParameters load(String xmlFilePath) {
+    public static RawParameters load(String xmlFilePath) throws IOException, SAXException {
         RawParameters raw = new RawParameters();
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         try {
@@ -124,15 +122,8 @@ public class XmlSaver {
                 raw.phoneSpikes[i] = spike.getAttribute("phone");
                 raw.actigraphSpikes[i] = spike.getAttribute("actig");
             }
-        } catch (ParserConfigurationException pce) {
-            System.err.println(pce.getMessage());
-            pce.printStackTrace();
-        } catch (SAXException se) {
-            System.err.println(se.getMessage());
-            se.printStackTrace();
-        } catch (IOException ioe) {
-            System.err.println(ioe.getMessage());
-            ioe.printStackTrace();
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
         }
         return raw;
     }
@@ -141,11 +132,15 @@ public class XmlSaver {
         NodeList children = root.getElementsByTagName(tag);
         if (children.getLength() == 0)
             return null;
-        return children.item(0).getFirstChild().getNodeValue();
+        Node fieldNode = children.item(0).getFirstChild();
+        if (fieldNode == null) {
+            return null;
+        } else {
+            return fieldNode.getNodeValue();
+        }
     }
 
-    private static void appendFilePickers(Document doc, Element parent, String[] files,
-            String tag) {
+    private static void appendFilePickers(Document doc, Element parent, String[] files, String tag) {
         for (int i = 0; i < files.length; i++) {
             Element file = appendField(doc, parent, tag, files[i]);
             file.setAttribute("index", i + "");
@@ -158,7 +153,12 @@ public class XmlSaver {
         for (int i = 0; i < childrenFiles.getLength(); i++) {
             Element file = (Element) childrenFiles.item(i);
             int index = Integer.parseInt(file.getAttribute("index"));
-            filesPaths[index] = file.getFirstChild().getNodeValue();
+            Node filePathNode = file.getFirstChild();
+            if (filePathNode == null) {
+                filesPaths[index] = null;
+            } else {
+                filesPaths[index] = filePathNode.getNodeValue();
+            }
         }
         return filesPaths;
     }

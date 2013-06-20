@@ -8,8 +8,12 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.XmlSaver;
+import com.joffrey_bion.file_processor_window.ConsoleLogger;
 import com.joffrey_bion.file_processor_window.FilePicker;
 import com.joffrey_bion.file_processor_window.JFilePickersPanel;
+import com.joffrey_bion.file_processor_window.Logger;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
@@ -21,16 +25,14 @@ import java.awt.BorderLayout;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
-import parameters.RawParameters;
-import parameters.XmlSaver;
-
 import java.awt.Component;
 
 @SuppressWarnings("serial")
 public class ArgsPanel extends JPanel {
 
     private final JFilePickersPanel filePickers;
-    
+    private Logger log;
+
     private JTextField tfStartTime;
     private JTextField tfStopTime;
 
@@ -48,6 +50,7 @@ public class ArgsPanel extends JPanel {
      */
     public ArgsPanel(JFilePickersPanel filePickers) {
         this.filePickers = filePickers;
+        this.log = new ConsoleLogger();
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
@@ -138,10 +141,17 @@ public class ArgsPanel extends JPanel {
         FilePicker saveFilePicker = new FilePicker(this, btnSave, FilePicker.MODE_SAVE) {
             @Override
             protected void onSelect() {
-                String[] inFiles = ArgsPanel.this.filePickers.getInputFilePaths();
-                String[] outFiles = ArgsPanel.this.filePickers.getOutputFilePaths();
-                RawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
-                XmlSaver.save(getSelectedFilePath(), rawParams);
+                try {
+                    String[] inFiles = ArgsPanel.this.filePickers.getInputFilePaths();
+                    String[] outFiles = ArgsPanel.this.filePickers.getOutputFilePaths();
+                    RawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
+                    String paramFilePath = getSelectedFilePath();
+                    XmlSaver.save(paramFilePath, rawParams);
+                    log.println("Parameters saved to '" + paramFilePath + "'.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.printErr(e.toString());
+                }
             }
         };
         saveFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
@@ -152,13 +162,20 @@ public class ArgsPanel extends JPanel {
         FilePicker loadFilePicker = new FilePicker(this, btnLoad, FilePicker.MODE_OPEN) {
             @Override
             protected void onSelect() {
-                RawParameters raw = XmlSaver.load(getSelectedFilePath());
-                setParameters(raw);
-                FilePicker[] inFp = ArgsPanel.this.filePickers.getInputFilePickers();
-                inFp[0].setSelectedFilePath(raw.phoneRawFile);
-                inFp[1].setSelectedFilePath(raw.actigEpFile);
-                FilePicker[] outFp = ArgsPanel.this.filePickers.getOutputFilePickers();
-                outFp[0].setSelectedFilePath(raw.outputFile);
+                try {
+                    String paramFilePath = getSelectedFilePath();
+                    RawParameters raw = XmlSaver.load(paramFilePath);
+                    setParameters(raw);
+                    FilePicker[] inFp = ArgsPanel.this.filePickers.getInputFilePickers();
+                    inFp[0].setSelectedFilePath(raw.phoneRawFile);
+                    inFp[1].setSelectedFilePath(raw.actigEpFile);
+                    FilePicker[] outFp = ArgsPanel.this.filePickers.getOutputFilePickers();
+                    outFp[0].setSelectedFilePath(raw.outputFile);
+                    log.println("Parameters loaded from '" + paramFilePath + "'.");
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    log.printErr(e.toString());
+                }
             }
         };
         loadFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
@@ -213,6 +230,10 @@ public class ArgsPanel extends JPanel {
         }
     }
 
+    public void setLogger(Logger log) {
+        this.log = log;
+    }
+
     public void setParameters(RawParameters raw) {
         tfStartTime.setText(raw.startTime);
         tfStopTime.setText(raw.stopTime);
@@ -245,8 +266,13 @@ public class ArgsPanel extends JPanel {
                 nbSpikes++;
             }
         }
-        params.phoneSpikes = Arrays.copyOfRange(phoneSpikes, 0, nbSpikes - 1);
-        params.actigraphSpikes = Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes - 1);
+        if (nbSpikes > 0) {
+            params.phoneSpikes = Arrays.copyOfRange(phoneSpikes, 0, nbSpikes - 1);
+            params.actigraphSpikes = Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes - 1);
+        } else {
+            params.phoneSpikes = new String[0];
+            params.actigraphSpikes = new String[0];
+        }
         return params;
     }
 }

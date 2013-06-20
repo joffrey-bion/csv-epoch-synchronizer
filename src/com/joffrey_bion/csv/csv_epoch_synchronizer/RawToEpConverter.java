@@ -3,11 +3,11 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer;
 import java.io.IOException;
 import java.util.LinkedList;
 
-import parameters.Parameters;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics.StatsLineSkipSome;
 import com.joffrey_bion.csv.CsvWriter;
 
