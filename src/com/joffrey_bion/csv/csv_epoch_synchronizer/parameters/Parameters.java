@@ -82,6 +82,9 @@ public class Parameters {
         } catch (ParseException e) {
             throw new ArgumentFormatException("Incorrect format for stop timestamp.");
         }
+        if (startTime > stopTime) {
+            throw new IllegalArgumentException("Start time must be less than stop time.");
+        }
         if (USE_DEFAULTS_WIDTHS) {
             setWindowFields(DEFAULT_WINDOW_WIDTH_SEC, DEFAULT_EPOCH_WIDTH_SEC);
         } else {
@@ -147,18 +150,41 @@ public class Parameters {
         delay = Double.valueOf(delayStats.mean()).longValue();
     }
 
+    /**
+     * Returns the delay in nanoseconds to add to a phone timestamp to find the
+     * corresponding actigraph timestamp.
+     * 
+     * @return the delay between the phone time and actigraph time.
+     */
     public long getDelay() {
         return delay;
     }
 
+    /**
+     * Returns the width of the labeled part of the time window.
+     * 
+     * @return The width of the labeled part of the time window.
+     */
     public long getEpochWidthNano() {
         return epochWidthNano;
     }
 
+    /**
+     * Returns the width of the time window.
+     * 
+     * @return The width of the time window.
+     */
     public long getWindowWidthNano() {
         return windowWidthNano;
     }
 
+    /**
+     * Returns the time between the beginning of the time window and the beginning of
+     * the labeled part.
+     * 
+     * @return The time between the beginning of the time window and the beginning of
+     *         the labeled part.
+     */
     public long getWinBeginToEpBegin() {
         return winBeginToEpBegin;
     }

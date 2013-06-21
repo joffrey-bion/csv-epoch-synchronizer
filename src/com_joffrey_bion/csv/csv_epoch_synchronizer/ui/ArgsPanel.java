@@ -9,7 +9,6 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.XmlSaver;
 import com.joffrey_bion.file_processor_window.ConsoleLogger;
 import com.joffrey_bion.file_processor_window.FilePicker;
 import com.joffrey_bion.file_processor_window.JFilePickersPanel;
@@ -146,7 +145,7 @@ public class ArgsPanel extends JPanel {
                     String[] outFiles = ArgsPanel.this.filePickers.getOutputFilePaths();
                     RawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
                     String paramFilePath = getSelectedFilePath();
-                    XmlSaver.save(paramFilePath, rawParams);
+                    rawParams.save(paramFilePath);
                     log.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     e.printStackTrace();
@@ -164,7 +163,7 @@ public class ArgsPanel extends JPanel {
             protected void onSelect() {
                 try {
                     String paramFilePath = getSelectedFilePath();
-                    RawParameters raw = XmlSaver.load(paramFilePath);
+                    RawParameters raw = RawParameters.load(paramFilePath);
                     setParameters(raw);
                     FilePicker[] inFp = ArgsPanel.this.filePickers.getInputFilePickers();
                     inFp[0].setSelectedFilePath(raw.phoneRawFile);

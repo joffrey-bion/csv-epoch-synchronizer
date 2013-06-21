@@ -12,7 +12,6 @@ import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.XmlSaver;
 import com.joffrey_bion.file_processor_window.ConsoleLogger;
 import com.joffrey_bion.file_processor_window.FilePicker;
 import com.joffrey_bion.file_processor_window.JFilePickersPanel;
@@ -50,7 +49,7 @@ public class CsvEpochSynchronizer {
             // console version, process parameter files one by one.
             for (String xmlParamsFile : args) {
                 try {
-                    RawParameters rawParams = XmlSaver.load(xmlParamsFile);
+                    RawParameters rawParams = RawParameters.load(xmlParamsFile);
                     createDataset(new Parameters(rawParams), new ConsoleLogger());
                 } catch (Parameters.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
