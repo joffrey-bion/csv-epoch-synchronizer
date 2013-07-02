@@ -11,7 +11,7 @@ public class Parameters {
     public static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
     private static final boolean USE_DEFAULTS_WIDTHS = true;
-    private static final int DEFAULT_WINDOW_WIDTH_SEC = 1;
+    private static final int DEFAULT_WINDOW_WIDTH_SEC = 5;
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
 
     /** Window width in nanoseconds */

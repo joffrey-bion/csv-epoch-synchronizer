@@ -31,4 +31,8 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
         long nbEpochsPerMin = ((long) 60 * 1000 * 1000000) / epochWidthNanos;
         return Double.valueOf(line[VM_COL]) * nbEpochsPerMin;
     }
+    
+    public void skipHeaders() throws IOException {
+        readRows(2);
+    }
 }
