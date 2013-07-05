@@ -31,8 +31,7 @@ public class CountsLabeler {
             cutPoints.add(new CutPoint("Sedentary", 150.0));
             cutPoints.add(new CutPoint("Light", 2690.0));
             cutPoints.add(new CutPoint("Moderate", 6166.0));
-            cutPoints.add(new CutPoint("Vigorous", 9642.0));
-            cutPoints.add(new CutPoint("VeryVigorous", Double.MAX_VALUE));
+            cutPoints.add(new CutPoint("Vigorous", Double.MAX_VALUE));
         } else if (setIndex == FREEDSON_ADULT_VM3) {
             cutPoints.add(new CutPoint("Light", 2690.0));
             cutPoints.add(new CutPoint("Moderate", 6166.0));
