@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.joffrey_bion.csv.TimestampedCsvReader;
+
 public class PhoneCsvReader extends TimestampedCsvReader {
 
     private static final int TIMESTAMP_COL = 0;

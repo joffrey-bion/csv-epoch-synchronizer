@@ -4,6 +4,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.joffrey_bion.csv.TimestampedCsvReader;
+
 /**
  * A reader for the CSV file produced by ActiLife when exporting the actigraph's
  * epochs. All the constants relative to the organization of the CSV file are
