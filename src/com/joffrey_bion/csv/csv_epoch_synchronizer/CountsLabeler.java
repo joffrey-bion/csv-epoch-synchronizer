@@ -6,6 +6,7 @@ public class CountsLabeler {
 
     public static final int CUSTOM_VM3 = 0;
     public static final int FREEDSON_ADULT_VM3 = 1;
+    public static final int SEDENTARY_VS_ALL = 2;
 
     private class CutPoint {
         public String label;
@@ -17,26 +18,25 @@ public class CountsLabeler {
         }
     }
 
-    private LinkedList<CutPoint> cutPoints;
+    private LinkedList<CutPoint> cpmCutPoints;
 
-    public CountsLabeler() {
-        setCutPoints(CUSTOM_VM3);
-    }
-
-    private void setCutPoints(int setIndex) {
-        cutPoints = new LinkedList<>();
+    public CountsLabeler(int cutPointsSetIndex) {
+        cpmCutPoints = new LinkedList<>();
         // the names of the levels of activity have to match the camelcase value of
         // the Level enum in the phone app
-        if (setIndex == CUSTOM_VM3) {
-            cutPoints.add(new CutPoint("Sedentary", 150.0));
-            cutPoints.add(new CutPoint("Light", 2690.0));
-            cutPoints.add(new CutPoint("Moderate", 6166.0));
-            cutPoints.add(new CutPoint("Vigorous", Double.MAX_VALUE));
-        } else if (setIndex == FREEDSON_ADULT_VM3) {
-            cutPoints.add(new CutPoint("Light", 2690.0));
-            cutPoints.add(new CutPoint("Moderate", 6166.0));
-            cutPoints.add(new CutPoint("Vigorous", 9642.0));
-            cutPoints.add(new CutPoint("VeryVigorous", Double.MAX_VALUE));
+        if (cutPointsSetIndex == CUSTOM_VM3) {
+            cpmCutPoints.add(new CutPoint("Sedentary", 150.0));
+            cpmCutPoints.add(new CutPoint("Light", 2690.0));
+            cpmCutPoints.add(new CutPoint("Moderate", 6166.0));
+            cpmCutPoints.add(new CutPoint("Vigorous", Double.MAX_VALUE));
+        } else if (cutPointsSetIndex == FREEDSON_ADULT_VM3) {
+            cpmCutPoints.add(new CutPoint("Light", 2690.0));
+            cpmCutPoints.add(new CutPoint("Moderate", 6166.0));
+            cpmCutPoints.add(new CutPoint("Vigorous", 9642.0));
+            cpmCutPoints.add(new CutPoint("VeryVigorous", Double.MAX_VALUE));
+        } else if (cutPointsSetIndex == SEDENTARY_VS_ALL) {
+            cpmCutPoints.add(new CutPoint("Sedentary", 150.0));
+            cpmCutPoints.add(new CutPoint("Active", Double.MAX_VALUE));
         } else {
             throw new RuntimeException("unknown cut points set");
         }
@@ -45,7 +45,7 @@ public class CountsLabeler {
     public String countsToLabel(double countsPerMin) {
         if (countsPerMin < 0)
             throw new IllegalArgumentException("CPM must be positive");
-        for (CutPoint cutPoint : cutPoints) {
+        for (CutPoint cutPoint : cpmCutPoints) {
             if (countsPerMin <= cutPoint.upperLimit) {
                 return cutPoint.label;
             }

@@ -58,6 +58,7 @@ public class CsvEpochSynchronizer {
                 } catch (SAXException e) {
                     e.printStackTrace();
                 }
+                System.out.println("______________________________________________");
             }
         }
     }

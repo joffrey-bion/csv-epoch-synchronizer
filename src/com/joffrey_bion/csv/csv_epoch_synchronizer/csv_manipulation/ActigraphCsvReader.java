@@ -4,6 +4,13 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 
+/**
+ * A reader for the CSV file produced by ActiLife when exporting the actigraph's
+ * epochs. All the constants relative to the organization of the CSV file are
+ * hardcoded in this class.
+ * 
+ * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
+ */
 public class ActigraphCsvReader extends TimestampedCsvReader {
 
     private static final int VM_COL = 5;
@@ -26,12 +33,12 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
             throw new IOException(e.getMessage());
         }
     }
-    
+
     public static double extractCountsPerMinutes(String[] line, long epochWidthNanos) {
         long nbEpochsPerMin = ((long) 60 * 1000 * 1000000) / epochWidthNanos;
         return Double.valueOf(line[VM_COL]) * nbEpochsPerMin;
     }
-    
+
     public void skipHeaders() throws IOException {
         readRows(2);
     }
