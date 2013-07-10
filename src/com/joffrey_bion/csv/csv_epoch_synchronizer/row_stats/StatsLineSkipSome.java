@@ -1,6 +1,7 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.row_stats;
 
 import java.util.Arrays;
+
 
 public class StatsLineSkipSome {
 

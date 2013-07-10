@@ -1,4 +1,4 @@
-package com_joffrey_bion.csv.csv_epoch_synchronizer.ui;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.ui;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;

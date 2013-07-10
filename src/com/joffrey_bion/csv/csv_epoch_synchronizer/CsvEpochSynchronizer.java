@@ -18,7 +18,7 @@ import com.joffrey_bion.file_processor_window.JFilePickersPanel;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.Logger;
 
-import com_joffrey_bion.csv.csv_epoch_synchronizer.ui.ArgsPanel;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.ui.ArgsPanel;
 
 /**
  * This program is meant to create a Weka-ready dataset based on the given raw phone

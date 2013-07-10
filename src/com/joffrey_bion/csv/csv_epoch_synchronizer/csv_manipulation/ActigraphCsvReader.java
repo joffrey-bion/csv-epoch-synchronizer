@@ -15,6 +15,8 @@ import com.joffrey_bion.csv.TimestampedCsvReader;
  */
 public class ActigraphCsvReader extends TimestampedCsvReader {
 
+    private static final int NB_HEADER_LINES = 2;
+    
     private static final int VM_COL = 5;
     private static final int DATE_COL = 0;
     private static final int TIME_COL = 1;
@@ -42,6 +44,6 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
     }
 
     public void skipHeaders() throws IOException {
-        readRows(2);
+        readRows(NB_HEADER_LINES);
     }
 }

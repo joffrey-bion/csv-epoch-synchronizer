@@ -3,7 +3,7 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer.parameters;
 import java.text.ParseException;
 
 import com.joffrey_bion.csv.Csv;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics.FlowStats;
+import com.joffrey_bion.utils.stats.FlowStats;
 
 public class Parameters {
 

@@ -1,4 +1,7 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer.row_statistics;
+package com.joffrey_bion.csv.csv_epoch_synchronizer.row_stats;
+
+import com.joffrey_bion.utils.stats.FlowStats;
+
 
 public class StatsLine {
 
@@ -12,22 +15,27 @@ public class StatsLine {
     }
 
     public void add(String[] line) {
-        if (columns.length != line.length)
-            throw new RuntimeException("wrong number of columns in the line");
-        for (int i = 0; i < columns.length; i++)
+        if (columns.length != line.length) {
+            throw new IllegalArgumentException("wrong number of columns in the line");
+        }
+        for (int i = 0; i < columns.length; i++) {
             columns[i].add(Double.valueOf(line[i]));
+        }
     }
 
     public void remove(String[] line) {
-        if (columns.length != line.length)
-            throw new RuntimeException("wrong number of columns in the line");
-        for (int i = 0; i < columns.length; i++)
+        if (columns.length != line.length) {
+            throw new IllegalArgumentException("wrong number of columns in the line");
+        }
+        for (int i = 0; i < columns.length; i++) {
             columns[i].remove(Double.valueOf(line[i]));
+        }
     }
 
     public void clear() {
-        for (int i = 0; i < columns.length; i++)
-            columns[i].clear();
+        for (FlowStats column : columns) {
+            column.clear();
+        }
     }
 
     public int getNbColumns() {
