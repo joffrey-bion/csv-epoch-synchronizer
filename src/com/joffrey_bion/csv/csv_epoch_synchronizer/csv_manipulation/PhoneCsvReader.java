@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import com.joffrey_bion.csv.TimestampedCsvReader;
+import com.joffrey_bion.utils.dates.DateHelper;
 
 public class PhoneCsvReader extends TimestampedCsvReader {
 
@@ -18,7 +19,7 @@ public class PhoneCsvReader extends TimestampedCsvReader {
     @Override
     public long extractTimestamp(String[] line) throws IOException {
         try {
-            return timestampStrToNanos(line[TIMESTAMP_COL], TIMESTAMP_FORMAT);
+            return DateHelper.timestampStrToNanos(line[TIMESTAMP_COL], TIMESTAMP_FORMAT);
         } catch (ParseException e) {
             throw new IOException(e.getMessage());
         }

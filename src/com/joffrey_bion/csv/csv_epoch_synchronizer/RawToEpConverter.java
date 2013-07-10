@@ -3,7 +3,6 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer;
 import java.io.IOException;
 import java.util.LinkedList;
 
-
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
@@ -29,7 +28,8 @@ public class RawToEpConverter {
         }
     }
 
-    public RawToEpConverter(String sourceName, String destName) throws IOException, NotACsvFileException {
+    public RawToEpConverter(String sourceName, String destName) throws IOException,
+            NotACsvFileException {
         reader = new PhoneCsvReader(sourceName);
         writer = new CsvWriter(destName);
     }
@@ -110,7 +110,7 @@ public class RawToEpConverter {
         private final long WINDOW_WIDTH_NANO;
         private final long EPOCH_WIDTH_NANO;
         private final long WIN_BEGIN_TO_EP_BEGIN;
-        
+
         private long winBeginning;
         private long lastEpBeginning;
         private boolean full;
@@ -138,7 +138,7 @@ public class RawToEpConverter {
             timestamps.add(timestamp);
             samples.add(line);
             stats.add(line);
-            //System.out.println("add " + timestamp);
+            // System.out.println("add " + timestamp);
             while (timestamp > winBeginning + WINDOW_WIDTH_NANO) {
                 full = true;
                 removeFirst();
@@ -146,7 +146,7 @@ public class RawToEpConverter {
         }
 
         private String[] removeFirst() {
-            //System.out.println("remove " + timestamps.getFirst());
+            // System.out.println("remove " + timestamps.getFirst());
             timestamps.removeFirst();
             String[] line = samples.removeFirst();
             stats.remove(line);
@@ -159,11 +159,12 @@ public class RawToEpConverter {
             String[] accLine = stats.getEpochLine(lastEpBeginning + phoneToActigDelay);
             return accLine;
         }
-        
+
         public boolean hasMovedEnough() {
-            return full && (winBeginning + WIN_BEGIN_TO_EP_BEGIN - lastEpBeginning >= EPOCH_WIDTH_NANO);
+            return full
+                    && (winBeginning + WIN_BEGIN_TO_EP_BEGIN - lastEpBeginning >= EPOCH_WIDTH_NANO);
         }
-        
+
         public long getLastEpEnd() {
             return lastEpBeginning + EPOCH_WIDTH_NANO;
         }

@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.ParseException;
 
 import com.joffrey_bion.csv.TimestampedCsvReader;
+import com.joffrey_bion.utils.dates.DateHelper;
 
 /**
  * A reader for the CSV file produced by ActiLife when exporting the actigraph's
@@ -32,7 +33,7 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
         String timestamp = line[DATE_COL] + " " + line[TIME_COL];
         String format = DATE_FORMAT + " " + TIME_FORMAT;
         try {
-            return timestampStrToNanos(timestamp, format);
+            return DateHelper.timestampStrToNanos(timestamp, format);
         } catch (ParseException e) {
             throw new IOException(e.getMessage());
         }

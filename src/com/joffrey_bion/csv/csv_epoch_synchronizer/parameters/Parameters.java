@@ -2,7 +2,7 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer.parameters;
 
 import java.text.ParseException;
 
-import com.joffrey_bion.csv.Csv;
+import com.joffrey_bion.utils.dates.DateHelper;
 import com.joffrey_bion.utils.stats.FlowStats;
 
 public class Parameters {
@@ -71,13 +71,13 @@ public class Parameters {
             outputFilename = rawParams.outputFile;
         }
         try {
-            startTime = Csv.timestampStrToNanos(rawParams.startTime,
+            startTime = DateHelper.timestampStrToNanos(rawParams.startTime,
                     Parameters.START_STOP_TIMESTAMP_FORMAT);
         } catch (ParseException e) {
             throw new ArgumentFormatException("Incorrect format for start timestamp.");
         }
         try {
-            stopTime = Csv.timestampStrToNanos(rawParams.stopTime,
+            stopTime = DateHelper.timestampStrToNanos(rawParams.stopTime,
                     Parameters.START_STOP_TIMESTAMP_FORMAT);
         } catch (ParseException e) {
             throw new ArgumentFormatException("Incorrect format for stop timestamp.");
@@ -143,8 +143,9 @@ public class Parameters {
         long phoneTime;
         long actigraphTime;
         for (int i = 0; i < phoneSpikes.length / 2; i++) {
-            phoneTime = Csv.timestampStrToNanos(phoneSpikes[i], SPIKE_TIMESTAMP_FORMAT);
-            actigraphTime = Csv.timestampStrToNanos(actigraphSpikes[i], SPIKE_TIMESTAMP_FORMAT);
+            phoneTime = DateHelper.timestampStrToNanos(phoneSpikes[i], SPIKE_TIMESTAMP_FORMAT);
+            actigraphTime = DateHelper.timestampStrToNanos(actigraphSpikes[i],
+                    SPIKE_TIMESTAMP_FORMAT);
             delayStats.add(actigraphTime - phoneTime);
         }
         delay = Double.valueOf(delayStats.mean()).longValue();
