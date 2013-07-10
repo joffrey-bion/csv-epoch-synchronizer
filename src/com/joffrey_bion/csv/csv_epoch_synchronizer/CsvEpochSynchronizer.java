@@ -9,7 +9,6 @@ import javax.swing.UIManager;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv.Csv;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
 import com.joffrey_bion.file_processor_window.ConsoleLogger;
@@ -17,6 +16,7 @@ import com.joffrey_bion.file_processor_window.FilePicker;
 import com.joffrey_bion.file_processor_window.JFilePickersPanel;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.Logger;
+import com.joffrey_bion.utils.dates.DateHelper;
 
 import com.joffrey_bion.csv.csv_epoch_synchronizer.ui.ArgsPanel;
 

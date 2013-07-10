@@ -5,10 +5,10 @@ import java.util.Arrays;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.ActigraphCsvReader;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.DateHelper;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
 import com.joffrey_bion.csv.CsvWriter;
+import com.joffrey_bion.utils.dates.DateHelper;
 
 public class EpLabelsMerger {
 
