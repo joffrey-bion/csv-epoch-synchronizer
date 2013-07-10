@@ -9,10 +9,10 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
-import com.joffrey_bion.file_processor_window.ConsoleLogger;
-import com.joffrey_bion.file_processor_window.FilePicker;
-import com.joffrey_bion.file_processor_window.JFilePickersPanel;
-import com.joffrey_bion.file_processor_window.Logger;
+import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
+import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.file_processor_window.logging.ConsoleLogger;
+import com.joffrey_bion.file_processor_window.logging.Logger;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
