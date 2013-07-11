@@ -2,7 +2,6 @@ package com.joffrey_bion.csv.csv_epoch_synchronizer.row_stats;
 
 import com.joffrey_bion.utils.stats.FlowStats;
 
-
 public class StatsLine {
 
     private FlowStats[] columns;

@@ -52,7 +52,7 @@ public class EpLabelsMerger {
             }
             double cpm = ActigraphCsvReader.extractCountsPerMinutes(lineActigraph,
                     props.getEpochWidthNano());
-            String[] row = shiftLeftAndAppend(linePhone, labeler.countsToLabel(cpm));
+            String[] row = shiftLeftAndAppend(linePhone, labeler.countsToLevel(cpm));
             writer.writeRow(row);
         }
         phone.close();

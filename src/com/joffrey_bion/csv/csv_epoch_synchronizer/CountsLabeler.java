@@ -42,7 +42,7 @@ public class CountsLabeler {
         }
     }
 
-    public String countsToLabel(double countsPerMin) {
+    public String countsToLevel(double countsPerMin) {
         if (countsPerMin < 0)
             throw new IllegalArgumentException("CPM must be positive");
         for (CutPoint cutPoint : cpmCutPoints) {
