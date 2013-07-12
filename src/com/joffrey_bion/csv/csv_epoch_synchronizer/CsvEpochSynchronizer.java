@@ -48,6 +48,8 @@ public class CsvEpochSynchronizer {
         } else {
             // console version, process parameter files one by one.
             for (String xmlParamsFile : args) {
+                System.out.println("------[ " + xmlParamsFile + " ]---------------------");
+                System.out.println();
                 try {
                     RawParameters rawParams = RawParameters.load(xmlParamsFile);
                     createDataset(new Parameters(rawParams), new ConsoleLogger());
@@ -58,7 +60,7 @@ public class CsvEpochSynchronizer {
                 } catch (SAXException e) {
                     e.printStackTrace();
                 }
-                System.out.println("______________________________________________");
+                System.out.println();
             }
         }
     }
@@ -116,25 +118,29 @@ public class CsvEpochSynchronizer {
     private static void createDataset(Parameters params, Logger log) {
         long timerStart = System.currentTimeMillis();
         try {
+            log.println("Computing phone-to-actigraph delay...");
             log.println("> Phone-to-actigraph delay average: " + params.getDelay() / 1000000 + "ms");
-            log.println("");
-            log.println("Actigraph start time: "
+            log.println("> Actigraph start time: "
                     + DateHelper.toDateTimeMillis(params.startTime / 1000000));
+            long phoneStartTime = params.startTime - params.getDelay();
+            log.println("> Phone start time: "
+                    + DateHelper.toDateTimeMillis(phoneStartTime / 1000000));
+            log.println("");
             log.println("Accumulating phone raw data into actigraph-timestamped epochs...");
             String phoneEpFilename = Csv.removeCsvExtension(params.phoneRawFilename)
                     + "-epochs.csv";
             RawToEpConverter conv = new RawToEpConverter(params.phoneRawFilename, phoneEpFilename);
             conv.createEpochsFile(params);
-            log.println("> Intermediate file successfully created (" + phoneEpFilename + ")");
+            log.println("> Intermediate epoch file created (" + phoneEpFilename + ")");
             log.println("");
             log.println("Merging phone epochs with actigraph labels...");
             EpLabelsMerger merger = new EpLabelsMerger(phoneEpFilename, params.actigraphEpFilename,
                     params.outputFilename);
             merger.createLabeledFile(params);
-            log.println("> Dataset file successfully created (" + params.outputFilename + ").");
+            log.println("> Dataset file created (" + params.outputFilename + ").");
             if (params.deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
-                    log.println("> Intermediate file deleted (" + phoneEpFilename + ").");
+                    log.println("> Intermediate epoch file deleted (" + phoneEpFilename + ").");
                 } else {
                     log.printErr("> Delete operation has failed.");
                 }
@@ -143,6 +149,8 @@ public class CsvEpochSynchronizer {
             }
         } catch (IOException e) {
             log.printErr(e.getMessage());
+            e.printStackTrace();
+            return;
         }
         log.println("");
         log.println("Total processing time: " + (System.currentTimeMillis() - timerStart) + "ms");

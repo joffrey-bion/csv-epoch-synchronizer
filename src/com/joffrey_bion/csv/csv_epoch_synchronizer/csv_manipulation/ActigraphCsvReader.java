@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv.TimestampedCsvReader;
 import com.joffrey_bion.utils.dates.DateHelper;
 
@@ -24,7 +25,7 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
     private static final String DATE_FORMAT = "M/d/yyyy";
     private static final String TIME_FORMAT = "hh:mm:ss a";
 
-    public ActigraphCsvReader(String filename) throws FileNotFoundException, NotACsvFileException {
+    public ActigraphCsvReader(String filename) throws FileNotFoundException, Csv.NotACsvFileException {
         super(filename);
     }
 

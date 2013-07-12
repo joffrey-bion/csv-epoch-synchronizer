@@ -4,6 +4,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv.TimestampedCsvReader;
 import com.joffrey_bion.utils.dates.DateHelper;
 
@@ -12,7 +13,7 @@ public class PhoneCsvReader extends TimestampedCsvReader {
     private static final int TIMESTAMP_COL = 0;
     private static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
 
-    public PhoneCsvReader(String filename) throws FileNotFoundException, NotACsvFileException {
+    public PhoneCsvReader(String filename) throws FileNotFoundException, Csv.NotACsvFileException {
         super(filename);
     }
 

@@ -7,19 +7,12 @@ import com.joffrey_bion.utils.stats.FlowStats;
 
 public class Parameters {
 
-    public static final String SPIKE_TIMESTAMP_FORMAT = "HH:mm:ss.SSS";
-    public static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-
+    private static final String SPIKE_TIMESTAMP_FORMAT = "HH:mm:ss.SSS";
+    private static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final boolean USE_DEFAULTS_WIDTHS = true;
-    private static final int DEFAULT_WINDOW_WIDTH_SEC = 5;
+    private static final int DEFAULT_WINDOW_WIDTH_SEC = 1;
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
 
-    /** Window width in nanoseconds */
-    private long windowWidthNano;
-    /** Epochs width in nanoseconds */
-    private long epochWidthNano;
-    /** Time between the beginning of the window and the beginning of the epoch */
-    private long winBeginToEpBegin;
     /** Name of the file containing the raw data from the phone */
     public String phoneRawFilename;
     /** Name of the file containing the epochs from the actigraph */
@@ -30,6 +23,12 @@ public class Parameters {
     public long startTime;
     /** Stop time in actigraph reference in nanoseconds */
     public long stopTime;
+    /** Window width in nanoseconds */
+    private long windowWidthNano;
+    /** Epochs width in nanoseconds */
+    private long epochWidthNano;
+    /** Time between the beginning of the window and the beginning of the epoch */
+    private long winBeginToEpBegin;
     /**
      * Delay in nanoseconds to add to a phone timestamp to find the corresponding
      * actigraph timestamp.
