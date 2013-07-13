@@ -11,8 +11,6 @@ import com.jgoodies.forms.factories.FormFactory;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
-import com.joffrey_bion.file_processor_window.logging.ConsoleLogger;
-import com.joffrey_bion.file_processor_window.logging.Logger;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
@@ -30,7 +28,6 @@ import java.awt.Component;
 public class ArgsPanel extends JPanel {
 
     private final JFilePickersPanel filePickers;
-    private Logger log;
 
     private JTextField tfStartTime;
     private JTextField tfStopTime;
@@ -49,7 +46,6 @@ public class ArgsPanel extends JPanel {
      */
     public ArgsPanel(JFilePickersPanel filePickers) {
         this.filePickers = filePickers;
-        this.log = new ConsoleLogger();
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
@@ -146,10 +142,9 @@ public class ArgsPanel extends JPanel {
                     RawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
                     String paramFilePath = getSelectedFilePath();
                     rawParams.save(paramFilePath);
-                    log.println("Parameters saved to '" + paramFilePath + "'.");
+                    System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    log.printErr(e.toString());
                 }
             }
         };
@@ -170,10 +165,9 @@ public class ArgsPanel extends JPanel {
                     inFp[1].setSelectedFilePath(raw.actigEpFile);
                     FilePicker[] outFp = ArgsPanel.this.filePickers.getOutputFilePickers();
                     outFp[0].setSelectedFilePath(raw.outputFile);
-                    log.println("Parameters loaded from '" + paramFilePath + "'.");
+                    System.out.println("Parameters loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     e.printStackTrace();
-                    log.printErr(e.toString());
                 }
             }
         };
@@ -227,10 +221,6 @@ public class ArgsPanel extends JPanel {
             tfSpikeActig[i].setHorizontalAlignment(SwingConstants.CENTER);
             panelSpikes.add(tfSpikeActig[i], "5, " + (2 * i + 5) + ", fill, default");
         }
-    }
-
-    public void setLogger(Logger log) {
-        this.log = log;
     }
 
     public void setParameters(RawParameters raw) {

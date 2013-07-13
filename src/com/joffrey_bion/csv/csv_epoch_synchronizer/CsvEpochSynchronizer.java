@@ -14,8 +14,6 @@ import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
-import com.joffrey_bion.file_processor_window.logging.ConsoleLogger;
-import com.joffrey_bion.file_processor_window.logging.Logger;
 import com.joffrey_bion.utils.dates.DateHelper;
 
 import com.joffrey_bion.csv.csv_epoch_synchronizer.ui.ArgsPanel;
@@ -52,7 +50,7 @@ public class CsvEpochSynchronizer {
                 System.out.println();
                 try {
                     RawParameters rawParams = RawParameters.load(xmlParamsFile);
-                    createDataset(new Parameters(rawParams), new ConsoleLogger());
+                    createDataset(new Parameters(rawParams));
                 } catch (Parameters.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
                 } catch (IOException e) {
@@ -71,7 +69,8 @@ public class CsvEpochSynchronizer {
     private static void openWindow() {
         // windows system look and feel for the window
         try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -94,13 +93,12 @@ public class CsvEpochSynchronizer {
                 try {
                     RawParameters rawParams = argsPanel.getRawParameters(inPaths[0], inPaths[1],
                             outPaths[0]);
-                    createDataset(new Parameters(rawParams), this);
+                    createDataset(new Parameters(rawParams));
                 } catch (Parameters.ArgumentFormatException e) {
-                    this.printErr(e.getMessage());
+                    System.err.println(e.getMessage());
                 }
             }
         };
-        argsPanel.setLogger(frame);
         frame.pack();
         frame.setVisible(true);
     }
@@ -112,47 +110,44 @@ public class CsvEpochSynchronizer {
      * @param params
      *            The com.joffrey_bion.csv.csv_epoch_synchronizer.parameters for the
      *            instance to deal with.
-     * @param log
-     *            A {@link Logger} to display log messages.
      */
-    private static void createDataset(Parameters params, Logger log) {
+    private static void createDataset(Parameters params) {
         long timerStart = System.currentTimeMillis();
         try {
-            log.println("Computing phone-to-actigraph delay...");
-            log.println("> Phone-to-actigraph delay average: " + params.getDelay() / 1000000 + "ms");
-            log.println("> Actigraph start time: "
+            System.out.println("Computing phone-to-actigraph delay...");
+            System.out.println("> Phone-to-actigraph delay average: " + params.getDelay() / 1000000 + "ms");
+            System.out.println("> Actigraph start time: "
                     + DateHelper.toDateTimeMillis(params.startTime / 1000000));
             long phoneStartTime = params.startTime - params.getDelay();
-            log.println("> Phone start time: "
+            System.out.println("> Phone start time: "
                     + DateHelper.toDateTimeMillis(phoneStartTime / 1000000));
-            log.println("");
-            log.println("Accumulating phone raw data into actigraph-timestamped epochs...");
+            System.out.println("");
+            System.out.println("Accumulating phone raw data into actigraph-timestamped epochs...");
             String phoneEpFilename = Csv.removeCsvExtension(params.phoneRawFilename)
                     + "-epochs.csv";
             RawToEpConverter conv = new RawToEpConverter(params.phoneRawFilename, phoneEpFilename);
             conv.createEpochsFile(params);
-            log.println("> Intermediate epoch file created (" + phoneEpFilename + ")");
-            log.println("");
-            log.println("Merging phone epochs with actigraph labels...");
+            System.out.println("> Intermediate epoch file created (" + phoneEpFilename + ")");
+            System.out.println("");
+            System.out.println("Merging phone epochs with actigraph labels...");
             EpLabelsMerger merger = new EpLabelsMerger(phoneEpFilename, params.actigraphEpFilename,
                     params.outputFilename);
             merger.createLabeledFile(params);
-            log.println("> Dataset file created (" + params.outputFilename + ").");
+            System.out.println("> Dataset file created (" + params.outputFilename + ").");
             if (params.deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
-                    log.println("> Intermediate epoch file deleted (" + phoneEpFilename + ").");
+                    System.out.println("> Intermediate epoch file deleted (" + phoneEpFilename + ").");
                 } else {
-                    log.printErr("> Delete operation has failed.");
+                    System.err.println("> Delete operation has failed.");
                 }
             } else {
-                log.println("> Intermediate file kept (" + phoneEpFilename + ").");
+                System.out.println("> Intermediate file kept (" + phoneEpFilename + ").");
             }
         } catch (IOException e) {
-            log.printErr(e.getMessage());
-            e.printStackTrace();
+            System.err.println(e.getMessage());
             return;
         }
-        log.println("");
-        log.println("Total processing time: " + (System.currentTimeMillis() - timerStart) + "ms");
+        System.out.println("");
+        System.out.println("Total processing time: " + (System.currentTimeMillis() - timerStart) + "ms");
     }
 }
