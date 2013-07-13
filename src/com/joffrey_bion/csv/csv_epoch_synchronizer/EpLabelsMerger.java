@@ -37,7 +37,7 @@ public class EpLabelsMerger {
         long timestampActigraph;
         String[] linePhone;
         String[] lineActigraph;
-        CountsLabeler labeler = new CountsLabeler(CountsLabeler.SEDENTARY_VS_ALL);
+        CountsLabeler labeler = new CountsLabeler(CountsLabeler.CUSTOM_VM3);
         while ((linePhone = phone.readRow()) != null
                 && (lineActigraph = actigraph.readRow()) != null) {
             timestampPhone = phone.extractTimestamp(linePhone);
