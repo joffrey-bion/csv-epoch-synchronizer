@@ -17,7 +17,7 @@ public class RawToEpConverter {
     private CsvWriter writer;
 
     private class EpochStatsLine extends StatsLineSkipSome {
-
+        
         public EpochStatsLine(int nbOfColumns) {
             super(nbOfColumns, 1);
         }
@@ -61,29 +61,6 @@ public class RawToEpConverter {
             newHeaders[j++] = headers[i] + "StdDev";
         }
         return newHeaders;
-    }
-
-    @SuppressWarnings("unused")
-    private void writeEpochs(int nbOfColumns, Parameters props) throws IOException {
-        EpochStatsLine stats = new EpochStatsLine(nbOfColumns);
-        long phoneStartTime = props.startTime - props.getDelay();
-        long phoneStopTime = props.stopTime - props.getDelay();
-        reader.skipToReachTimestamp(phoneStartTime);
-        long beginning = phoneStartTime;
-        String[] line;
-        while ((line = reader.readRow()) != null) {
-            long timestamp = reader.extractTimestamp(line);
-            if (timestamp > beginning + props.getEpochWidthNano()) {
-                writer.writeRow(stats.getEpochLine(beginning + props.getDelay()));
-                stats.clear();
-                beginning += props.getEpochWidthNano();
-                if (beginning >= phoneStopTime)
-                    break;
-            }
-            stats.add(line);
-        }
-        reader.close();
-        writer.close();
     }
 
     private void writeSmoothEpochs(int nbOfColumns, Parameters props) throws IOException {

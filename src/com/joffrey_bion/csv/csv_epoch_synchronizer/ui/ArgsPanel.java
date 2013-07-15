@@ -8,7 +8,8 @@ import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Config;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.InstanceRawParameters;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 
@@ -119,12 +120,12 @@ public class ArgsPanel extends JPanel {
         panel_3.add(lblWindowWidth, "1, 4, left, center");
 
         tfWindowWidth = new JTextField();
-        tfWindowWidth.setText("5");
+        tfWindowWidth.setText(Integer.toString(Config.get().windowWidthSec));
         panel_3.add(tfWindowWidth, "3, 4, fill, center");
         tfWindowWidth.setColumns(1);
 
         chckbxDeleteTemp = new JCheckBox("Delete temporary file");
-        chckbxDeleteTemp.setSelected(true);
+        chckbxDeleteTemp.setSelected(Config.get().deleteIntermediateFile);
         chckbxDeleteTemp.setHorizontalAlignment(SwingConstants.TRAILING);
         panel_4.add(chckbxDeleteTemp);
 
@@ -139,7 +140,7 @@ public class ArgsPanel extends JPanel {
                 try {
                     String[] inFiles = ArgsPanel.this.filePickers.getInputFilePaths();
                     String[] outFiles = ArgsPanel.this.filePickers.getOutputFilePaths();
-                    RawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
+                    InstanceRawParameters rawParams = getRawParameters(inFiles[0], inFiles[1], outFiles[0]);
                     String paramFilePath = getSelectedFilePath();
                     rawParams.save(paramFilePath);
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
@@ -158,7 +159,7 @@ public class ArgsPanel extends JPanel {
             protected void onSelect() {
                 try {
                     String paramFilePath = getSelectedFilePath();
-                    RawParameters raw = RawParameters.load(paramFilePath);
+                    InstanceRawParameters raw = InstanceRawParameters.load(paramFilePath);
                     setParameters(raw);
                     FilePicker[] inFp = ArgsPanel.this.filePickers.getInputFilePickers();
                     inFp[0].setSelectedFilePath(raw.phoneRawFile);
@@ -204,10 +205,10 @@ public class ArgsPanel extends JPanel {
         JLabel lblActigraph = new JLabel("Actigraph");
         panelSpikes.add(lblActigraph, "5, 3, center, default");
 
-        tfSpikeLabel = new JLabel[RawParameters.NB_MAX_SPIKES];
-        tfSpikePhone = new JTextField[RawParameters.NB_MAX_SPIKES];
-        tfSpikeActig = new JTextField[RawParameters.NB_MAX_SPIKES];
-        for (int i = 0; i < RawParameters.NB_MAX_SPIKES; i++) {
+        tfSpikeLabel = new JLabel[InstanceRawParameters.NB_MAX_SPIKES];
+        tfSpikePhone = new JTextField[InstanceRawParameters.NB_MAX_SPIKES];
+        tfSpikeActig = new JTextField[InstanceRawParameters.NB_MAX_SPIKES];
+        for (int i = 0; i < InstanceRawParameters.NB_MAX_SPIKES; i++) {
             tfSpikeLabel[i] = new JLabel(Integer.toString(i + 1));
             panelSpikes.add(tfSpikeLabel[i], "1, " + (2 * i + 5) + ", right, default");
 
@@ -223,32 +224,28 @@ public class ArgsPanel extends JPanel {
         }
     }
 
-    public void setParameters(RawParameters raw) {
+    public void setParameters(InstanceRawParameters raw) {
         tfStartTime.setText(raw.startTime);
         tfStopTime.setText(raw.stopTime);
         tfEpochWidth.setText(raw.epochWidthSec);
-        tfWindowWidth.setText(raw.windowWidthSec);
-        chckbxDeleteTemp.setSelected(raw.deleteIntermediateFile);
         for (int i = 0; i < raw.phoneSpikes.length; i++) {
             tfSpikePhone[i].setText(raw.phoneSpikes[i]);
             tfSpikeActig[i].setText(raw.actigraphSpikes[i]);
         }
     }
 
-    public RawParameters getRawParameters(String phoneRawFile, String actigEpFile, String outputFile) {
-        RawParameters params = new RawParameters();
+    public InstanceRawParameters getRawParameters(String phoneRawFile, String actigEpFile, String outputFile) {
+        InstanceRawParameters params = new InstanceRawParameters();
         params.phoneRawFile = phoneRawFile;
         params.actigEpFile = actigEpFile;
         params.outputFile = outputFile;
         params.startTime = tfStartTime.getText();
         params.stopTime = tfStopTime.getText();
         params.epochWidthSec = tfEpochWidth.getText();
-        params.windowWidthSec = tfWindowWidth.getText();
-        params.deleteIntermediateFile = chckbxDeleteTemp.isSelected();
-        String[] phoneSpikes = new String[RawParameters.NB_MAX_SPIKES];
-        String[] actigraphSpikes = new String[RawParameters.NB_MAX_SPIKES];
+        String[] phoneSpikes = new String[InstanceRawParameters.NB_MAX_SPIKES];
+        String[] actigraphSpikes = new String[InstanceRawParameters.NB_MAX_SPIKES];
         int nbSpikes = 0;
-        for (int i = 0; i < RawParameters.NB_MAX_SPIKES; i++) {
+        for (int i = 0; i < InstanceRawParameters.NB_MAX_SPIKES; i++) {
             phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
             actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
             if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {

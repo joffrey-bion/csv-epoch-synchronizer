@@ -9,8 +9,9 @@ import javax.swing.UIManager;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv.Csv;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Config;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.RawParameters;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.InstanceRawParameters;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
@@ -49,7 +50,7 @@ public class CsvEpochSynchronizer {
                 System.out.println("------[ " + xmlParamsFile + " ]---------------------");
                 System.out.println();
                 try {
-                    RawParameters rawParams = RawParameters.load(xmlParamsFile);
+                    InstanceRawParameters rawParams = InstanceRawParameters.load(xmlParamsFile);
                     createDataset(new Parameters(rawParams));
                 } catch (Parameters.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
@@ -91,7 +92,7 @@ public class CsvEpochSynchronizer {
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
-                    RawParameters rawParams = argsPanel.getRawParameters(inPaths[0], inPaths[1],
+                    InstanceRawParameters rawParams = argsPanel.getRawParameters(inPaths[0], inPaths[1],
                             outPaths[0]);
                     createDataset(new Parameters(rawParams));
                 } catch (Parameters.ArgumentFormatException e) {
@@ -134,7 +135,7 @@ public class CsvEpochSynchronizer {
                     params.outputFilename);
             merger.createLabeledFile(params);
             System.out.println("> Dataset file created (" + params.outputFilename + ").");
-            if (params.deleteIntermediateFile) {
+            if (Config.get().deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
                     System.out.println("> Intermediate epoch file deleted (" + phoneEpFilename + ").");
                 } else {

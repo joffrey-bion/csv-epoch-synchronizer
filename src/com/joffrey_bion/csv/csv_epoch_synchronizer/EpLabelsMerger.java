@@ -6,6 +6,7 @@ import java.util.Arrays;
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.ActigraphCsvReader;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
+import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Config;
 import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
 import com.joffrey_bion.csv.CsvWriter;
 import com.joffrey_bion.utils.dates.DateHelper;
@@ -37,7 +38,7 @@ public class EpLabelsMerger {
         long timestampActigraph;
         String[] linePhone;
         String[] lineActigraph;
-        CountsLabeler labeler = new CountsLabeler(CountsLabeler.CUSTOM_VM3);
+        CountsLabeler labeler = new CountsLabeler(Config.get().cutPointsSet);
         while ((linePhone = phone.readRow()) != null
                 && (lineActigraph = actigraph.readRow()) != null) {
             timestampPhone = phone.extractTimestamp(linePhone);

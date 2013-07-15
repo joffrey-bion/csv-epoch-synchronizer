@@ -9,10 +9,9 @@ public class Parameters {
 
     private static final String SPIKE_TIMESTAMP_FORMAT = "HH:mm:ss.SSS";
     private static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
-    private static final boolean USE_DEFAULTS_WIDTHS = true;
-    private static final int DEFAULT_WINDOW_WIDTH_SEC = 1;
+    private static final boolean USE_DEFAULT_WIDTH = true;
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
-
+    
     /** Name of the file containing the raw data from the phone */
     public String phoneRawFilename;
     /** Name of the file containing the epochs from the actigraph */
@@ -34,12 +33,7 @@ public class Parameters {
      * actigraph timestamp.
      */
     private long delay;
-    /**
-     * Whether or not the intermediate file (containing phone epochs) must be
-     * deleted.
-     */
-    public boolean deleteIntermediateFile = true;
-
+    
     @SuppressWarnings("serial")
     public class ArgumentFormatException extends Exception {
         public ArgumentFormatException(String message) {
@@ -55,7 +49,7 @@ public class Parameters {
      * @throws ArgumentFormatException
      *             If one of the parameters is not in the expected format.
      */
-    public Parameters(RawParameters rawParams) throws ArgumentFormatException {
+    public Parameters(InstanceRawParameters rawParams) throws ArgumentFormatException {
         if (rawParams.phoneRawFile == null || rawParams.phoneRawFile.equals("")) {
             throw new ArgumentFormatException("Phone raw data file must be specified.");
         } else {
@@ -84,22 +78,20 @@ public class Parameters {
         if (startTime > stopTime) {
             throw new IllegalArgumentException("Start time must be less than stop time.");
         }
-        if (USE_DEFAULTS_WIDTHS) {
-            setWindowFields(DEFAULT_WINDOW_WIDTH_SEC, DEFAULT_EPOCH_WIDTH_SEC);
+        if (USE_DEFAULT_WIDTH) {
+            setWindowFields(DEFAULT_EPOCH_WIDTH_SEC);
         } else {
             try {
                 int epochWidth = Integer.parseInt(rawParams.epochWidthSec);
-                int windowWidth = Integer.parseInt(rawParams.windowWidthSec);
-                if (epochWidth > windowWidth) {
+                if (epochWidth > Config.get().windowWidthSec) {
                     throw new ArgumentFormatException("The epoch cannot be longer than the window.");
                 }
-                setWindowFields(epochWidth, windowWidth);
+                setWindowFields(epochWidth);
             } catch (NumberFormatException e) {
                 throw new ArgumentFormatException(
                         "Incorrect format for epoch or window width, integer expected.");
             }
         }
-        deleteIntermediateFile = rawParams.deleteIntermediateFile;
         try {
             if (rawParams.phoneSpikes.length != rawParams.actigraphSpikes.length) {
                 throw new ArgumentFormatException("Incorrect format for spikes timestamp.");
@@ -113,13 +105,11 @@ public class Parameters {
     /**
      * Sets the fields related to the time window and the labeled part.
      * 
-     * @param windowWidthSec
-     *            The time window width in seconds.
      * @param epochWidthSec
      *            The width of the labeled part of the time window in seconds.
      */
-    private void setWindowFields(int windowWidthSec, int epochWidthSec) {
-        this.windowWidthNano = windowWidthSec * 1000 * 1000000;
+    private void setWindowFields(int epochWidthSec) {
+        this.windowWidthNano = Config.get().windowWidthSec * 1000 * 1000000;
         this.epochWidthNano = epochWidthSec * 1000 * 1000000;
         this.winBeginToEpBegin = (windowWidthNano - epochWidthNano) / 2;
     }
