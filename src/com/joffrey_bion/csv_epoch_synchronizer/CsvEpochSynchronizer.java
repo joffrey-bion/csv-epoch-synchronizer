@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 import org.xml.sax.SAXException;
 
@@ -69,13 +68,7 @@ public class CsvEpochSynchronizer {
      * Starts the GUI.
      */
     private static void openWindow() {
-        // windows system look and feel for the window
-        try {
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JFileProcessorWindow.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
                 "Phone raw file", "Actigraph epoch file" }, "Output file");

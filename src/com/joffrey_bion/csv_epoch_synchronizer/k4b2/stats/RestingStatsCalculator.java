@@ -1,9 +1,8 @@
-package com.joffrey_bion.csv_epoch_synchronizer.k4b2;
+package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
 import java.io.IOException;
 
 import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.CsvWriter;
@@ -36,12 +35,7 @@ public class RestingStatsCalculator {
      * Starts the GUI.
      */
     private static void openWindow() {
-        // windows system look and feel for the window
-        try {
-            UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        JFileProcessorWindow.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel("K4b2 CSV file", "Output file");
         for (FilePicker fp : filePickers.getInputFilePickers()) {
