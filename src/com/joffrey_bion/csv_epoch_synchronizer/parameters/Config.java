@@ -82,6 +82,7 @@ public class Config {
         }
         Element root = doc.createElement(ROOT);
         doc.appendChild(root);
+        root.appendChild(doc.createComment("The cut points set must be one of CutPointsSet enum constant names"));
         XmlHelper.appendField(doc, root, TAG_CUT_POINTS, cutPointsSet.toString());
         XmlHelper.appendField(doc, root, TAG_WINDOW_WIDTH, Integer.toString(windowWidthSec));
         XmlHelper.appendField(doc, root, TAG_DELETE_TEMP_FILE,
@@ -144,7 +145,7 @@ public class Config {
             String urlString = ClassLoader
                     .getSystemClassLoader()
                     .getResource(
-                            "com/joffrey_bion/csv/csv_epoch_synchronizer/CsvEpochSynchronizer.class")
+                            "com/joffrey_bion/csv_epoch_synchronizer/CsvEpochSynchronizer.class")
                     .toString();
             urlString = urlString.substring(urlString.indexOf("file:"), urlString.indexOf('!'));
             URL url = new URL(urlString);

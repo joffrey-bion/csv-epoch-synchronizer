@@ -1,8 +1,8 @@
 package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
 
 public enum ActigraphFileFormat {
-    EXPORTED("hh:mm:ss a", 11, 11),
-    CONVERTED("HH:mm:ss", 5, 2);
+    EXPORTED("hh:mm:ss a", 5, 2),
+    CONVERTED("HH:mm:ss", 11, 11);
     
     public final String DATE_FORMAT;
     public final String TIME_FORMAT;

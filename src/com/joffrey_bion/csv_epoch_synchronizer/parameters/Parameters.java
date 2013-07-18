@@ -81,11 +81,10 @@ public class Parameters {
         if (startTime > stopTime) {
             throw new IllegalArgumentException("Start time must be less than stop time.");
         }
-        if (rawParams.actigraphFileFormat == null
-                || ActigraphFileFormat.EXPORTED.toString().equalsIgnoreCase(rawParams.actigraphFileFormat)) {
+        if (rawParams.actigraphFileFormat == null) {
             actigraphFileFormat = ActigraphFileFormat.EXPORTED;
-        } else if (ActigraphFileFormat.CONVERTED.toString().equalsIgnoreCase(rawParams.actigraphFileFormat)) {
-            actigraphFileFormat = ActigraphFileFormat.CONVERTED;
+        } else {
+            actigraphFileFormat = ActigraphFileFormat.valueOf(rawParams.actigraphFileFormat);
         }
         if (USE_DEFAULT_WIDTH) {
             setWindowFields(DEFAULT_EPOCH_WIDTH_SEC);

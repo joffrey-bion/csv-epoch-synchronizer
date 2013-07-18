@@ -186,16 +186,16 @@ public class ArgsPanel extends JPanel {
 
         JLabel lblActigraph = new JLabel("Actigraph");
         panelSpikes.add(lblActigraph, "5, 3, center, default");
-        
+
         Component verticalStrut = Box.createVerticalStrut(5);
         add(verticalStrut);
-        
+
         JSeparator separator_1 = new JSeparator();
         add(separator_1);
-        
+
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
-        
+
         JPanel savePanel = new JPanel();
         FlowLayout flowLayout_1 = (FlowLayout) savePanel.getLayout();
         flowLayout_1.setHgap(0);
@@ -269,6 +269,10 @@ public class ArgsPanel extends JPanel {
         tfStartTime.setText(raw.startTime);
         tfStopTime.setText(raw.stopTime);
         tfEpochWidth.setText(raw.epochWidthSec);
+        if (raw.actigraphFileFormat != null) {
+            cBoxActigraphFileFormat.setSelectedItem(ActigraphFileFormat
+                    .valueOf(raw.actigraphFileFormat));
+        }
         for (int i = 0; i < raw.phoneSpikes.length; i++) {
             tfSpikePhone[i].setText(raw.phoneSpikes[i]);
             tfSpikeActig[i].setText(raw.actigraphSpikes[i]);
@@ -283,7 +287,8 @@ public class ArgsPanel extends JPanel {
         params.outputFile = outputFile;
         params.startTime = tfStartTime.getText();
         params.stopTime = tfStopTime.getText();
-        params.actigraphFileFormat = ((ActigraphFileFormat) cBoxActigraphFileFormat.getSelectedItem()).toString();
+        params.actigraphFileFormat = ((ActigraphFileFormat) cBoxActigraphFileFormat
+                .getSelectedItem()).toString();
         params.epochWidthSec = tfEpochWidth.getText();
         String[] phoneSpikes = new String[InstanceRawParameters.NB_MAX_SPIKES];
         String[] actigraphSpikes = new String[InstanceRawParameters.NB_MAX_SPIKES];
@@ -296,8 +301,8 @@ public class ArgsPanel extends JPanel {
             }
         }
         if (nbSpikes > 0) {
-            params.phoneSpikes = Arrays.copyOfRange(phoneSpikes, 0, nbSpikes - 1);
-            params.actigraphSpikes = Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes - 1);
+            params.phoneSpikes = Arrays.copyOfRange(phoneSpikes, 0, nbSpikes);
+            params.actigraphSpikes = Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes);
         } else {
             params.phoneSpikes = new String[0];
             params.actigraphSpikes = new String[0];
