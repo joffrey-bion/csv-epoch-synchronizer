@@ -1,9 +1,8 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer.row_stats;
+package com.joffrey_bion.csv_epoch_synchronizer.phone;
 
 import java.util.Arrays;
 
-
-public class StatsLineSkipSome {
+class StatsLineSkipSome {
 
     private StatsLine statsLine;
     private int nbSkippedCols;

@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer;
+package com.joffrey_bion.csv_epoch_synchronizer;
 
 import java.io.File;
 import java.io.IOException;
@@ -9,26 +9,27 @@ import javax.swing.UIManager;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv.Csv;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Config;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.InstanceRawParameters;
+import com.joffrey_bion.csv_epoch_synchronizer.actigraph.EpLabelsMerger;
+import com.joffrey_bion.csv_epoch_synchronizer.parameters.Config;
+import com.joffrey_bion.csv_epoch_synchronizer.parameters.InstanceRawParameters;
+import com.joffrey_bion.csv_epoch_synchronizer.parameters.Parameters;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 import com.joffrey_bion.utils.dates.DateHelper;
 
-import com.joffrey_bion.csv.csv_epoch_synchronizer.ui.ArgsPanel;
 
 /**
  * This program is meant to create a Weka-ready dataset based on the given raw phone
  * samples and the actigraph's epochs. For more information about the
- * com.joffrey_bion.csv.csv_epoch_synchronizer.parameters, check the
+ * com.joffrey_bion.csv_epoch_synchronizer.parameters, check the
  * {@link Parameters} class.
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
 public class CsvEpochSynchronizer {
-
+    
     /**
      * Choose between GUI or console version according to the number of arguments.
      * 
@@ -71,7 +72,7 @@ public class CsvEpochSynchronizer {
         // windows system look and feel for the window
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-            //UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
+            // UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -92,8 +93,8 @@ public class CsvEpochSynchronizer {
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
-                    InstanceRawParameters rawParams = argsPanel.getRawParameters(inPaths[0], inPaths[1],
-                            outPaths[0]);
+                    InstanceRawParameters rawParams = argsPanel.getRawParameters(inPaths[0],
+                            inPaths[1], outPaths[0]);
                     createDataset(new Parameters(rawParams));
                 } catch (Parameters.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
@@ -109,14 +110,15 @@ public class CsvEpochSynchronizer {
      * actigraph's epochs.
      * 
      * @param params
-     *            The com.joffrey_bion.csv.csv_epoch_synchronizer.parameters for the
+     *            The com.joffrey_bion.csv_epoch_synchronizer.parameters for the
      *            instance to deal with.
      */
     private static void createDataset(Parameters params) {
         long timerStart = System.currentTimeMillis();
         try {
             System.out.println("Computing phone-to-actigraph delay...");
-            System.out.println("> Phone-to-actigraph delay average: " + params.getDelay() / 1000000 + "ms");
+            System.out.println("> Phone-to-actigraph delay average: " + params.getDelay() / 1000000
+                    + "ms");
             System.out.println("> Actigraph start time: "
                     + DateHelper.toDateTimeMillis(params.startTime / 1000000));
             long phoneStartTime = params.startTime - params.getDelay();
@@ -132,12 +134,13 @@ public class CsvEpochSynchronizer {
             System.out.println("");
             System.out.println("Merging phone epochs with actigraph labels...");
             EpLabelsMerger merger = new EpLabelsMerger(phoneEpFilename, params.actigraphEpFilename,
-                    params.outputFilename);
+                    params.outputFilename, params.actigraphFileFormat);
             merger.createLabeledFile(params);
             System.out.println("> Dataset file created (" + params.outputFilename + ").");
             if (Config.get().deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
-                    System.out.println("> Intermediate epoch file deleted (" + phoneEpFilename + ").");
+                    System.out.println("> Intermediate epoch file deleted (" + phoneEpFilename
+                            + ").");
                 } else {
                     System.err.println("> Delete operation has failed.");
                 }
@@ -149,6 +152,7 @@ public class CsvEpochSynchronizer {
             return;
         }
         System.out.println("");
-        System.out.println("Total processing time: " + (System.currentTimeMillis() - timerStart) + "ms");
+        System.out.println("Total processing time: " + (System.currentTimeMillis() - timerStart)
+                + "ms");
     }
 }

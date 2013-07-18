@@ -1,7 +1,8 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer.parameters;
+package com.joffrey_bion.csv_epoch_synchronizer.parameters;
 
 import java.text.ParseException;
 
+import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.utils.dates.DateHelper;
 import com.joffrey_bion.utils.stats.FlowStats;
 
@@ -11,7 +12,7 @@ public class Parameters {
     private static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final boolean USE_DEFAULT_WIDTH = true;
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
-    
+
     /** Name of the file containing the raw data from the phone */
     public String phoneRawFilename;
     /** Name of the file containing the epochs from the actigraph */
@@ -22,6 +23,8 @@ public class Parameters {
     public long startTime;
     /** Stop time in actigraph reference in nanoseconds */
     public long stopTime;
+    /** Actigraph epochs file format */
+    public ActigraphFileFormat actigraphFileFormat;
     /** Window width in nanoseconds */
     private long windowWidthNano;
     /** Epochs width in nanoseconds */
@@ -33,7 +36,7 @@ public class Parameters {
      * actigraph timestamp.
      */
     private long delay;
-    
+
     @SuppressWarnings("serial")
     public class ArgumentFormatException extends Exception {
         public ArgumentFormatException(String message) {
@@ -77,6 +80,12 @@ public class Parameters {
         }
         if (startTime > stopTime) {
             throw new IllegalArgumentException("Start time must be less than stop time.");
+        }
+        if (rawParams.actigraphFileFormat == null
+                || ActigraphFileFormat.EXPORTED.toString().equalsIgnoreCase(rawParams.actigraphFileFormat)) {
+            actigraphFileFormat = ActigraphFileFormat.EXPORTED;
+        } else if (ActigraphFileFormat.CONVERTED.toString().equalsIgnoreCase(rawParams.actigraphFileFormat)) {
+            actigraphFileFormat = ActigraphFileFormat.CONVERTED;
         }
         if (USE_DEFAULT_WIDTH) {
             setWindowFields(DEFAULT_EPOCH_WIDTH_SEC);

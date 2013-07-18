@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer.parameters;
+package com.joffrey_bion.csv_epoch_synchronizer.parameters;
 
 import java.io.IOException;
 
@@ -30,6 +30,7 @@ public class InstanceRawParameters {
     private static final String INPUT_FILE = "input-file";
     private static final String OUTPUT_FILE = "output-file";
     private static final String FILE_INDEX_ATT = "index";
+    private static final String ACTIG_FILE_FORMAT = "actigraph-format";
     private static final String START_TIME = "start";
     private static final String STOP_TIME = "stop";
     private static final String EPOCH_WIDTH_SEC = "epoch-width";
@@ -48,7 +49,8 @@ public class InstanceRawParameters {
     public String stopTime;
     public String[] phoneSpikes;
     public String[] actigraphSpikes;
-
+    public String actigraphFileFormat;
+    
     /**
      * Save this {@code InstanceRawParameters} object to the specified XML file.
      * 
@@ -72,6 +74,7 @@ public class InstanceRawParameters {
                     "0");
             XmlHelper.appendField(doc, root, START_TIME, startTime);
             XmlHelper.appendField(doc, root, STOP_TIME, stopTime);
+            XmlHelper.appendField(doc, root, ACTIG_FILE_FORMAT, actigraphFileFormat);
             XmlHelper.appendField(doc, root, EPOCH_WIDTH_SEC, epochWidthSec);
             Element spikes = doc.createElement(SPIKES_LIST);
             root.appendChild(spikes);
@@ -115,6 +118,7 @@ public class InstanceRawParameters {
         raw.outputFile = outFiles[0];
         raw.startTime = XmlHelper.getField(root, START_TIME);
         raw.stopTime = XmlHelper.getField(root, STOP_TIME);
+        raw.actigraphFileFormat = XmlHelper.getField(root, ACTIG_FILE_FORMAT);
         raw.epochWidthSec = XmlHelper.getField(root, EPOCH_WIDTH_SEC);
         Element spikes = (Element) root.getElementsByTagName(SPIKES_LIST).item(0);
         NodeList spikesList = spikes.getElementsByTagName(SPIKE);

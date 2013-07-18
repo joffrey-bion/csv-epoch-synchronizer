@@ -1,13 +1,12 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer;
+package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.ActigraphCsvReader;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.csv_manipulation.PhoneCsvReader;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Config;
-import com.joffrey_bion.csv.csv_epoch_synchronizer.parameters.Parameters;
+import com.joffrey_bion.csv_epoch_synchronizer.parameters.Config;
+import com.joffrey_bion.csv_epoch_synchronizer.parameters.Parameters;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneCsvReader;
 import com.joffrey_bion.csv.CsvWriter;
 import com.joffrey_bion.utils.dates.DateHelper;
 
@@ -17,10 +16,10 @@ public class EpLabelsMerger {
     private ActigraphCsvReader actigraph;
     private CsvWriter writer;
 
-    public EpLabelsMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename)
+    public EpLabelsMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename, ActigraphFileFormat actigraphFileFormat)
             throws IOException, NotACsvFileException {
         phone = new PhoneCsvReader(phoneEpFilename);
-        actigraph = new ActigraphCsvReader(actigraphEpFilename);
+        actigraph = new ActigraphCsvReader(actigraphEpFilename, actigraphFileFormat);
         writer = new CsvWriter(destFilename);
     }
 
@@ -38,7 +37,7 @@ public class EpLabelsMerger {
         long timestampActigraph;
         String[] linePhone;
         String[] lineActigraph;
-        CountsLabeler labeler = new CountsLabeler(Config.get().cutPointsSet);
+        CutPointsSet labeler = Config.get().cutPointsSet;
         while ((linePhone = phone.readRow()) != null
                 && (lineActigraph = actigraph.readRow()) != null) {
             timestampPhone = phone.extractTimestamp(linePhone);
@@ -51,8 +50,8 @@ public class EpLabelsMerger {
                 throw new RuntimeException(
                         "Internal error, epoch beyond stoptime in intermediate file");
             }
-            double cpm = ActigraphCsvReader.extractCountsPerMinutes(lineActigraph,
-                    props.getEpochWidthNano());
+            double cpm = actigraph
+                    .extractCountsPerMinutes(lineActigraph, props.getEpochWidthNano());
             String[] row = shiftLeftAndAppend(linePhone, labeler.countsToLevel(cpm));
             writer.writeRow(row);
         }

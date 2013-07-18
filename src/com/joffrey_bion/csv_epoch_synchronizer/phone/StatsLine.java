@@ -1,8 +1,8 @@
-package com.joffrey_bion.csv.csv_epoch_synchronizer.row_stats;
+package com.joffrey_bion.csv_epoch_synchronizer.phone;
 
 import com.joffrey_bion.utils.stats.FlowStats;
 
-public class StatsLine {
+class StatsLine {
 
     private FlowStats[] columns;
 
