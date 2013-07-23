@@ -1,58 +1,72 @@
 package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2CsvReader;
-
+import java.util.Iterator;
+import java.util.LinkedList;
 
 public class Results {
 
     public static final long TOTAL_LENGTH_MILLIS = 5 * 60 * 1000;
     public static final long GROUP_LENGTH_MILLIS = 30 * 1000;
 
-    private NestedStats VO2;
-    private NestedStats VCO2;
-    private NestedStats R;
-    private NestedStats VO2kg;
+    private LinkedList<StatsWindowsGroup> windows;
 
     public Results() {
-        VO2 = new NestedStats();
-        VO2kg = new NestedStats();
-        VCO2 = new NestedStats();
-        R = new NestedStats();
+        windows = new LinkedList<>();
+        windows.add(new StatsWindowsGroup(TOTAL_LENGTH_MILLIS, GROUP_LENGTH_MILLIS));
     }
 
+    /**
+     * Adds the specified line of values to the results calculation.
+     * 
+     * @param line
+     *            The line to add.
+     * @param length
+     *            The duration of the sample corresponding to the specified line.
+     */
     public void add(String[] line, double length) {
-        VO2.add(K4b2CsvReader.getVO2(line), length);
-        VO2kg.add(K4b2CsvReader.getVO2kg(line), length);
-        VCO2.add(K4b2CsvReader.getVCO2(line), length);
-        R.add(K4b2CsvReader.getR(line), length);
+        LinkedList<K4b2Line> toMove = new LinkedList<>();
+        toMove.add(new K4b2Line(line, length));
+        LinkedList<K4b2Line> toMoveNext = new LinkedList<>();
+        double cumulatedDuration = 0;
+        int nbWindows = 0;
+        // fill first window, and move extra old lines to next window
+        for (StatsWindowsGroup win : windows) {
+            win.setCompensation(cumulatedDuration, nbWindows);
+            toMoveNext.clear();
+            win.add(toMove, toMoveNext);
+            LinkedList<K4b2Line> tempForInversion = toMoveNext;
+            toMoveNext = toMove;
+            toMove = tempForInversion;
+            cumulatedDuration += win.getDuration();
+            nbWindows++;
+        }
+        // create new windows for the extra old lines that remain
+        while (!toMove.isEmpty()) {
+            StatsWindowsGroup win = new StatsWindowsGroup(TOTAL_LENGTH_MILLIS, GROUP_LENGTH_MILLIS);
+            windows.add(win);
+            win.setCompensation(cumulatedDuration, nbWindows);
+            toMoveNext.clear();
+            win.add(toMove, toMoveNext);
+            LinkedList<K4b2Line> tempForInversion = toMoveNext;
+            toMoveNext = toMove;
+            toMove = tempForInversion;
+            cumulatedDuration += win.getDuration();
+            nbWindows++;
+        }
     }
 
-    public void finishCurrentGroup() {
-        VO2.finishCurrentGroup();
-        VO2kg.finishCurrentGroup();
-        VCO2.finishCurrentGroup();
-        R.finishCurrentGroup();
+    public double getVO2kgAvg() {
+        return windows.getFirst().getVO2kgAvg();
     }
-
-    public long getTotalLength() {
-        return (long) VO2.getGlobalStats().getTotalWeight();
-    }
-
-    public long getVO2kgAvg() {
-        return (long) VO2kg.getGlobalStats().mean();
-    }
-
-    private static String formatPercent(double d) {
-        return String.format("%2.2f", d * 100) + "%";
-    }
-
+    
     @Override
     public String toString() {
-        String res = "Total length: " + getTotalLength() / 1000 + "s\n";
-        res += "VO2  CV = " + formatPercent(VO2.getGlobalStats().coeffOfVariation()) + "\n";
-        res += "VCO2 CV = " + formatPercent(VCO2.getGlobalStats().coeffOfVariation()) + "\n";
-        res += "R    CV = " + formatPercent(R.getGlobalStats().coeffOfVariation()) + "\n";
-        res += "VO2/kg average = " + String.format("%2.2f", VO2kg.getGlobalStats().mean()) + "\n";
-        return res;
+        StringBuilder sb = new StringBuilder();
+        Iterator<StatsWindowsGroup> it = windows.descendingIterator();
+        while (it.hasNext()) {
+            sb.append(it.next().toString());
+            sb.append("\n");
+        }
+        return sb.toString();
     }
 }

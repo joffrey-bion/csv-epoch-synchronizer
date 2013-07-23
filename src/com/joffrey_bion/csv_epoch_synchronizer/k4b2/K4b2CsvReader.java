@@ -4,10 +4,10 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.text.ParseException;
 
-import com.joffrey_bion.csv.TimestampedCsvReader;
+import com.joffrey_bion.csv.CsvReader;
 import com.joffrey_bion.utils.dates.DateHelper;
 
-public class K4b2CsvReader extends TimestampedCsvReader {
+public class K4b2CsvReader extends CsvReader {
 
     private static final int NB_HEADER_LINES = 3;
 
@@ -20,8 +20,6 @@ public class K4b2CsvReader extends TimestampedCsvReader {
     public static final int COL_METS = 107;
 
     private static final String MARK = "mark";
-
-    private static final String DATE_FORMAT = "M/d/yyyy";
     private static final String TIME_FORMAT = "hh:mm:ss";
 
     private long previousTime;
@@ -29,17 +27,7 @@ public class K4b2CsvReader extends TimestampedCsvReader {
     public K4b2CsvReader(String filename) throws IOException {
         super(filename);
         super.readRow();
-    }
-
-    @Override
-    public long extractTimestamp(String[] line) throws IOException {
-        String timestamp = line[COL_TIME]; // TODO figure something out
-        String format = DATE_FORMAT + " " + TIME_FORMAT;
-        try {
-            return DateHelper.timestampStrToNanos(timestamp, format);
-        } catch (ParseException e) {
-            throw new IOException(e.getMessage());
-        }
+        previousTime = 0;
     }
 
     public void skipHeaders() throws IOException {
@@ -50,7 +38,11 @@ public class K4b2CsvReader extends TimestampedCsvReader {
 
     @Override
     public String[] readRow() throws IOException {
-        previousTime = getTimeMillis();
+        try {
+            previousTime = getTimeMillis();
+        } catch (ParseException e) {
+            throw new IOException(e.getMessage());
+        }
         return super.readRow();
     }
 
@@ -63,9 +55,10 @@ public class K4b2CsvReader extends TimestampedCsvReader {
      * @throws IOException
      */
     public String[] skipMarkers(int nbToSkip) throws IOException {
-        if (!currentRow[COL_MARK].equals(MARK)) {
+        if (!isMarked()) {
             goToNextMarker();
         }
+        // at this point the current row is marked
         for (int i = 0; i < nbToSkip; i++) {
             currentRow = goToNextMarker();
         }
@@ -75,7 +68,7 @@ public class K4b2CsvReader extends TimestampedCsvReader {
     /**
      * Reads as many rows as necessary to reach the next row with a marker. If the
      * current row is marked, it is not taken into account and the next row with a
-     * marker is returned.
+     * marker is returned. Postcondition: {@link #isMarked()} will return true.
      * 
      * @return The next marked row.
      * @throws IOException
@@ -93,47 +86,47 @@ public class K4b2CsvReader extends TimestampedCsvReader {
                         + " rows read).");
     }
 
-    public long getTimeMillis() {
+    public long getTimeMillis() throws ParseException {
         if (currentRow == null) {
             return 0;
         }
         return getTimeMillis(currentRow);
     }
 
-    public long getCurrentEpochLength() {
-        return getTimeMillis(currentRow) - previousTime;
+    public long getCurrentEpochLength() throws IOException {
+        try {
+            return getTimeMillis(currentRow) - previousTime;
+        } catch (ParseException e) {
+            throw new IOException(e.getMessage());
+        }
     }
 
-    public static long getTimeMillis(String[] line) {
-        String[] hhmmss = line[COL_TIME].split(":");
-        long h = Long.parseLong(hhmmss[0]);
-        long m = Long.parseLong(hhmmss[1]);
-        long s = Long.parseLong(hhmmss[2]);
-        return (((h * 60) + m) * 60 + s) * 1000;
+    public static long getTimeMillis(String[] line) throws ParseException {
+        return DateHelper.timestampStrToMillis(line[COL_TIME], TIME_FORMAT);
     }
 
-    public static boolean isMarked(String[] line) {
-        return line[COL_MARK].equals(MARK);
+    public boolean isMarked() {
+        return currentRow[COL_MARK].equals(MARK);
     }
 
-    public static double getNumber(int column, String[] line) {
+    public static double getValue(int column, String[] line) {
         return Double.parseDouble(line[column]);
     }
 
     public static double getVO2(String[] line) {
-        return getNumber(COL_VO2, line);
+        return getValue(COL_VO2, line);
     }
 
     public static double getVCO2(String[] line) {
-        return getNumber(COL_VCO2, line);
+        return getValue(COL_VCO2, line);
     }
 
     public static double getR(String[] line) {
-        return getNumber(COL_R, line);
+        return getValue(COL_R, line);
     }
 
     public static double getVO2kg(String[] line) {
-        return getNumber(COL_VO2KG, line);
+        return getValue(COL_VO2KG, line);
     }
 
 }

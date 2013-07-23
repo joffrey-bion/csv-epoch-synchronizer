@@ -78,15 +78,15 @@ public class CsvEpochSynchronizer {
         for (FilePicker fp : filePickers.getOutputFilePickers()) {
             fp.addFileTypeFilter(".csv", "Comma-Separated Values file");
         }
-        final ArgsPanel argsPanel = new ArgsPanel(filePickers);
+        final ArgsPanelCES argsPanelCES = new ArgsPanelCES(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("Epoch Synchronizer", "Process",
-                filePickers, argsPanel) {
+                filePickers, argsPanelCES) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
-                    InstanceRawParameters rawParams = argsPanel.getRawParameters(inPaths[0],
+                    InstanceRawParameters rawParams = argsPanelCES.getRawParameters(inPaths[0],
                             inPaths[1], outPaths[0]);
                     createDataset(new Parameters(rawParams));
                 } catch (Parameters.ArgumentFormatException e) {

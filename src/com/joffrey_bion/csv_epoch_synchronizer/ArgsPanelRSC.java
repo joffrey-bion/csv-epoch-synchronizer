@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
+package com.joffrey_bion.csv_epoch_synchronizer;
 
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JPanel;
@@ -16,7 +16,7 @@ import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
-class ArgsPanel extends JPanel {
+class ArgsPanelRSC extends JPanel {
 
     private static final Integer[] NB_SYNC_MARKERS_LIST = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     private final JFilePickersPanel filePickers;
@@ -28,7 +28,7 @@ class ArgsPanel extends JPanel {
      * 
      * @param filePickers
      */
-    public ArgsPanel(JFilePickersPanel filePickers) {
+    public ArgsPanelRSC(JFilePickersPanel filePickers) {
         this.filePickers = filePickers;
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
@@ -44,7 +44,7 @@ class ArgsPanel extends JPanel {
         chckbxOutput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ArgsPanel.this.filePickers.setOutputFilePickerEnabled(0, chckbxOutput.isSelected());
+                ArgsPanelRSC.this.filePickers.setOutputFilePickerEnabled(0, chckbxOutput.isSelected());
             }
         });
         

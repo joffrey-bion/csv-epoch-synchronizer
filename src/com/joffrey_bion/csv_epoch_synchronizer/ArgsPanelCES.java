@@ -28,7 +28,7 @@ import javax.swing.JComboBox;
 import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
-public class ArgsPanel extends JPanel {
+class ArgsPanelCES extends JPanel {
 
     private final JFilePickersPanel filePickers;
 
@@ -48,7 +48,7 @@ public class ArgsPanel extends JPanel {
      * 
      * @param filePickers
      */
-    public ArgsPanel(JFilePickersPanel filePickers) {
+    public ArgsPanelCES(JFilePickersPanel filePickers) {
         this.filePickers = filePickers;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -208,8 +208,8 @@ public class ArgsPanel extends JPanel {
             @Override
             protected void onSelect() {
                 try {
-                    String[] inFiles = ArgsPanel.this.filePickers.getInputFilePaths();
-                    String[] outFiles = ArgsPanel.this.filePickers.getOutputFilePaths();
+                    String[] inFiles = ArgsPanelCES.this.filePickers.getInputFilePaths();
+                    String[] outFiles = ArgsPanelCES.this.filePickers.getOutputFilePaths();
                     InstanceRawParameters rawParams = getRawParameters(inFiles[0], inFiles[1],
                             outFiles[0]);
                     String paramFilePath = getSelectedFilePath();
@@ -232,10 +232,10 @@ public class ArgsPanel extends JPanel {
                     String paramFilePath = getSelectedFilePath();
                     InstanceRawParameters raw = InstanceRawParameters.load(paramFilePath);
                     setParameters(raw);
-                    FilePicker[] inFp = ArgsPanel.this.filePickers.getInputFilePickers();
+                    FilePicker[] inFp = ArgsPanelCES.this.filePickers.getInputFilePickers();
                     inFp[0].setSelectedFilePath(raw.phoneRawFile);
                     inFp[1].setSelectedFilePath(raw.actigEpFile);
-                    FilePicker[] outFp = ArgsPanel.this.filePickers.getOutputFilePickers();
+                    FilePicker[] outFp = ArgsPanelCES.this.filePickers.getOutputFilePickers();
                     outFp[0].setSelectedFilePath(raw.outputFile);
                     System.out.println("Parameters loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
