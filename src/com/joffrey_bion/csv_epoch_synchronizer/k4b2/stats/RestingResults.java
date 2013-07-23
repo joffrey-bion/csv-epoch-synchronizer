@@ -3,14 +3,16 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-public class Results {
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+
+public class RestingResults {
 
     public static final long TOTAL_LENGTH_MILLIS = 5 * 60 * 1000;
     public static final long GROUP_LENGTH_MILLIS = 30 * 1000;
 
     private LinkedList<StatsWindowsGroup> windows;
 
-    public Results() {
+    public RestingResults() {
         windows = new LinkedList<>();
         windows.add(new StatsWindowsGroup(TOTAL_LENGTH_MILLIS, GROUP_LENGTH_MILLIS));
     }
@@ -23,10 +25,10 @@ public class Results {
      * @param length
      *            The duration of the sample corresponding to the specified line.
      */
-    public void add(String[] line, double length) {
-        LinkedList<K4b2Line> toMove = new LinkedList<>();
-        toMove.add(new K4b2Line(line, length));
-        LinkedList<K4b2Line> toMoveNext = new LinkedList<>();
+    public void add(K4b2Sample sample) {
+        LinkedList<K4b2Sample> toMove = new LinkedList<>();
+        toMove.add(sample);
+        LinkedList<K4b2Sample> toMoveNext = new LinkedList<>();
         double cumulatedDuration = 0;
         int nbWindows = 0;
         // fill first window, and move extra old lines to next window
@@ -34,7 +36,7 @@ public class Results {
             win.setCompensation(cumulatedDuration, nbWindows);
             toMoveNext.clear();
             win.add(toMove, toMoveNext);
-            LinkedList<K4b2Line> tempForInversion = toMoveNext;
+            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
             toMoveNext = toMove;
             toMove = tempForInversion;
             cumulatedDuration += win.getDuration();
@@ -47,7 +49,7 @@ public class Results {
             win.setCompensation(cumulatedDuration, nbWindows);
             toMoveNext.clear();
             win.add(toMove, toMoveNext);
-            LinkedList<K4b2Line> tempForInversion = toMoveNext;
+            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
             toMoveNext = toMove;
             toMove = tempForInversion;
             cumulatedDuration += win.getDuration();

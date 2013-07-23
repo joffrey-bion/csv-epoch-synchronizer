@@ -2,9 +2,10 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
 import java.util.LinkedList;
 
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
 import com.joffrey_bion.utils.stats.FlowStats;
 
-public class StatsWindowsGroup {
+class StatsWindowsGroup {
 
     private final double maxDuration;
     private final double subwindowsDuration;
@@ -28,19 +29,19 @@ public class StatsWindowsGroup {
      * Adds the specified lines of values to this group.
      * 
      * @param lines
-     *            The {@link K4b2Line}s to add, in the order they should be added to
+     *            The {@link K4b2Sample}s to add, in the order they should be added to
      *            this window. This list is not modified.
      * @param oldies
      *            A list to receive the oldest lines in this group that do not fit
      *            anymore in the maximum length. The oldest of these lines is added
      *            first in the list, the newest is added last.
      */
-    public void add(LinkedList<K4b2Line> lines, LinkedList<K4b2Line> oldies) {
-        LinkedList<K4b2Line> toMove = lines;
-        for (K4b2Line line : lines) {
+    public void add(LinkedList<K4b2Sample> lines, LinkedList<K4b2Sample> oldies) {
+        LinkedList<K4b2Sample> toMove = lines;
+        for (K4b2Sample line : lines) {
             duration += line.duration;
         }
-        LinkedList<K4b2Line> toMoveNext = new LinkedList<>();
+        LinkedList<K4b2Sample> toMoveNext = new LinkedList<>();
         double cumulatedDuration = 0;
         int nbWindows = 0;
         // fill first subwindow, and move extra old lines to next subwindow
@@ -48,7 +49,7 @@ public class StatsWindowsGroup {
             win.setCompensation(cumulatedDuration, nbWindows);
             toMoveNext.clear();
             win.add(toMove, toMoveNext);
-            LinkedList<K4b2Line> tempForInversion = toMoveNext;
+            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
             toMoveNext = toMove;
             toMove = tempForInversion;
             cumulatedDuration += win.getDuration();
@@ -61,7 +62,7 @@ public class StatsWindowsGroup {
             win.setCompensation(cumulatedDuration, nbWindows);
             toMoveNext.clear();
             win.add(toMove, toMoveNext);
-            LinkedList<K4b2Line> tempForInversion = toMoveNext;
+            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
             toMoveNext = toMove;
             toMove = tempForInversion;
             cumulatedDuration += win.getDuration();
@@ -73,9 +74,9 @@ public class StatsWindowsGroup {
         }
     }
 
-    private K4b2Line removeOldest() {
+    private K4b2Sample removeOldest() {
         StatsWindow win = subwindows.getLast();
-        K4b2Line oldest = win.removeOldest();
+        K4b2Sample oldest = win.removeOldest();
         duration -= oldest.duration;
         if (win.isEmpty()) {
             subwindows.remove(win);
@@ -88,14 +89,14 @@ public class StatsWindowsGroup {
     }
     
     public double getVO2kgAvg() {
-        return getStats(Column.VO2KG).mean();
+        return getStats(K4b2StatsColumn.VO2KG).mean();
     }
 
     private static String formatPercent(double d) {
         return String.format("%2.2f", d * 100) + "%";
     }
 
-    private FlowStats getStats(Column c) {
+    private FlowStats getStats(K4b2StatsColumn c) {
         FlowStats globalStats = new FlowStats();
         for (StatsWindow win : subwindows) {
             globalStats.add(win.getStats().getStats(c).mean());
@@ -106,10 +107,10 @@ public class StatsWindowsGroup {
     @Override
     public String toString() {
         String res = "Total length: " + duration / 1000 + "s\n";
-        res += "VO2  CV = " + formatPercent(getStats(Column.VO2).coeffOfVariation()) + "\n";
-        res += "VCO2 CV = " + formatPercent(getStats(Column.VCO2).coeffOfVariation()) + "\n";
-        res += "R    CV = " + formatPercent(getStats(Column.R).coeffOfVariation()) + "\n";
-        res += "VO2/kg average = " + String.format("%2.2f", getStats(Column.VO2KG).mean()) + "\n";
+        res += "VO2  CV = " + formatPercent(getStats(K4b2StatsColumn.VO2).coeffOfVariation()) + "\n";
+        res += "VCO2 CV = " + formatPercent(getStats(K4b2StatsColumn.VCO2).coeffOfVariation()) + "\n";
+        res += "R    CV = " + formatPercent(getStats(K4b2StatsColumn.R).coeffOfVariation()) + "\n";
+        res += "VO2/kg average = " + String.format("%2.2f", getStats(K4b2StatsColumn.VO2KG).mean()) + "\n";
         return res;
     }
 }

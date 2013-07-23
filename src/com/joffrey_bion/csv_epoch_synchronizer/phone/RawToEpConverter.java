@@ -113,7 +113,7 @@ public class RawToEpConverter {
             timestamps.add(timestamp);
             samples.add(line);
             stats.add(line);
-            // System.out.println("add " + timestamp);
+            // System.out.println("add " + startTime);
             while (timestamp > winBeginning + WINDOW_WIDTH_NANO) {
                 full = true;
                 removeFirst();

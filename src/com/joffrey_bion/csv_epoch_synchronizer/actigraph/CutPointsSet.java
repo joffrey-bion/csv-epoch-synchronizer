@@ -31,13 +31,13 @@ public enum CutPointsSet {
         }
     }
 
-    private CutPointsSet(String[] labels, double[] values) {
-        if (labels.length != values.length + 1) {
+    private CutPointsSet(String[] labels, double[] thresholds) {
+        if (labels.length != thresholds.length + 1) {
             throw new IllegalArgumentException("There must be n-1 values to separate n labels.");
         }
         this.cpmCutPoints = new LinkedList<>();
-        for (int i = 0; i < values.length; i++) {
-            this.cpmCutPoints.add(new CutPoint(labels[i], values[i]));
+        for (int i = 0; i < thresholds.length; i++) {
+            this.cpmCutPoints.add(new CutPoint(labels[i], thresholds[i]));
         }
         this.cpmCutPoints.add(new CutPoint(labels[labels.length - 1], Double.MAX_VALUE));
     }

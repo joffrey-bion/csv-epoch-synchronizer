@@ -32,8 +32,8 @@ public class Parameters {
     /** Time between the beginning of the window and the beginning of the epoch */
     private long winBeginToEpBegin;
     /**
-     * Delay in nanoseconds to add to a phone timestamp to find the corresponding
-     * actigraph timestamp.
+     * Delay in nanoseconds to add to a phone startTime to find the corresponding
+     * actigraph startTime.
      */
     private long delay;
 
@@ -70,13 +70,13 @@ public class Parameters {
             startTime = DateHelper.timestampStrToNanos(rawParams.startTime,
                     Parameters.START_STOP_TIMESTAMP_FORMAT);
         } catch (ParseException e) {
-            throw new ArgumentFormatException("Incorrect format for start timestamp.");
+            throw new ArgumentFormatException("Incorrect format for start startTime.");
         }
         try {
             stopTime = DateHelper.timestampStrToNanos(rawParams.stopTime,
                     Parameters.START_STOP_TIMESTAMP_FORMAT);
         } catch (ParseException e) {
-            throw new ArgumentFormatException("Incorrect format for stop timestamp.");
+            throw new ArgumentFormatException("Incorrect format for stop startTime.");
         }
         if (startTime > stopTime) {
             throw new IllegalArgumentException("Start time must be less than stop time.");
@@ -102,11 +102,11 @@ public class Parameters {
         }
         try {
             if (rawParams.phoneSpikes.length != rawParams.actigraphSpikes.length) {
-                throw new ArgumentFormatException("Incorrect format for spikes timestamp.");
+                throw new ArgumentFormatException("Incorrect format for spikes startTime.");
             }
             setDelay(rawParams.phoneSpikes, rawParams.actigraphSpikes);
         } catch (ParseException e) {
-            throw new ArgumentFormatException("Incorrect format for spikes timestamp.");
+            throw new ArgumentFormatException("Incorrect format for spikes startTime.");
         }
     }
 
@@ -132,7 +132,7 @@ public class Parameters {
      * @param actigraphSpikes
      *            Timestamps of the same spikes in the actigraph's reference.
      * @throws ParseException
-     *             If a timestamp does not match the expected format
+     *             If a startTime does not match the expected format
      *             {@link #SPIKE_TIMESTAMP_FORMAT}.
      */
     private void setDelay(String[] phoneSpikes, String[] actigraphSpikes) throws ParseException {
@@ -149,8 +149,8 @@ public class Parameters {
     }
 
     /**
-     * Returns the delay in nanoseconds to add to a phone timestamp to find the
-     * corresponding actigraph timestamp.
+     * Returns the delay in nanoseconds to add to a phone startTime to find the
+     * corresponding actigraph startTime.
      * 
      * @return the delay between the phone time and actigraph time.
      */

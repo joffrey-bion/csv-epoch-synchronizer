@@ -43,8 +43,8 @@ public class EpLabelsMerger {
             timestampPhone = phone.extractTimestamp(linePhone);
             timestampActigraph = actigraph.extractTimestamp(lineActigraph);
             if (timestampPhone != timestampActigraph) {
-                DateHelper.displayTimestamp("phone timestamp", timestampPhone);
-                DateHelper.displayTimestamp("actigraph timestamp", timestampActigraph);
+                DateHelper.displayTimestamp("phone startTime", timestampPhone);
+                DateHelper.displayTimestamp("actigraph startTime", timestampActigraph);
                 throw new RuntimeException("phone and actigraph timestamps do not correspond");
             } else if (timestampPhone > props.stopTime) {
                 throw new RuntimeException(
