@@ -3,74 +3,74 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 import java.util.LinkedList;
 
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+import com.joffrey_bion.utils.dates.DurationHelper;
 import com.joffrey_bion.utils.stats.FlowStats;
 
 class StatsWindowsGroup {
 
-    private final double maxDuration;
-    private final double subwindowsDuration;
-    private double compensation;
-    private double duration;
+    private final long maxDuration;
+    private final long subwindowsDuration;
+    private long compensation;
+    private long duration;
     private LinkedList<StatsWindow> subwindows;
 
-    public StatsWindowsGroup(double maxDuration, double subwindowsDuration) {
+    public StatsWindowsGroup(long maxDuration, long subwindowsDuration) {
         this.maxDuration = maxDuration;
         this.subwindowsDuration = subwindowsDuration;
         this.compensation = 0;
         this.duration = 0;
         subwindows = new LinkedList<>();
     }
-    
-    public void setCompensation(double prevCumulatedDuration, int nbPrevious) {
+
+    /**
+     * Sets the duration compensation of this window. This allows this window to have
+     * a longer duration than the maximum if the previous windows are shorter, and
+     * vice-versa.
+     * 
+     * @param prevCumulatedDuration
+     *            The cumulated duration of the previous windows.
+     * @param nbPrevious
+     *            The number of previous windows.
+     */
+    public void setCompensation(long prevCumulatedDuration, int nbPrevious) {
         compensation = prevCumulatedDuration - nbPrevious * maxDuration;
     }
 
     /**
      * Adds the specified lines of values to this group.
      * 
-     * @param lines
-     *            The {@link K4b2Sample}s to add, in the order they should be added to
-     *            this window. This list is not modified.
-     * @param oldies
-     *            A list to receive the oldest lines in this group that do not fit
-     *            anymore in the maximum length. The oldest of these lines is added
-     *            first in the list, the newest is added last.
+     * @param linesToAdd
+     *            The {@link K4b2Sample}s to add, in the order they should be added
+     *            to this window. This list will be cleared and receive the oldest
+     *            lines in this group that do not fit anymore in the maximum length.
+     *            The oldest of these lines is added first in the list, the newest is
+     *            added last.
      */
-    public void add(LinkedList<K4b2Sample> lines, LinkedList<K4b2Sample> oldies) {
-        LinkedList<K4b2Sample> toMove = lines;
-        for (K4b2Sample line : lines) {
+    public void add(LinkedList<K4b2Sample> linesToAdd) {
+        for (K4b2Sample line : linesToAdd) {
             duration += line.duration;
         }
-        LinkedList<K4b2Sample> toMoveNext = new LinkedList<>();
-        double cumulatedDuration = 0;
+        long cumulatedDuration = 0;
         int nbWindows = 0;
         // fill first subwindow, and move extra old lines to next subwindow
         for (StatsWindow win : subwindows) {
             win.setCompensation(cumulatedDuration, nbWindows);
-            toMoveNext.clear();
-            win.add(toMove, toMoveNext);
-            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
-            toMoveNext = toMove;
-            toMove = tempForInversion;
+            win.add(linesToAdd);
             cumulatedDuration += win.getDuration();
             nbWindows++;
         }
         // create new subwindows for the extra old lines that remain
-        while (!toMove.isEmpty()) {
+        while (!linesToAdd.isEmpty()) {
             StatsWindow win = new StatsWindow(subwindowsDuration);
             subwindows.add(win);
             win.setCompensation(cumulatedDuration, nbWindows);
-            toMoveNext.clear();
-            win.add(toMove, toMoveNext);
-            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
-            toMoveNext = toMove;
-            toMove = tempForInversion;
+            win.add(linesToAdd);
             cumulatedDuration += win.getDuration();
             nbWindows++;
         }
         // fill oldies with the global extra old lines exceeding the duration
         while (duration + compensation > maxDuration) {
-            oldies.add(removeOldest());
+            linesToAdd.add(removeOldest());
         }
     }
 
@@ -87,30 +87,47 @@ class StatsWindowsGroup {
     public double getDuration() {
         return duration;
     }
-    
+
     public double getVO2kgAvg() {
-        return getStats(K4b2StatsColumn.VO2KG).mean();
+        return getStats(StatsColumn.VO2KG).mean();
     }
 
     private static String formatPercent(double d) {
         return String.format("%2.2f", d * 100) + "%";
     }
 
-    private FlowStats getStats(K4b2StatsColumn c) {
+    private FlowStats getStats(StatsColumn c) {
         FlowStats globalStats = new FlowStats();
         for (StatsWindow win : subwindows) {
             globalStats.add(win.getStats().getStats(c).mean());
         }
         return globalStats;
     }
-    
+
+    private String getCV(StatsColumn c) {
+        return formatPercent(getStats(c).coeffOfVariation());
+    }
+
+    private String getStartTime() {
+        long time = subwindows.getLast().getStartTime();
+        return DurationHelper.toTime(time);
+    }
+
+    private String getEndTime() {
+        long time = subwindows.getFirst().getEndTime();
+        return DurationHelper.toTime(time);
+    }
+
     @Override
     public String toString() {
-        String res = "Total length: " + duration / 1000 + "s\n";
-        res += "VO2  CV = " + formatPercent(getStats(K4b2StatsColumn.VO2).coeffOfVariation()) + "\n";
-        res += "VCO2 CV = " + formatPercent(getStats(K4b2StatsColumn.VCO2).coeffOfVariation()) + "\n";
-        res += "R    CV = " + formatPercent(getStats(K4b2StatsColumn.R).coeffOfVariation()) + "\n";
-        res += "VO2/kg average = " + String.format("%2.2f", getStats(K4b2StatsColumn.VO2KG).mean()) + "\n";
-        return res;
+        StringBuilder sb = new StringBuilder();
+        sb.append(getStartTime() + " to " + getEndTime());
+        sb.append(" (" + DurationHelper.toTime(duration) + ")\n");
+        sb.append(" VO2 CV = " + getCV(StatsColumn.VO2) + "\n");
+        sb.append("VCO2 CV = " + getCV(StatsColumn.VCO2) + "\n");
+        sb.append("   R CV = " + getCV(StatsColumn.R) + "\n");
+        sb.append("Resting VO2/kg avg = "
+                + String.format("%2.2f", getStats(StatsColumn.VO2KG).mean()) + "\n");
+        return sb.toString();
     }
 }

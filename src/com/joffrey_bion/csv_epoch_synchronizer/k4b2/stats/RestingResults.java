@@ -5,16 +5,18 @@ import java.util.LinkedList;
 
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
 
-public class RestingResults {
-
-    public static final long TOTAL_LENGTH_MILLIS = 5 * 60 * 1000;
-    public static final long GROUP_LENGTH_MILLIS = 30 * 1000;
+public class RestingResults extends PhaseResults {
+    
+    private static final long GROUP_LENGTH_MILLIS = 5 * 60 * 1000;
+    private static final long SUBGROUP_LENGTH_MILLIS = 30 * 1000;
+    
+    private static final long END_TRIM_MILLIS = 15 * 1000;
 
     private LinkedList<StatsWindowsGroup> windows;
 
     public RestingResults() {
         windows = new LinkedList<>();
-        windows.add(new StatsWindowsGroup(TOTAL_LENGTH_MILLIS, GROUP_LENGTH_MILLIS));
+        windows.add(new StatsWindowsGroup(GROUP_LENGTH_MILLIS, SUBGROUP_LENGTH_MILLIS));
     }
 
     /**
@@ -25,50 +27,54 @@ public class RestingResults {
      * @param length
      *            The duration of the sample corresponding to the specified line.
      */
+    @Override
     public void add(K4b2Sample sample) {
+        super.add(sample);
         LinkedList<K4b2Sample> toMove = new LinkedList<>();
         toMove.add(sample);
-        LinkedList<K4b2Sample> toMoveNext = new LinkedList<>();
-        double cumulatedDuration = 0;
+        long cumulatedDuration = 0;
         int nbWindows = 0;
         // fill first window, and move extra old lines to next window
         for (StatsWindowsGroup win : windows) {
             win.setCompensation(cumulatedDuration, nbWindows);
-            toMoveNext.clear();
-            win.add(toMove, toMoveNext);
-            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
-            toMoveNext = toMove;
-            toMove = tempForInversion;
+            win.add(toMove);
             cumulatedDuration += win.getDuration();
             nbWindows++;
         }
         // create new windows for the extra old lines that remain
         while (!toMove.isEmpty()) {
-            StatsWindowsGroup win = new StatsWindowsGroup(TOTAL_LENGTH_MILLIS, GROUP_LENGTH_MILLIS);
+            StatsWindowsGroup win = new StatsWindowsGroup(GROUP_LENGTH_MILLIS, SUBGROUP_LENGTH_MILLIS);
             windows.add(win);
             win.setCompensation(cumulatedDuration, nbWindows);
-            toMoveNext.clear();
-            win.add(toMove, toMoveNext);
-            LinkedList<K4b2Sample> tempForInversion = toMoveNext;
-            toMoveNext = toMove;
-            toMove = tempForInversion;
+            win.add(toMove);
             cumulatedDuration += win.getDuration();
             nbWindows++;
         }
     }
 
+    @Override
+    public void trim() {
+        trimBeginningToReach(GROUP_LENGTH_MILLIS + END_TRIM_MILLIS);
+        trimEnd(END_TRIM_MILLIS);
+    }
+
     public double getVO2kgAvg() {
         return windows.getFirst().getVO2kgAvg();
     }
-    
-    @Override
-    public String toString() {
+
+    public String allToString() {
         StringBuilder sb = new StringBuilder();
         Iterator<StatsWindowsGroup> it = windows.descendingIterator();
         while (it.hasNext()) {
             sb.append(it.next().toString());
-            sb.append("\n");
+            if (it.hasNext()) {
+                sb.append("\n");
+            }
         }
         return sb.toString();
+    }
+
+    public String lastToString() {
+        return windows.getFirst().toString();
     }
 }

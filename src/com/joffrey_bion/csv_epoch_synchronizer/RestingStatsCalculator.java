@@ -1,12 +1,16 @@
 package com.joffrey_bion.csv_epoch_synchronizer;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.io.IOException;
 
 import javax.swing.SwingUtilities;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.K4b2StatsCalculator;
-import com.joffrey_bion.csv.CsvWriter;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Stats;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.RestingResults;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
@@ -14,8 +18,8 @@ import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 public class RestingStatsCalculator {
     
     private static final int NB_ARGS = 2;
-    private static final int SOURCE = 0;
-    private static final int NB_MARKERS = 1;
+    private static final int ARG_SOURCE = 0;
+    private static final int ARG_NB_MARKERS = 1;
     
     /**
      * Choose between GUI or console version according to the number of arguments.
@@ -34,9 +38,9 @@ public class RestingStatsCalculator {
             });
         } else if (args.length == NB_ARGS){
             try {
-                calculateStats(args[SOURCE], null, Integer.parseInt(args[NB_MARKERS]), false);
+                calculateStats(args[ARG_SOURCE], null, Integer.parseInt(args[ARG_NB_MARKERS]), false);
             } catch (NumberFormatException e) {
-                System.err.println("The number of synchornization markers must be an integer.");
+                System.err.println("The number of synchronization markers must be an integer.");
             } catch (IOException e) {
                 System.err.println(e.getMessage());
             }
@@ -84,10 +88,16 @@ public class RestingStatsCalculator {
             Integer nbSyncMarkers, boolean output) throws IOException {
         System.out.println("Opening file...");
         K4b2StatsCalculator k4 = new K4b2StatsCalculator(inputFilename);
-        CsvWriter writer = output ? new CsvWriter(outputFilename) : null;
+        BufferedWriter writer = output ? new BufferedWriter(new FileWriter(outputFilename)) : null;
         System.out.println("Computing stats...");
-        System.out.println(k4.getStats(nbSyncMarkers));
+        K4b2Stats stats = k4.getStats(nbSyncMarkers);
+        System.out.println("Done.\n");
+        System.out.println("*** RESTING STABILITY ***");
+        System.out.println(((RestingResults) stats.get(Phase.RESTING)).allToString());
+        System.out.println("*** STATISTICS PER PHASE ***");
+        System.out.println(stats.toString());
         if (output) {
+            writer.write(stats.toString());
             writer.close();
         }
     }
