@@ -7,7 +7,7 @@ import java.io.IOException;
 import javax.swing.SwingUtilities;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Stats;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Results;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.RestingResults;
@@ -90,7 +90,7 @@ public class RestingStatsCalculator {
         K4b2StatsCalculator k4 = new K4b2StatsCalculator(inputFilename);
         BufferedWriter writer = output ? new BufferedWriter(new FileWriter(outputFilename)) : null;
         System.out.println("Computing stats...");
-        K4b2Stats stats = k4.getStats(nbSyncMarkers);
+        K4b2Results stats = k4.getStats(nbSyncMarkers);
         System.out.println("Done.\n");
         System.out.println("*** RESTING STABILITY ***");
         System.out.println(((RestingResults) stats.get(Phase.RESTING)).allToString());
