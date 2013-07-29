@@ -15,7 +15,7 @@ import com.joffrey_bion.utils.dates.DateHelper;
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
-class ActigraphCsvReader extends TimestampedCsvReader {
+public class ActigraphCsvReader extends TimestampedCsvReader {
 
     private final ActigraphFileFormat f;
 

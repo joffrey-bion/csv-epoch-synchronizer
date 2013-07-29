@@ -6,7 +6,7 @@ import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.RestingResults;
 
 @SuppressWarnings("serial")
-public class K4b2Results extends HashMap<Phase, PhaseResults> {
+public class Results extends HashMap<Phase, PhaseResults> {
 
     @Override
     public PhaseResults put(Phase phase, PhaseResults results) {

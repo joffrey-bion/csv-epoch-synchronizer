@@ -6,11 +6,11 @@ import java.text.ParseException;
 
 import com.joffrey_bion.csv.CsvReader;
 
-public class K4b2CsvReader extends CsvReader {
+class K4b2CsvReader extends CsvReader {
 
     private static final int NB_HEADER_LINES = 3;
 
-    private K4b2Sample lastSampleRead;
+    private Sample lastSampleRead;
 
     public K4b2CsvReader(String filename) throws IOException {
         super(filename);
@@ -29,20 +29,20 @@ public class K4b2CsvReader extends CsvReader {
     }
 
     /**
-     * Reads a row as a {@link K4b2Sample} object.
+     * Reads a row as a {@link Sample} object.
      * 
-     * @return A {@link K4b2Sample} object representing the CSV row.
+     * @return A {@link Sample} object representing the CSV row.
      * @throws IOException
      *             If an error occurs while reading the file.
      */
-    public K4b2Sample readK4b2Sample() throws IOException {
+    public Sample readK4b2Sample() throws IOException {
         String[] row = readRow();
         if (row == null) {
             return null;
         }
         try {
             long previousTime = lastSampleRead != null ? lastSampleRead.endTime : 0;
-            lastSampleRead = new K4b2Sample(row, previousTime);
+            lastSampleRead = new Sample(row, previousTime);
         } catch (ParseException e) {
             throw new IOException(e.getMessage());
         }
@@ -59,7 +59,7 @@ public class K4b2CsvReader extends CsvReader {
      * @throws IOException
      *             If an error occurs while reading the file.
      */
-    public K4b2Sample skipMarkers(int nbToSkip) throws IOException {
+    public Sample skipMarkers(int nbToSkip) throws IOException {
         if (lastSampleRead == null || !lastSampleRead.isMarked()) {
             goToNextMarker();
         }
@@ -79,7 +79,7 @@ public class K4b2CsvReader extends CsvReader {
      * @throws IOException
      *             If an error occurs while reading the file.
      */
-    public K4b2Sample goToNextMarker() throws IOException {
+    public Sample goToNextMarker() throws IOException {
         int count = 0;
         while (readK4b2Sample() != null) {
             count++;
@@ -97,7 +97,7 @@ public class K4b2CsvReader extends CsvReader {
      * 
      * @return the last sample that was read by this reader.
      */
-    public K4b2Sample getLastSample() {
+    public Sample getLastSample() {
         return lastSampleRead;
     }
 }

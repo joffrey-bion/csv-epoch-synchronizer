@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv_epoch_synchronizer.mains.k4b2_stats_printer;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -7,7 +7,7 @@ import java.io.IOException;
 import javax.swing.SwingUtilities;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Results;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Results;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.RestingResults;
@@ -15,7 +15,7 @@ import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 
-public class RestingStatsCalculator {
+public class K4b2StatsPrinter {
     
     private static final int NB_ARGS = 2;
     private static final int ARG_SOURCE = 0;
@@ -62,16 +62,16 @@ public class RestingStatsCalculator {
         for (FilePicker fp : filePickers.getOutputFilePickers()) {
             fp.addFileTypeFilter(".txt", "Text file");
         }
-        final ArgsPanelRSC argsPanelRSC = new ArgsPanelRSC(filePickers);
+        final KSPArgsPanel kSPArgsPanel = new KSPArgsPanel(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("Resting Stats Calculator",
-                "Calculate", filePickers, argsPanelRSC) {
+                "Calculate", filePickers, kSPArgsPanel) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
-                    calculateStats(inPaths[0], outPaths[0], argsPanelRSC.getNbSyncMarkers(),
-                            argsPanelRSC.shouldWriteOutput());
+                    calculateStats(inPaths[0], outPaths[0], kSPArgsPanel.getNbSyncMarkers(),
+                            kSPArgsPanel.shouldWriteOutput());
                 } catch (NotACsvFileException e) {
                     System.err.println(e.getMessage());
                     System.err.println("Please open the file in Excel and save it as a CSV file.");
@@ -90,7 +90,7 @@ public class RestingStatsCalculator {
         K4b2StatsCalculator k4 = new K4b2StatsCalculator(inputFilename);
         BufferedWriter writer = output ? new BufferedWriter(new FileWriter(outputFilename)) : null;
         System.out.println("Computing stats...");
-        K4b2Results stats = k4.getStats(nbSyncMarkers);
+        Results stats = k4.getStats(nbSyncMarkers);
         System.out.println("Done.\n");
         System.out.println("*** RESTING STABILITY ***");
         System.out.println(((RestingResults) stats.get(Phase.RESTING)).allToString());

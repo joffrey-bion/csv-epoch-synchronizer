@@ -2,7 +2,7 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
 import java.util.LinkedList;
 
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Sample;
 import com.joffrey_bion.utils.dates.DurationHelper;
 import com.joffrey_bion.utils.stats.FlowStats;
 
@@ -40,14 +40,14 @@ class StatsWindowsGroup {
      * Adds the specified lines of values to this group.
      * 
      * @param linesToAdd
-     *            The {@link K4b2Sample}s to add, in the order they should be added
+     *            The {@link Sample}s to add, in the order they should be added
      *            to this window. This list will be cleared and receive the oldest
      *            lines in this group that do not fit anymore in the maximum length.
      *            The oldest of these lines is added first in the list, the newest is
      *            added last.
      */
-    public void add(LinkedList<K4b2Sample> linesToAdd) {
-        for (K4b2Sample line : linesToAdd) {
+    public void add(LinkedList<Sample> linesToAdd) {
+        for (Sample line : linesToAdd) {
             duration += line.duration;
         }
         long cumulatedDuration = 0;
@@ -74,9 +74,9 @@ class StatsWindowsGroup {
         }
     }
 
-    private K4b2Sample removeOldest() {
+    private Sample removeOldest() {
         StatsWindow win = subwindows.getLast();
-        K4b2Sample oldest = win.removeOldest();
+        Sample oldest = win.removeOldest();
         duration -= oldest.duration;
         if (win.isEmpty()) {
             subwindows.remove(win);

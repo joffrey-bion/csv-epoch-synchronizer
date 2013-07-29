@@ -1,29 +1,31 @@
-package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
+package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import java.io.IOException;
 import java.util.Arrays;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.Config;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.Parameters;
+import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphCsvReader;
+import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
+import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
+import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneCsvReader;
 import com.joffrey_bion.csv.CsvWriter;
 import com.joffrey_bion.utils.dates.DateHelper;
 
-public class EpLabelsMerger {
+public class PvAMerger {
 
     private PhoneCsvReader phone;
     private ActigraphCsvReader actigraph;
     private CsvWriter writer;
 
-    public EpLabelsMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename, ActigraphFileFormat actigraphFileFormat)
+    public PvAMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename, ActigraphFileFormat actigraphFileFormat)
             throws IOException, NotACsvFileException {
         phone = new PhoneCsvReader(phoneEpFilename);
         actigraph = new ActigraphCsvReader(actigraphEpFilename, actigraphFileFormat);
         writer = new CsvWriter(destFilename);
     }
 
-    public void createLabeledFile(Parameters props) throws IOException {
+    public void createLabeledFile(PvAParams props) throws IOException {
         // write new columns headers
         String[] headers = shiftLeftAndAppend(phone.readRow(), "Activity Level");
         writer.writeRow(headers);

@@ -20,12 +20,12 @@ public class K4b2StatsCalculator {
      * 
      * @param nbSyncMarkers
      *            The number of markers that were used for synchronization.
-     * @return The stats of each phase in a {@link K4b2Results} object.
+     * @return The stats of each phase in a {@link Results} object.
      * @throws IOException
      *             If an error occurs while reading the file.
      */
-    public K4b2Results getStats(int nbSyncMarkers) throws IOException {
-        K4b2Results fullResults = new K4b2Results();
+    public Results getStats(int nbSyncMarkers) throws IOException {
+        Results fullResults = new Results();
         reader.skipHeaders();
         reader.skipMarkers(nbSyncMarkers);
         for (Phase p : Phase.values()) {
@@ -56,7 +56,7 @@ public class K4b2StatsCalculator {
         if (!reader.getLastSample().isMarked()) {
             throw new IllegalStateException("The reader must be on the marker starting the phase.");
         }
-        K4b2Sample line;
+        Sample line;
         while ((line = reader.readK4b2Sample()) != null && !line.isMarked()) {
             results.add(line);
         }

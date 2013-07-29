@@ -4,7 +4,7 @@ import java.text.ParseException;
 
 import com.joffrey_bion.utils.dates.DurationHelper;
 
-public class K4b2Sample {
+public class Sample {
 
     public static final int COL_VO2 = 13;
     public static final int COL_VCO2 = 14;
@@ -23,7 +23,7 @@ public class K4b2Sample {
     public long endTime;
     public double duration;
 
-    public K4b2Sample(String[] cols, long previousTime) throws ParseException {
+    public Sample(String[] cols, long previousTime) throws ParseException {
         if (cols == null) {
             throw new IllegalArgumentException("The given row cannot be null");
         }

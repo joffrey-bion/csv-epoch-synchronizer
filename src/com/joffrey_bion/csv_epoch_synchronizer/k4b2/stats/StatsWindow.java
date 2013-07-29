@@ -2,7 +2,7 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
 import java.util.LinkedList;
 
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Sample;
 
 /**
  * A {@code StatsWindow} sets a duration limit for a group of values. When adding new
@@ -17,7 +17,7 @@ class StatsWindow {
     private long compensation;
     private long duration;
     private K4b2SampleStats stats;
-    private LinkedList<K4b2Sample> samples;
+    private LinkedList<Sample> samples;
 
     /**
      * Creates a new window without maximum duration.
@@ -55,10 +55,10 @@ class StatsWindow {
      * Adds the specified line of values to this window.
      * 
      * @param line
-     *            The {@link K4b2Sample} to add.
+     *            The {@link Sample} to add.
      */
-    public void add(K4b2Sample line) {
-        LinkedList<K4b2Sample> linesToAdd = new LinkedList<>();
+    public void add(Sample line) {
+        LinkedList<Sample> linesToAdd = new LinkedList<>();
         linesToAdd.add(line);
         add(linesToAdd);
     }
@@ -67,15 +67,15 @@ class StatsWindow {
      * Adds the specified samples of values to this group.
      * 
      * @param linesToAdd
-     *            The {@link K4b2Sample}s to add, in the order they should be added
+     *            The {@link Sample}s to add, in the order they should be added
      *            to this window. This list will be cleared and receive the oldest
      *            samples in this group that do not fit anymore in the maximum
      *            length. The oldest of these samples is added first in the list, the
      *            newest is added last.
      */
-    public void add(LinkedList<K4b2Sample> linesToAdd) {
+    public void add(LinkedList<Sample> linesToAdd) {
         while (!linesToAdd.isEmpty()) {
-            K4b2Sample sample = linesToAdd.pollFirst();
+            Sample sample = linesToAdd.pollFirst();
             stats.add(sample);
             samples.add(sample);
             duration += sample.duration;
@@ -108,8 +108,8 @@ class StatsWindow {
      * 
      * @return The removed oldest sample.
      */
-    public K4b2Sample removeOldest() {
-        K4b2Sample oldest = samples.pollFirst();
+    public Sample removeOldest() {
+        Sample oldest = samples.pollFirst();
         if (oldest == null) {
             return null;
         }
@@ -123,8 +123,8 @@ class StatsWindow {
      * 
      * @return The removed newest sample.
      */
-    public K4b2Sample removeNewest() {
-        K4b2Sample newest = samples.pollLast();
+    public Sample removeNewest() {
+        Sample newest = samples.pollLast();
         if (newest == null) {
             return null;
         }

@@ -1,12 +1,14 @@
-package com.joffrey_bion.csv_epoch_synchronizer.parameters;
+package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import java.text.ParseException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
+import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
 import com.joffrey_bion.utils.dates.DateHelper;
 import com.joffrey_bion.utils.stats.FlowStats;
 
-public class Parameters {
+public class PvAParams implements PhoneRawToEpParams {
 
     private static final String SPIKE_TIMESTAMP_FORMAT = "HH:mm:ss.SSS";
     private static final String START_STOP_TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
@@ -32,8 +34,8 @@ public class Parameters {
     /** Time between the beginning of the window and the beginning of the epoch */
     private long winBeginToEpBegin;
     /**
-     * Delay in nanoseconds to add to a phone startTime to find the corresponding
-     * actigraph startTime.
+     * Delay in nanoseconds to add to a phone time to find the corresponding
+     * actigraph time.
      */
     private long delay;
 
@@ -45,14 +47,14 @@ public class Parameters {
     }
 
     /**
-     * Creates a {@code Parameters} object based on the given raw parameters.
+     * Creates a {@code PvAParams} object based on the given raw parameters.
      * 
      * @param rawParams
      *            A set of raw parameters to parse.
      * @throws ArgumentFormatException
      *             If one of the parameters is not in the expected format.
      */
-    public Parameters(InstanceRawParameters rawParams) throws ArgumentFormatException {
+    public PvAParams(PvARawParams rawParams) throws ArgumentFormatException {
         if (rawParams.phoneRawFile == null || rawParams.phoneRawFile.equals("")) {
             throw new ArgumentFormatException("Phone raw data file must be specified.");
         } else {
@@ -68,15 +70,15 @@ public class Parameters {
         }
         try {
             startTime = DateHelper.timestampStrToNanos(rawParams.startTime,
-                    Parameters.START_STOP_TIMESTAMP_FORMAT);
+                    PvAParams.START_STOP_TIMESTAMP_FORMAT);
         } catch (ParseException e) {
-            throw new ArgumentFormatException("Incorrect format for start startTime.");
+            throw new ArgumentFormatException("Incorrect format for start time.");
         }
         try {
             stopTime = DateHelper.timestampStrToNanos(rawParams.stopTime,
-                    Parameters.START_STOP_TIMESTAMP_FORMAT);
+                    PvAParams.START_STOP_TIMESTAMP_FORMAT);
         } catch (ParseException e) {
-            throw new ArgumentFormatException("Incorrect format for stop startTime.");
+            throw new ArgumentFormatException("Incorrect format for stop time.");
         }
         if (startTime > stopTime) {
             throw new IllegalArgumentException("Start time must be less than stop time.");
@@ -102,11 +104,11 @@ public class Parameters {
         }
         try {
             if (rawParams.phoneSpikes.length != rawParams.actigraphSpikes.length) {
-                throw new ArgumentFormatException("Incorrect format for spikes startTime.");
+                throw new ArgumentFormatException("Incorrect format for spikes time.");
             }
             setDelay(rawParams.phoneSpikes, rawParams.actigraphSpikes);
         } catch (ParseException e) {
-            throw new ArgumentFormatException("Incorrect format for spikes startTime.");
+            throw new ArgumentFormatException("Incorrect format for spikes time.");
         }
     }
 
@@ -149,11 +151,12 @@ public class Parameters {
     }
 
     /**
-     * Returns the delay in nanoseconds to add to a phone startTime to find the
-     * corresponding actigraph startTime.
+     * Returns the delay in nanoseconds to add to a phone time to find the
+     * corresponding actigraph time.
      * 
      * @return the delay between the phone time and actigraph time.
      */
+    @Override
     public long getDelay() {
         return delay;
     }
@@ -163,6 +166,7 @@ public class Parameters {
      * 
      * @return The width of the labeled part of the time window.
      */
+    @Override
     public long getEpochWidthNano() {
         return epochWidthNano;
     }
@@ -172,6 +176,7 @@ public class Parameters {
      * 
      * @return The width of the time window.
      */
+    @Override
     public long getWindowWidthNano() {
         return windowWidthNano;
     }
@@ -183,7 +188,18 @@ public class Parameters {
      * @return The time between the beginning of the time window and the beginning of
      *         the labeled part.
      */
+    @Override
     public long getWinBeginToEpBegin() {
         return winBeginToEpBegin;
+    }
+
+    @Override
+    public long getPhoneStartTime() {
+        return startTime - delay;
+    }
+
+    @Override
+    public long getPhoneStopTime() {
+        return stopTime - delay;
     }
 }

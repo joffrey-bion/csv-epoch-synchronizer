@@ -3,7 +3,7 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 import java.util.Iterator;
 import java.util.LinkedList;
 
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Sample;
 
 public class RestingResults extends PhaseResults {
     
@@ -28,9 +28,9 @@ public class RestingResults extends PhaseResults {
      *            The duration of the sample corresponding to the specified line.
      */
     @Override
-    public void add(K4b2Sample sample) {
+    public void add(Sample sample) {
         super.add(sample);
-        LinkedList<K4b2Sample> toMove = new LinkedList<>();
+        LinkedList<Sample> toMove = new LinkedList<>();
         toMove.add(sample);
         long cumulatedDuration = 0;
         int nbWindows = 0;

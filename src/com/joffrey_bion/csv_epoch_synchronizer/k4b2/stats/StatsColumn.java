@@ -1,13 +1,13 @@
 package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Sample;
 
 enum StatsColumn {
-    VO2(K4b2Sample.COL_VO2),
-    VCO2(K4b2Sample.COL_VCO2),
-    R(K4b2Sample.COL_R),
-    VO2KG(K4b2Sample.COL_VO2KG),
-    METS(K4b2Sample.COL_METS);
+    VO2(Sample.COL_VO2),
+    VCO2(Sample.COL_VCO2),
+    R(Sample.COL_R),
+    VO2KG(Sample.COL_VO2KG),
+    METS(Sample.COL_METS);
     
     public final int index;
     

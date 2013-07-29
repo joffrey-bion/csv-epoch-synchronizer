@@ -1,8 +1,6 @@
-package com.joffrey_bion.csv_epoch_synchronizer.parameters;
+package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
 
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -10,10 +8,10 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import com.joffrey_bion.utils.xml_helper.XmlHelper;
+import com.joffrey_bion.utils.xml.XmlHelper;
 
 /**
- * A {@code InstanceRawParameters} object contains all the raw information read from
+ * A {@code PvARawParams} object contains all the raw information read from
  * an XML parameter file or from the GUI. Therefore, most fields are just
  * {@code String}s because they have not been parsed yet.
  * <p>
@@ -23,7 +21,7 @@ import com.joffrey_bion.utils.xml_helper.XmlHelper;
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
-public class InstanceRawParameters {
+public class PvARawParams {
 
     private static final String ROOT = "parameters";
     private static final String FILES_LIST = "files";
@@ -52,7 +50,7 @@ public class InstanceRawParameters {
     public String actigraphFileFormat;
     
     /**
-     * Save this {@code InstanceRawParameters} object to the specified XML file.
+     * Save this {@code PvARawParams} object to the specified XML file.
      * 
      * @param xmlFilePath
      *            The path to the XML output file.
@@ -60,38 +58,34 @@ public class InstanceRawParameters {
      *             If an error occurs while writing to the file.
      */
     public void save(String xmlFilePath) throws IOException {
-        try {
-            Document doc = XmlHelper.createEmptyDomDocument();
-            Element root = doc.createElement(ROOT);
-            doc.appendChild(root);
-            Element files = doc.createElement(FILES_LIST);
-            root.appendChild(files);
-            XmlHelper.appendField(doc, files, INPUT_FILE, phoneRawFile).setAttribute(
-                    FILE_INDEX_ATT, "0");
-            XmlHelper.appendField(doc, files, INPUT_FILE, actigEpFile).setAttribute(FILE_INDEX_ATT,
-                    "1");
-            XmlHelper.appendField(doc, files, OUTPUT_FILE, outputFile).setAttribute(FILE_INDEX_ATT,
-                    "0");
-            XmlHelper.appendField(doc, root, START_TIME, startTime);
-            XmlHelper.appendField(doc, root, STOP_TIME, stopTime);
-            XmlHelper.appendField(doc, root, ACTIG_FILE_FORMAT, actigraphFileFormat);
-            XmlHelper.appendField(doc, root, EPOCH_WIDTH_SEC, epochWidthSec);
-            Element spikes = doc.createElement(SPIKES_LIST);
-            root.appendChild(spikes);
-            for (int i = 0; i < phoneSpikes.length; i++) {
-                Element spike = doc.createElement(SPIKE);
-                spike.setAttribute(SPIKE_PHONE_ATT, phoneSpikes[i]);
-                spike.setAttribute(SPIKE_ACTIGRAPH_ATT, actigraphSpikes[i]);
-                spikes.appendChild(spike);
-            }
-            XmlHelper.writeXml(xmlFilePath, doc);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+        Document doc = XmlHelper.createEmptyDomDocument();
+        Element root = doc.createElement(ROOT);
+        doc.appendChild(root);
+        Element files = doc.createElement(FILES_LIST);
+        root.appendChild(files);
+        XmlHelper.appendField(doc, files, INPUT_FILE, phoneRawFile).setAttribute(
+                FILE_INDEX_ATT, "0");
+        XmlHelper.appendField(doc, files, INPUT_FILE, actigEpFile).setAttribute(FILE_INDEX_ATT,
+                "1");
+        XmlHelper.appendField(doc, files, OUTPUT_FILE, outputFile).setAttribute(FILE_INDEX_ATT,
+                "0");
+        XmlHelper.appendField(doc, root, START_TIME, startTime);
+        XmlHelper.appendField(doc, root, STOP_TIME, stopTime);
+        XmlHelper.appendField(doc, root, ACTIG_FILE_FORMAT, actigraphFileFormat);
+        XmlHelper.appendField(doc, root, EPOCH_WIDTH_SEC, epochWidthSec);
+        Element spikes = doc.createElement(SPIKES_LIST);
+        root.appendChild(spikes);
+        for (int i = 0; i < phoneSpikes.length; i++) {
+            Element spike = doc.createElement(SPIKE);
+            spike.setAttribute(SPIKE_PHONE_ATT, phoneSpikes[i]);
+            spike.setAttribute(SPIKE_ACTIGRAPH_ATT, actigraphSpikes[i]);
+            spikes.appendChild(spike);
         }
+        XmlHelper.writeXml(xmlFilePath, doc);
     }
 
     /**
-     * Creates a {@code InstanceRawParameters} object from the specified XML file.
+     * Creates a {@code PvARawParams} object from the specified XML file.
      * 
      * @param xmlFilePath
      *            The path to the XML output file.
@@ -100,15 +94,9 @@ public class InstanceRawParameters {
      * @throws SAXException
      *             If any parse error occurs.
      */
-    public static InstanceRawParameters load(String xmlFilePath) throws IOException, SAXException {
-        InstanceRawParameters raw = new InstanceRawParameters();
-        Document dom;
-        try {
-            dom = XmlHelper.getDomDocumentFromFile(xmlFilePath);
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static PvARawParams load(String xmlFilePath) throws IOException, SAXException {
+        PvARawParams raw = new PvARawParams();
+        Document dom = XmlHelper.getDomDocumentFromFile(xmlFilePath);
         Element root = dom.getDocumentElement();
         Element files = (Element) root.getElementsByTagName(FILES_LIST).item(0);
         String[] inFiles = getFilesPaths(files, INPUT_FILE);

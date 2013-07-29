@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.util.LinkedList;
 
 import com.joffrey_bion.csv.Csv.NotACsvFileException;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.Parameters;
 import com.joffrey_bion.csv.CsvWriter;
 import com.joffrey_bion.utils.dates.DateHelper;
 
@@ -32,7 +31,7 @@ public class RawToEpConverter {
         writer = new CsvWriter(destName);
     }
 
-    public int createEpochsFile(Parameters props) throws IOException {
+    public int createEpochsFile(PhoneRawToEpParams props) throws IOException {
         // read the columns headers
         String[] line;
         if ((line = reader.readRow()) != null) {
@@ -61,9 +60,9 @@ public class RawToEpConverter {
         return newHeaders;
     }
 
-    private void writeSmoothEpochs(int nbOfColumns, Parameters props) throws IOException {
-        final long phoneStartTime = props.startTime - props.getDelay();
-        final long phoneStopTime = props.stopTime - props.getDelay();
+    private void writeSmoothEpochs(int nbOfColumns, PhoneRawToEpParams props) throws IOException {
+        final long phoneStartTime = props.getPhoneStartTime();
+        final long phoneStopTime = props.getPhoneStopTime();
         final Window win = new Window(phoneStartTime, nbOfColumns, props);
         reader.skipToReachTimestamp(phoneStartTime - props.getWinBeginToEpBegin());
         String[] line;
@@ -94,7 +93,7 @@ public class RawToEpConverter {
         private LinkedList<String[]> samples;
         private EpochStatsLine stats;
 
-        public Window(long firstEpBeginningTime, int nbOfColumns, Parameters props) {
+        public Window(long firstEpBeginningTime, int nbOfColumns, PhoneRawToEpParams props) {
             WINDOW_WIDTH_NANO = props.getWindowWidthNano();
             EPOCH_WIDTH_NANO = props.getEpochWidthNano();
             WIN_BEGIN_TO_EP_BEGIN = props.getWinBeginToEpBegin();
@@ -113,7 +112,6 @@ public class RawToEpConverter {
             timestamps.add(timestamp);
             samples.add(line);
             stats.add(line);
-            // System.out.println("add " + startTime);
             while (timestamp > winBeginning + WINDOW_WIDTH_NANO) {
                 full = true;
                 removeFirst();
@@ -121,7 +119,6 @@ public class RawToEpConverter {
         }
 
         private String[] removeFirst() {
-            // System.out.println("remove " + timestamps.getFirst());
             timestamps.removeFirst();
             String[] line = samples.removeFirst();
             stats.remove(line);

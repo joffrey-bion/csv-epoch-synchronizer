@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer.parameters;
+package com.joffrey_bion.csv_epoch_synchronizer.config;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -7,14 +7,12 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
 
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
-import com.joffrey_bion.utils.xml_helper.XmlHelper;
+import com.joffrey_bion.utils.xml.XmlHelper;
 
 public class Config {
 
@@ -72,14 +70,7 @@ public class Config {
      *            The path to the XML output file.
      */
     private void save(String xmlFilePath) {
-        Document doc;
-        try {
-            doc = XmlHelper.createEmptyDomDocument();
-        } catch (ParserConfigurationException e) {
-            // no reason for this to happen
-            e.printStackTrace();
-            return;
-        }
+        Document doc = XmlHelper.createEmptyDomDocument();
         Element root = doc.createElement(ROOT);
         doc.appendChild(root);
         root.appendChild(doc.createComment("The cut points set must be one of CutPointsSet enum constant names"));
@@ -101,15 +92,12 @@ public class Config {
      *            The path to the XML output file.
      * @return Whether the configuration file has been read.
      */
-    public boolean load(String xmlFilePath) {
+    private boolean load(String xmlFilePath) {
         Document dom;
         try {
             dom = XmlHelper.getDomDocumentFromFile(xmlFilePath);
         } catch (FileNotFoundException e) {
             System.out.println("Config file not found.");
-            return false;
-        } catch (ParserConfigurationException e) {
-            e.printStackTrace();
             return false;
         } catch (SAXException e) {
             e.printStackTrace();
@@ -145,7 +133,7 @@ public class Config {
             String urlString = ClassLoader
                     .getSystemClassLoader()
                     .getResource(
-                            "com/joffrey_bion/csv_epoch_synchronizer/CsvEpochSynchronizer.class")
+                            "com/joffrey_bion/csv_epoch_synchronizer/mains/phone_vs_actigraph/PhoneVSActigraphMerger.class")
                     .toString();
             urlString = urlString.substring(urlString.indexOf("file:"), urlString.indexOf('!'));
             URL url = new URL(urlString);

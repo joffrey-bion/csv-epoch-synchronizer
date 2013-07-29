@@ -2,7 +2,7 @@ package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
 import java.util.HashMap;
 
-import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2Sample;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Sample;
 import com.joffrey_bion.utils.stats.FlowStats;
 
 class K4b2SampleStats {
@@ -17,13 +17,13 @@ class K4b2SampleStats {
         }
     }
     
-    public void add(K4b2Sample sample) {
+    public void add(Sample sample) {
         for (StatsColumn c : COLUMNS) {
             stats.get(c).add(sample.getValue(c.index), sample.duration);
         }
     }
     
-    public void remove(K4b2Sample sample) {
+    public void remove(Sample sample) {
         for (StatsColumn c : COLUMNS) {
             stats.get(c).remove(sample.getValue(c.index), sample.duration);
         }

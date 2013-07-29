@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import javax.swing.JPanel;
 import javax.swing.JLabel;
@@ -9,8 +9,7 @@ import com.jgoodies.forms.layout.ColumnSpec;
 import com.jgoodies.forms.layout.RowSpec;
 import com.jgoodies.forms.factories.FormFactory;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.Config;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.InstanceRawParameters;
+import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 
@@ -28,7 +27,7 @@ import javax.swing.JComboBox;
 import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")
-class ArgsPanelCES extends JPanel {
+class PvAArgsPanel extends JPanel {
 
     private final JFilePickersPanel filePickers;
 
@@ -48,7 +47,7 @@ class ArgsPanelCES extends JPanel {
      * 
      * @param filePickers
      */
-    public ArgsPanelCES(JFilePickersPanel filePickers) {
+    public PvAArgsPanel(JFilePickersPanel filePickers) {
         this.filePickers = filePickers;
 
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
@@ -208,13 +207,13 @@ class ArgsPanelCES extends JPanel {
             @Override
             protected void onSelect() {
                 try {
-                    String[] inFiles = ArgsPanelCES.this.filePickers.getInputFilePaths();
-                    String[] outFiles = ArgsPanelCES.this.filePickers.getOutputFilePaths();
-                    InstanceRawParameters rawParams = getRawParameters(inFiles[0], inFiles[1],
+                    String[] inFiles = PvAArgsPanel.this.filePickers.getInputFilePaths();
+                    String[] outFiles = PvAArgsPanel.this.filePickers.getOutputFilePaths();
+                    PvARawParams rawParams = getRawParameters(inFiles[0], inFiles[1],
                             outFiles[0]);
                     String paramFilePath = getSelectedFilePath();
                     rawParams.save(paramFilePath);
-                    System.out.println("Parameters saved to '" + paramFilePath + "'.");
+                    System.out.println("PvAParams saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -230,14 +229,14 @@ class ArgsPanelCES extends JPanel {
             protected void onSelect() {
                 try {
                     String paramFilePath = getSelectedFilePath();
-                    InstanceRawParameters raw = InstanceRawParameters.load(paramFilePath);
+                    PvARawParams raw = PvARawParams.load(paramFilePath);
                     setParameters(raw);
-                    FilePicker[] inFp = ArgsPanelCES.this.filePickers.getInputFilePickers();
+                    FilePicker[] inFp = PvAArgsPanel.this.filePickers.getInputFilePickers();
                     inFp[0].setSelectedFilePath(raw.phoneRawFile);
                     inFp[1].setSelectedFilePath(raw.actigEpFile);
-                    FilePicker[] outFp = ArgsPanelCES.this.filePickers.getOutputFilePickers();
+                    FilePicker[] outFp = PvAArgsPanel.this.filePickers.getOutputFilePickers();
                     outFp[0].setSelectedFilePath(raw.outputFile);
-                    System.out.println("Parameters loaded from '" + paramFilePath + "'.");
+                    System.out.println("PvAParams loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -246,10 +245,10 @@ class ArgsPanelCES extends JPanel {
         loadFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
         savePanel.add(btnLoad);
 
-        tfSpikeLabel = new JLabel[InstanceRawParameters.NB_MAX_SPIKES];
-        tfSpikePhone = new JTextField[InstanceRawParameters.NB_MAX_SPIKES];
-        tfSpikeActig = new JTextField[InstanceRawParameters.NB_MAX_SPIKES];
-        for (int i = 0; i < InstanceRawParameters.NB_MAX_SPIKES; i++) {
+        tfSpikeLabel = new JLabel[PvARawParams.NB_MAX_SPIKES];
+        tfSpikePhone = new JTextField[PvARawParams.NB_MAX_SPIKES];
+        tfSpikeActig = new JTextField[PvARawParams.NB_MAX_SPIKES];
+        for (int i = 0; i < PvARawParams.NB_MAX_SPIKES; i++) {
             tfSpikeLabel[i] = new JLabel(Integer.toString(i + 1));
             panelSpikes.add(tfSpikeLabel[i], "1, " + (2 * i + 5) + ", right, default");
 
@@ -265,7 +264,7 @@ class ArgsPanelCES extends JPanel {
         }
     }
 
-    public void setParameters(InstanceRawParameters raw) {
+    public void setParameters(PvARawParams raw) {
         tfStartTime.setText(raw.startTime);
         tfStopTime.setText(raw.stopTime);
         tfEpochWidth.setText(raw.epochWidthSec);
@@ -279,9 +278,9 @@ class ArgsPanelCES extends JPanel {
         }
     }
 
-    public InstanceRawParameters getRawParameters(String phoneRawFile, String actigEpFile,
+    public PvARawParams getRawParameters(String phoneRawFile, String actigEpFile,
             String outputFile) {
-        InstanceRawParameters params = new InstanceRawParameters();
+        PvARawParams params = new PvARawParams();
         params.phoneRawFile = phoneRawFile;
         params.actigEpFile = actigEpFile;
         params.outputFile = outputFile;
@@ -290,10 +289,10 @@ class ArgsPanelCES extends JPanel {
         params.actigraphFileFormat = ((ActigraphFileFormat) cBoxActigraphFileFormat
                 .getSelectedItem()).toString();
         params.epochWidthSec = tfEpochWidth.getText();
-        String[] phoneSpikes = new String[InstanceRawParameters.NB_MAX_SPIKES];
-        String[] actigraphSpikes = new String[InstanceRawParameters.NB_MAX_SPIKES];
+        String[] phoneSpikes = new String[PvARawParams.NB_MAX_SPIKES];
+        String[] actigraphSpikes = new String[PvARawParams.NB_MAX_SPIKES];
         int nbSpikes = 0;
-        for (int i = 0; i < InstanceRawParameters.NB_MAX_SPIKES; i++) {
+        for (int i = 0; i < PvARawParams.NB_MAX_SPIKES; i++) {
             phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
             actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
             if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {

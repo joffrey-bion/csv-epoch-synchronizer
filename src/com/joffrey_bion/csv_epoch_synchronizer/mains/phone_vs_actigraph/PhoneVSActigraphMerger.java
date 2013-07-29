@@ -1,4 +1,4 @@
-package com.joffrey_bion.csv_epoch_synchronizer;
+package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import java.io.File;
 import java.io.IOException;
@@ -8,10 +8,7 @@ import javax.swing.SwingUtilities;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv.Csv;
-import com.joffrey_bion.csv_epoch_synchronizer.actigraph.EpLabelsMerger;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.Config;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.InstanceRawParameters;
-import com.joffrey_bion.csv_epoch_synchronizer.parameters.Parameters;
+import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
@@ -21,13 +18,12 @@ import com.joffrey_bion.utils.dates.DateHelper;
 
 /**
  * This program is meant to create a Weka-ready dataset based on the given raw phone
- * samples and the actigraph's epochs. For more information about the
- * com.joffrey_bion.csv_epoch_synchronizer.parameters, check the
- * {@link Parameters} class.
+ * samples and the actigraph's epochs. For more information about the parameters, check the
+ * {@link PvAParams} class.
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
-public class CsvEpochSynchronizer {
+public class PhoneVSActigraphMerger {
     
     /**
      * Choose between GUI or console version according to the number of arguments.
@@ -50,9 +46,9 @@ public class CsvEpochSynchronizer {
                 System.out.println("------[ " + xmlParamsFile + " ]---------------------");
                 System.out.println();
                 try {
-                    InstanceRawParameters rawParams = InstanceRawParameters.load(xmlParamsFile);
-                    createDataset(new Parameters(rawParams));
-                } catch (Parameters.ArgumentFormatException e) {
+                    PvARawParams rawParams = PvARawParams.load(xmlParamsFile);
+                    createDataset(new PvAParams(rawParams));
+                } catch (PvAParams.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -78,18 +74,18 @@ public class CsvEpochSynchronizer {
         for (FilePicker fp : filePickers.getOutputFilePickers()) {
             fp.addFileTypeFilter(".csv", "Comma-Separated Values file");
         }
-        final ArgsPanelCES argsPanelCES = new ArgsPanelCES(filePickers);
+        final PvAArgsPanel pvAArgsPanel = new PvAArgsPanel(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("Epoch Synchronizer", "Process",
-                filePickers, argsPanelCES) {
+                filePickers, pvAArgsPanel) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
-                    InstanceRawParameters rawParams = argsPanelCES.getRawParameters(inPaths[0],
+                    PvARawParams rawParams = pvAArgsPanel.getRawParameters(inPaths[0],
                             inPaths[1], outPaths[0]);
-                    createDataset(new Parameters(rawParams));
-                } catch (Parameters.ArgumentFormatException e) {
+                    createDataset(new PvAParams(rawParams));
+                } catch (PvAParams.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
                 }
             }
@@ -103,10 +99,10 @@ public class CsvEpochSynchronizer {
      * actigraph's epochs.
      * 
      * @param params
-     *            The com.joffrey_bion.csv_epoch_synchronizer.parameters for the
+     *            The com.joffrey_bion.csv_epoch_synchronizer.config for the
      *            instance to deal with.
      */
-    private static void createDataset(Parameters params) {
+    private static void createDataset(PvAParams params) {
         long timerStart = System.currentTimeMillis();
         try {
             System.out.println("Computing phone-to-actigraph delay...");
@@ -126,7 +122,7 @@ public class CsvEpochSynchronizer {
             System.out.println("> Intermediate epoch file created (" + phoneEpFilename + ")");
             System.out.println("");
             System.out.println("Merging phone epochs with actigraph labels...");
-            EpLabelsMerger merger = new EpLabelsMerger(phoneEpFilename, params.actigraphEpFilename,
+            PvAMerger merger = new PvAMerger(phoneEpFilename, params.actigraphEpFilename,
                     params.outputFilename, params.actigraphFileFormat);
             merger.createLabeledFile(params);
             System.out.println("> Dataset file created (" + params.outputFilename + ").");
