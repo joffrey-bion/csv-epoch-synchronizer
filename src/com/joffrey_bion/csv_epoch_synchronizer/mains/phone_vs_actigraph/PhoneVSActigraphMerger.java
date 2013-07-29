@@ -15,16 +15,15 @@ import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 import com.joffrey_bion.utils.dates.DateHelper;
 
-
 /**
  * This program is meant to create a Weka-ready dataset based on the given raw phone
- * samples and the actigraph's epochs. For more information about the parameters, check the
- * {@link PvAParams} class.
+ * samples and the actigraph's epochs. For more information about the parameters,
+ * check the {@link PvAParams} class.
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
 public class PhoneVSActigraphMerger {
-    
+
     /**
      * Choose between GUI or console version according to the number of arguments.
      * 
@@ -76,14 +75,14 @@ public class PhoneVSActigraphMerger {
         }
         final PvAArgsPanel pvAArgsPanel = new PvAArgsPanel(filePickers);
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Epoch Synchronizer", "Process",
-                filePickers, pvAArgsPanel) {
+        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-Actigraph Synchronizer",
+                "Process", filePickers, pvAArgsPanel) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
-                    PvARawParams rawParams = pvAArgsPanel.getRawParameters(inPaths[0],
-                            inPaths[1], outPaths[0]);
+                    PvARawParams rawParams = pvAArgsPanel.getRawParameters(inPaths[0], inPaths[1],
+                            outPaths[0]);
                     createDataset(new PvAParams(rawParams));
                 } catch (PvAParams.ArgumentFormatException e) {
                     System.err.println(e.getMessage());
@@ -99,8 +98,8 @@ public class PhoneVSActigraphMerger {
      * actigraph's epochs.
      * 
      * @param params
-     *            The com.joffrey_bion.csv_epoch_synchronizer.config for the
-     *            instance to deal with.
+     *            The com.joffrey_bion.csv_epoch_synchronizer.config for the instance
+     *            to deal with.
      */
     private static void createDataset(PvAParams params) {
         long timerStart = System.currentTimeMillis();
@@ -125,16 +124,16 @@ public class PhoneVSActigraphMerger {
             PvAMerger merger = new PvAMerger(phoneEpFilename, params.actigraphEpFilename,
                     params.outputFilename, params.actigraphFileFormat);
             merger.createLabeledFile(params);
-            System.out.println("> Dataset file created (" + params.outputFilename + ").");
+            System.out.println("> Dataset file created (" + params.outputFilename + ")");
             if (Config.get().deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
                     System.out.println("> Intermediate epoch file deleted (" + phoneEpFilename
-                            + ").");
+                            + ")");
                 } else {
                     System.err.println("> Delete operation has failed.");
                 }
             } else {
-                System.out.println("> Intermediate file kept (" + phoneEpFilename + ").");
+                System.out.println("> Intermediate file kept (" + phoneEpFilename + ")");
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
