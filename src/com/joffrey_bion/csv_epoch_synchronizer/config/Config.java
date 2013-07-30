@@ -14,6 +14,12 @@ import org.xml.sax.SAXException;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
 import com.joffrey_bion.utils.xml.XmlHelper;
 
+/**
+ * A singleton containing the values of the configuration file. If no such file
+ * exists, it is created the first time this class is accessed.
+ * 
+ * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
+ */
 public class Config {
 
     private static final String CONFIG_FILENAME = "config.xml";
@@ -28,6 +34,11 @@ public class Config {
 
     private static Config instance = null;
 
+    /**
+     * Returns the current configuration.
+     * 
+     * @return the configuration as a {@link Config} object.
+     */
     public static Config get() {
         if (instance == null) {
             instance = new Config(getConfigFilePath());
@@ -73,7 +84,8 @@ public class Config {
         Document doc = XmlHelper.createEmptyDomDocument();
         Element root = doc.createElement(ROOT);
         doc.appendChild(root);
-        root.appendChild(doc.createComment("The cut points set must be one of CutPointsSet enum constant names"));
+        root.appendChild(doc
+                .createComment("The cut points set must be one of CutPointsSet enum constant names"));
         XmlHelper.appendField(doc, root, TAG_CUT_POINTS, cutPointsSet.toString());
         XmlHelper.appendField(doc, root, TAG_WINDOW_WIDTH, Integer.toString(windowWidthSec));
         XmlHelper.appendField(doc, root, TAG_DELETE_TEMP_FILE,

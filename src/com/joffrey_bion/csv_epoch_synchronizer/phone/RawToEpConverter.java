@@ -13,18 +13,6 @@ public class RawToEpConverter {
     private PhoneCsvReader reader;
     private CsvWriter writer;
 
-    private class EpochStatsLine extends StatsLineSkipSome {
-        
-        public EpochStatsLine(int nbOfColumns) {
-            super(nbOfColumns, 1);
-        }
-
-        public String[] getEpochLine(long firstTimestamp) {
-            String[] timestamp = { DateHelper.toDateTimeMillis(firstTimestamp / 1000000) };
-            return toStringArray(timestamp);
-        }
-    }
-
     public RawToEpConverter(String sourceName, String destName) throws IOException,
             NotACsvFileException {
         reader = new PhoneCsvReader(sourceName);
@@ -78,6 +66,17 @@ public class RawToEpConverter {
         }
         reader.close();
         writer.close();
+    }
+
+    private class EpochStatsLine extends StatsLineSkipSome {
+        public EpochStatsLine(int nbOfColumns) {
+            super(nbOfColumns, 1);
+        }
+
+        public String[] getEpochLine(long firstTimestamp) {
+            String[] timestamp = { DateHelper.toDateTimeMillis(firstTimestamp / 1000000) };
+            return toStringArray(timestamp);
+        }
     }
 
     private class Window {

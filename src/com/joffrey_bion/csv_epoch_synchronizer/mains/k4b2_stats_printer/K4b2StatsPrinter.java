@@ -15,12 +15,17 @@ import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 
+/**
+ * A program that displays the statistics of each phase of a K4b2 file.
+ * 
+ * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
+ */
 public class K4b2StatsPrinter {
-    
+
     private static final int NB_ARGS = 2;
     private static final int ARG_SOURCE = 0;
     private static final int ARG_NB_MARKERS = 1;
-    
+
     /**
      * Choose between GUI or console version according to the number of arguments.
      * 
@@ -36,9 +41,10 @@ public class K4b2StatsPrinter {
                     openWindow();
                 }
             });
-        } else if (args.length == NB_ARGS){
+        } else if (args.length == NB_ARGS) {
             try {
-                calculateStats(args[ARG_SOURCE], null, Integer.parseInt(args[ARG_NB_MARKERS]), false);
+                calculateStats(args[ARG_SOURCE], null, Integer.parseInt(args[ARG_NB_MARKERS]),
+                        false);
             } catch (NumberFormatException e) {
                 System.err.println("The number of synchronization markers must be an integer.");
             } catch (IOException e) {

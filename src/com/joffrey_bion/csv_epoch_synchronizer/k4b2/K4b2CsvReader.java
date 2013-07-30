@@ -1,18 +1,35 @@
 package com.joffrey_bion.csv_epoch_synchronizer.k4b2;
 
 import java.io.EOFException;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 
+import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.CsvReader;
 
+/**
+ * A CSV reader for the files produced by the Cosmed K4b2.
+ * 
+ * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
+ */
 class K4b2CsvReader extends CsvReader {
 
     private static final int NB_HEADER_LINES = 3;
 
-    private Sample lastSampleRead;
+    private Sample lastReadSample;
 
-    public K4b2CsvReader(String filename) throws IOException {
+    /**
+     * Creates a new {@link K4b2CsvReader} for the specified file.
+     * 
+     * @param filename
+     *            The path to the file to read.
+     * @throws FileNotFoundException
+     *             If the specified file does not exist.
+     * @throws NotACsvFileException
+     *             If the specified file is not a CSV file.
+     */
+    public K4b2CsvReader(String filename) throws FileNotFoundException, NotACsvFileException {
         super(filename);
     }
 
@@ -41,12 +58,12 @@ class K4b2CsvReader extends CsvReader {
             return null;
         }
         try {
-            long previousTime = lastSampleRead != null ? lastSampleRead.endTime : 0;
-            lastSampleRead = new Sample(row, previousTime);
+            long previousTime = lastReadSample != null ? lastReadSample.endTime : 0;
+            lastReadSample = new Sample(row, previousTime);
         } catch (ParseException e) {
             throw new IOException(e.getMessage());
         }
-        return lastSampleRead;
+        return lastReadSample;
     }
 
     /**
@@ -60,14 +77,14 @@ class K4b2CsvReader extends CsvReader {
      *             If an error occurs while reading the file.
      */
     public Sample skipMarkers(int nbToSkip) throws IOException {
-        if (lastSampleRead == null || !lastSampleRead.isMarked()) {
+        if (lastReadSample == null || !lastReadSample.isMarked()) {
             goToNextMarker();
         }
         // at this point the current row is marked
         for (int i = 0; i < nbToSkip; i++) {
             goToNextMarker();
         }
-        return lastSampleRead;
+        return lastReadSample;
     }
 
     /**
@@ -83,8 +100,8 @@ class K4b2CsvReader extends CsvReader {
         int count = 0;
         while (readK4b2Sample() != null) {
             count++;
-            if (lastSampleRead.isMarked()) {
-                return lastSampleRead;
+            if (lastReadSample.isMarked()) {
+                return lastReadSample;
             }
         }
         throw new EOFException(
@@ -98,6 +115,6 @@ class K4b2CsvReader extends CsvReader {
      * @return the last sample that was read by this reader.
      */
     public Sample getLastSample() {
-        return lastSampleRead;
+        return lastReadSample;
     }
 }

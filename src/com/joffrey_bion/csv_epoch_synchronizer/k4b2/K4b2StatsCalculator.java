@@ -5,11 +5,24 @@ import java.io.IOException;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.RestingResults;
 
+/**
+ * A program able to compute the statistics of each phase of a K4b2 test.
+ * 
+ * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
+ */
 public class K4b2StatsCalculator {
 
     private K4b2CsvReader reader;
     private double restingVO2kg;
 
+    /**
+     * Creates a new {@code K4b2StatsCalculator} for the specified file.
+     * 
+     * @param filename
+     *            The path to the file to read.
+     * @throws IOException
+     *             If any IO error occurs.
+     */
     public K4b2StatsCalculator(String filename) throws IOException {
         reader = new K4b2CsvReader(filename);
     }

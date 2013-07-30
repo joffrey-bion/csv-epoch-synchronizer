@@ -15,11 +15,11 @@ public class PvAParams implements PhoneRawToEpParams {
     private static final boolean USE_DEFAULT_WIDTH = true;
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
 
-    /** Name of the file containing the raw data from the phone */
+    /** Path to the file containing the raw data from the phone */
     public String phoneRawFilename;
-    /** Name of the file containing the epochs from the actigraph */
+    /** Path to the file containing the epochs from the actigraph */
     public String actigraphEpFilename;
-    /** Name of the output file */
+    /** Path to the output file */
     public String outputFilename = "dataset.csv";
     /** Start time in actigraph reference in nanoseconds */
     public long startTime;
@@ -150,44 +150,21 @@ public class PvAParams implements PhoneRawToEpParams {
         delay = Double.valueOf(delayStats.mean()).longValue();
     }
 
-    /**
-     * Returns the delay in nanoseconds to add to a phone time to find the
-     * corresponding actigraph time.
-     * 
-     * @return the delay between the phone time and actigraph time.
-     */
     @Override
     public long getDelay() {
         return delay;
     }
 
-    /**
-     * Returns the width of the labeled part of the time window.
-     * 
-     * @return The width of the labeled part of the time window.
-     */
     @Override
     public long getEpochWidthNano() {
         return epochWidthNano;
     }
 
-    /**
-     * Returns the width of the time window.
-     * 
-     * @return The width of the time window.
-     */
     @Override
     public long getWindowWidthNano() {
         return windowWidthNano;
     }
 
-    /**
-     * Returns the time between the beginning of the time window and the beginning of
-     * the labeled part.
-     * 
-     * @return The time between the beginning of the time window and the beginning of
-     *         the labeled part.
-     */
     @Override
     public long getWinBeginToEpBegin() {
         return winBeginToEpBegin;

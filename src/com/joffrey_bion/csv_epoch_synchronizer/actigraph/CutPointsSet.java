@@ -2,6 +2,12 @@ package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
 
 import java.util.LinkedList;
 
+/**
+ * An enum containing different sets of cut points to determine a level of activity
+ * from a CPM (counts per minute) number.
+ * 
+ * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
+ */
 public enum CutPointsSet {
 
     /**
@@ -22,7 +28,9 @@ public enum CutPointsSet {
     private LinkedList<CutPoint> cpmCutPoints;
 
     private class CutPoint {
+        /** The name of the level of activity corresponding to this CutPoint. */
         public String label;
+        /** The upper limit for the CPM before going to the next level. */
         public double upperLimit;
 
         public CutPoint(String label, double upperLimit) {
@@ -42,6 +50,15 @@ public enum CutPointsSet {
         this.cpmCutPoints.add(new CutPoint(labels[labels.length - 1], Double.MAX_VALUE));
     }
 
+    /**
+     * Determines the level of activity corresponding to the specified CPM.
+     * 
+     * @param countsPerMin
+     *            The number of counts per minute to convert into a level of
+     *            activity.
+     * @return the name of the level of activity corresponding to the specified CPM,
+     *         as a {@code String}.
+     */
     public String countsToLevel(double countsPerMin) {
         if (countsPerMin < 0)
             throw new IllegalArgumentException("CPM must be positive");

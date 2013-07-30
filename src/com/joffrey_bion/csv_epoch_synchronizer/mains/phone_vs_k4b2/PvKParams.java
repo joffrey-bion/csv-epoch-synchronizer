@@ -4,7 +4,6 @@ import java.io.IOException;
 
 import org.xml.sax.SAXException;
 
-import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
 import com.joffrey_bion.utils.stats.FlowStats;
 import com.joffrey_bion.utlis.xml.serializers.DateArraySerializer;
 import com.joffrey_bion.utlis.xml.serializers.DurationArraySerializer;
@@ -13,41 +12,61 @@ import com.joffrey_bion.xml_parameters_serializer.Parameters;
 import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
-public class PvKParams implements PhoneRawToEpParams {
-    
+public class PvKParams {
+
     private static final String KEY_PHONE_FILE = "phone-raw-file";
-    private static final String KEY_K4B2_FILE = "phone-raw-file";
+    private static final String KEY_K4B2_FILE = "k4b2-file";
+    private static final String KEY_TREE_FILE = "decision-tree";
     private static final String KEY_NB_SYNC_MARKERS = "nb-sync-markers";
     private static final String KEY_PHONE_SPIKES = "phone-spikes";
     private static final String KEY_K4B2_SPIKES = "k4b2-spikes";
 
-    private static final DateArraySerializer PHONE_SERIALIZER = new DateArraySerializer(
-            "yyyy-MM-dd HH:mm:ss.SSS");
-    private static final DurationArraySerializer K4B2_SERIALIZER = new DurationArraySerializer(
-            "HH:mm:ss");
+    private static final String PHONE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
+    private static final String K4B2_FORMAT = "HH:mm:ss";
+    private static final DateArraySerializer PHONE_SER = new DateArraySerializer(PHONE_FORMAT);
+    private static final DurationArraySerializer K4B2_SER = new DurationArraySerializer(K4B2_FORMAT);
 
     private static final ParamsSchema SCHEMA = new ParamsSchema();
     static {
         SCHEMA.addParam(KEY_PHONE_FILE, Serializer.STRING);
         SCHEMA.addParam(KEY_K4B2_FILE, Serializer.STRING);
+        SCHEMA.addParam(KEY_TREE_FILE, Serializer.STRING);
         SCHEMA.addParam(KEY_NB_SYNC_MARKERS, Serializer.INTEGER);
-        SCHEMA.addParam(KEY_PHONE_SPIKES, PHONE_SERIALIZER);
-        SCHEMA.addParam(KEY_K4B2_SPIKES, K4B2_SERIALIZER);
+        SCHEMA.addParam(KEY_PHONE_SPIKES, PHONE_SER, "Format: " + PHONE_FORMAT);
+        SCHEMA.addParam(KEY_K4B2_SPIKES, K4B2_SER, "Format: " + K4B2_FORMAT);
     }
 
+    /**
+     * Path to the CSV file containing the raw data from the phone.
+     */
     public String phoneRawFile;
+    /**
+     * Path to the CSV file containing the epochs from the K4b2.
+     */
     public String k4b2File;
+    /**
+     * Path to the XML file containing the decision tree.
+     */
+    public String xmlTreeFile;
+    /**
+     * Number of markers used to synchronize the phone, which have to be skipped.
+     */
     public Integer nbSyncMarkers;
+    /**
+     * Delay in nanoseconds to add to a phone time to find the corresponding
+     * actigraph time.
+     */
     public long delayPhoneToK4b2;
 
     public PvKParams(String paramsFilePath) throws IOException, SAXException,
             SpecificationNotMetException {
         Parameters params = Parameters.loadFromXml(paramsFilePath, SCHEMA);
-        phoneRawFile = params.getString(KEY_PHONE_FILE);
-        k4b2File = params.getString(KEY_K4B2_FILE);
-        nbSyncMarkers = params.getInteger(KEY_NB_SYNC_MARKERS);
-        Long[] phoneSpikes = params.get(KEY_PHONE_SPIKES, PHONE_SERIALIZER);
-        Long[] k4b2Spikes = params.get(KEY_K4B2_SPIKES, K4B2_SERIALIZER);
+        this.phoneRawFile = params.getString(KEY_PHONE_FILE);
+        this.k4b2File = params.getString(KEY_K4B2_FILE);
+        this.xmlTreeFile = params.getString(KEY_TREE_FILE);
+        this.nbSyncMarkers = params.getInteger(KEY_NB_SYNC_MARKERS);
+        Long[] phoneSpikes = params.get(KEY_PHONE_SPIKES, PHONE_SER);
+        Long[] k4b2Spikes = params.get(KEY_K4B2_SPIKES, K4B2_SER);
         setDelay(phoneSpikes, k4b2Spikes);
     }
 
@@ -70,44 +89,4 @@ public class PvKParams implements PhoneRawToEpParams {
         delayPhoneToK4b2 = Double.valueOf(delayStats.mean()).longValue();
     }
 
-    /**
-     * Returns the delay in milliseconds to add to a phone time to find the
-     * corresponding K4b2 time.
-     * 
-     * @return the delay between the phone time and actigraph time.
-     */
-    @Override
-    public long getDelay() {
-        return delayPhoneToK4b2;
-    }
-
-    @Override
-    public long getPhoneStartTime() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public long getPhoneStopTime() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public long getWindowWidthNano() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public long getEpochWidthNano() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
-
-    @Override
-    public long getWinBeginToEpBegin() {
-        // TODO Auto-generated method stub
-        return 0;
-    }
 }

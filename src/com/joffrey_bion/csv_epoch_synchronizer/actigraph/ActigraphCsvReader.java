@@ -19,6 +19,18 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
 
     private final ActigraphFileFormat f;
 
+    /**
+     * Opens a reader for the specified actigraph CSV file.
+     * 
+     * @param filename
+     *            The path to the CSV file to read.
+     * @param actigraphFileFormat
+     *            The format to expect from the specified file.
+     * @throws FileNotFoundException
+     *             If the specified file does not exist.
+     * @throws Csv.NotACsvFileException
+     *             If the specified file is not a CSV file.
+     */
     public ActigraphCsvReader(String filename, ActigraphFileFormat actigraphFileFormat)
             throws FileNotFoundException, Csv.NotACsvFileException {
         super(filename);
@@ -36,11 +48,26 @@ public class ActigraphCsvReader extends TimestampedCsvReader {
         }
     }
 
+    /**
+     * Returns the number of counts per minute in the specified row of the CSV file.
+     * 
+     * @param line
+     *            The line to get the CPM from.
+     * @param epochWidthNanos
+     *            The width of the actigraph's epochs, to scale the CPM to 1 minute.
+     * @return the CPM of the specified row.
+     */
     public double extractCountsPerMinutes(String[] line, long epochWidthNanos) {
         long nbEpochsPerMin = ((long) 60 * 1000 * 1000000) / epochWidthNanos;
         return Double.valueOf(line[f.VM_COL]) * nbEpochsPerMin;
     }
 
+    /**
+     * Skips the headers of the actigraph CSV file read by this reader.
+     * 
+     * @throws IOException
+     *             If any I/O error occurs.
+     */
     public void skipHeaders() throws IOException {
         readRows(f.NB_HEADER_LINES);
     }
