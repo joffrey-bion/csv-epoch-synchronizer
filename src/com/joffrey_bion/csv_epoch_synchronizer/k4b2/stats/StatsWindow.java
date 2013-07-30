@@ -166,7 +166,7 @@ class StatsWindow {
      * Removes the oldest (first) samples from this window. This window's duration is
      * shortened to reach {@code target} milliseconds.
      * 
-     * @param target
+     * @param targetDuration
      *            The target duration for this window.
      */
     public void trimBeginningToReach(long targetDuration) {
@@ -180,7 +180,7 @@ class StatsWindow {
      * Removes the newest (last) samples from this window. This window's duration is
      * shortened to reach {@code targetDuration} milliseconds.
      * 
-     * @param target
+     * @param targetDuration
      *            The target duration for this window.
      */
     public void trimEndToReach(long targetDuration) {
