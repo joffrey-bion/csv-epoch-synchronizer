@@ -13,7 +13,7 @@ import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 
 /**
- * A program that uses a decision tree to assign a label to each row of a dataset and
+ * A program that uses a decision tree to assign a level to each row of a dataset and
  * appends a new column containing the decided labels.
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
@@ -75,7 +75,7 @@ public class DecisionSimulator {
     }
 
     /**
-     * Appends a column to the specified dataset with the label assigned to each row
+     * Appends a column to the specified dataset with the level assigned to each row
      * by the specified decision tree.
      * 
      * @param xmlTreeFile

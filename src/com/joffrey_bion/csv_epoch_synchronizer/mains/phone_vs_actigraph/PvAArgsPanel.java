@@ -12,10 +12,12 @@ import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.xml_parameters_serializer.Parameters.ParameterTypeException;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
 import java.awt.Font;
+import java.text.ParseException;
 import java.util.Arrays;
 
 import javax.swing.Box;
@@ -29,6 +31,8 @@ import java.awt.FlowLayout;
 @SuppressWarnings("serial")
 class PvAArgsPanel extends JPanel {
 
+    private static final int NB_MAX_SPIKES = 6;
+    private static final int DATE_TEXTFIELD_WIDTH = 17;
     private final JFilePickersPanel filePickers;
 
     private JTextField tfStartTime;
@@ -81,7 +85,7 @@ class PvAArgsPanel extends JPanel {
         tfStartTime = new JTextField();
         tfStartTime.setHorizontalAlignment(SwingConstants.CENTER);
         panelLimits.add(tfStartTime, "3, 3, fill, center");
-        tfStartTime.setColumns(18);
+        tfStartTime.setColumns(DATE_TEXTFIELD_WIDTH);
 
         JLabel lblStopTime = new JLabel("Stop time:");
         panelLimits.add(lblStopTime, "1, 5, left, center");
@@ -89,9 +93,9 @@ class PvAArgsPanel extends JPanel {
         tfStopTime = new JTextField();
         tfStopTime.setHorizontalAlignment(SwingConstants.CENTER);
         panelLimits.add(tfStopTime, "3, 5, fill, center");
-        tfStopTime.setColumns(18);
+        tfStopTime.setColumns(DATE_TEXTFIELD_WIDTH);
 
-        JLabel lblFormat = new JLabel("(yyyy-MM-dd HH:mm:ss.SSS)");
+        JLabel lblFormat = new JLabel("(" + PvAParams.TIMESTAMP_FORMAT + ")");
         panelLimits.add(lblFormat, "3, 7, center, center");
 
         panelArgsLeft.add(Box.createVerticalStrut(5));
@@ -176,7 +180,7 @@ class PvAArgsPanel extends JPanel {
                 FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
                 FormFactory.DEFAULT_ROWSPEC, }));
 
-        JLabel lblSpikes = new JLabel("Spikes (HH:mm:ss.SSS)");
+        JLabel lblSpikes = new JLabel("Spikes (" + PvAParams.TIMESTAMP_FORMAT + ")");
         lblSpikes.setFont(new Font("Tahoma", Font.BOLD, 11));
         panelSpikes.add(lblSpikes, "3, 1, 3, 1, center, center");
 
@@ -207,15 +211,13 @@ class PvAArgsPanel extends JPanel {
             @Override
             protected void onSelect() {
                 try {
-                    String[] inFiles = PvAArgsPanel.this.filePickers.getInputFilePaths();
-                    String[] outFiles = PvAArgsPanel.this.filePickers.getOutputFilePaths();
-                    PvARawParams rawParams = getRawParameters(inFiles[0], inFiles[1],
-                            outFiles[0]);
+                    PvAParams params = new PvAParams();
+                    getParameters(params);
                     String paramFilePath = getSelectedFilePath();
-                    rawParams.save(paramFilePath);
-                    System.out.println("PvAParams saved to '" + paramFilePath + "'.");
+                    params.saveToXml(paramFilePath);
+                    System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    System.err.println(e.getMessage());
                 }
             }
         };
@@ -229,15 +231,11 @@ class PvAArgsPanel extends JPanel {
             protected void onSelect() {
                 try {
                     String paramFilePath = getSelectedFilePath();
-                    PvARawParams raw = PvARawParams.load(paramFilePath);
-                    setParameters(raw);
-                    FilePicker[] inFp = PvAArgsPanel.this.filePickers.getInputFilePickers();
-                    inFp[0].setSelectedFilePath(raw.phoneRawFile);
-                    inFp[1].setSelectedFilePath(raw.actigEpFile);
-                    FilePicker[] outFp = PvAArgsPanel.this.filePickers.getOutputFilePickers();
-                    outFp[0].setSelectedFilePath(raw.outputFile);
-                    System.out.println("PvAParams loaded from '" + paramFilePath + "'.");
+                    PvAParams params = new PvAParams(paramFilePath);
+                    setParameters(params);
+                    System.out.println("Parameters loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
+                    System.err.println(e.getMessage());
                     e.printStackTrace();
                 }
             }
@@ -245,26 +243,27 @@ class PvAArgsPanel extends JPanel {
         loadFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
         savePanel.add(btnLoad);
 
-        tfSpikeLabel = new JLabel[PvARawParams.NB_MAX_SPIKES];
-        tfSpikePhone = new JTextField[PvARawParams.NB_MAX_SPIKES];
-        tfSpikeActig = new JTextField[PvARawParams.NB_MAX_SPIKES];
-        for (int i = 0; i < PvARawParams.NB_MAX_SPIKES; i++) {
+        tfSpikeLabel = new JLabel[NB_MAX_SPIKES];
+        tfSpikePhone = new JTextField[NB_MAX_SPIKES];
+        tfSpikeActig = new JTextField[NB_MAX_SPIKES];
+        for (int i = 0; i < NB_MAX_SPIKES; i++) {
             tfSpikeLabel[i] = new JLabel(Integer.toString(i + 1));
             panelSpikes.add(tfSpikeLabel[i], "1, " + (2 * i + 5) + ", right, default");
 
             tfSpikePhone[i] = new JTextField();
-            tfSpikePhone[i].setColumns(10);
+            tfSpikePhone[i].setColumns(DATE_TEXTFIELD_WIDTH);
             tfSpikePhone[i].setHorizontalAlignment(SwingConstants.CENTER);
             panelSpikes.add(tfSpikePhone[i], "3, " + (2 * i + 5) + ", fill, default");
 
             tfSpikeActig[i] = new JTextField();
-            tfSpikeActig[i].setColumns(10);
+            tfSpikeActig[i].setColumns(DATE_TEXTFIELD_WIDTH);
             tfSpikeActig[i].setHorizontalAlignment(SwingConstants.CENTER);
             panelSpikes.add(tfSpikeActig[i], "5, " + (2 * i + 5) + ", fill, default");
         }
     }
 
-    public void setParameters(PvARawParams raw) {
+    @Deprecated
+    public void setParameters(OldPvARawParams raw) {
         tfStartTime.setText(raw.startTime);
         tfStopTime.setText(raw.stopTime);
         tfEpochWidth.setText(raw.epochWidthSec);
@@ -272,15 +271,19 @@ class PvAArgsPanel extends JPanel {
             cBoxActigraphFileFormat.setSelectedItem(ActigraphFileFormat
                     .valueOf(raw.actigraphFileFormat));
         }
+        String date = raw.startTime.substring(0, raw.startTime.indexOf(" ") + 1);
         for (int i = 0; i < raw.phoneSpikes.length; i++) {
-            tfSpikePhone[i].setText(raw.phoneSpikes[i]);
-            tfSpikeActig[i].setText(raw.actigraphSpikes[i]);
+            if (raw.phoneSpikes[i].length() > 0) {
+                tfSpikePhone[i].setText(date + raw.phoneSpikes[i]);
+                tfSpikeActig[i].setText(date + raw.actigraphSpikes[i]);
+            }
         }
     }
 
-    public PvARawParams getRawParameters(String phoneRawFile, String actigEpFile,
+    @Deprecated
+    public OldPvARawParams getRawParameters(String phoneRawFile, String actigEpFile,
             String outputFile) {
-        PvARawParams params = new PvARawParams();
+        OldPvARawParams params = new OldPvARawParams();
         params.phoneRawFile = phoneRawFile;
         params.actigEpFile = actigEpFile;
         params.outputFile = outputFile;
@@ -289,10 +292,10 @@ class PvAArgsPanel extends JPanel {
         params.actigraphFileFormat = ((ActigraphFileFormat) cBoxActigraphFileFormat
                 .getSelectedItem()).toString();
         params.epochWidthSec = tfEpochWidth.getText();
-        String[] phoneSpikes = new String[PvARawParams.NB_MAX_SPIKES];
-        String[] actigraphSpikes = new String[PvARawParams.NB_MAX_SPIKES];
+        String[] phoneSpikes = new String[OldPvARawParams.NB_MAX_SPIKES];
+        String[] actigraphSpikes = new String[OldPvARawParams.NB_MAX_SPIKES];
         int nbSpikes = 0;
-        for (int i = 0; i < PvARawParams.NB_MAX_SPIKES; i++) {
+        for (int i = 0; i < OldPvARawParams.NB_MAX_SPIKES; i++) {
             phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
             actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
             if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {
@@ -307,5 +310,60 @@ class PvAArgsPanel extends JPanel {
             params.actigraphSpikes = new String[0];
         }
         return params;
+    }
+
+    private static void setFileParam(PvAParams params, String key, String filePath) {
+        if (filePath != null && !filePath.equals("")) {
+            params.set(key, filePath);
+        }
+    }
+
+    public void setParameters(PvAParams params) throws ParameterTypeException {
+        FilePicker[] inputs = filePickers.getInputFilePickers();
+        inputs[0].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
+        inputs[1].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
+        FilePicker[] outputs = filePickers.getOutputFilePickers();
+        outputs[0].setSelectedFilePath(params.getString(PvAParams.OUTPUT_FILE_PATH));
+        tfStartTime.setText(params.getSerialized(PvAParams.START_TIME));
+        tfStopTime.setText(params.getSerialized(PvAParams.STOP_TIME));
+        tfEpochWidth.setText(params.getSerialized(PvAParams.EPOCH_WIDTH_SEC));
+        cBoxActigraphFileFormat.setSelectedItem(params.get(PvAParams.ACTIG_FILE_FORMAT));
+        String[] phoneSpikes = params.getSerializedArray(PvAParams.PHONE_SPIKES_LIST);
+        for (int i = 0; i < phoneSpikes.length; i++) {
+            tfSpikePhone[i].setText(phoneSpikes[i]);
+        }
+        String[] actigraphSpikes = params.getSerializedArray(PvAParams.ACTIG_SPIKES_LIST);
+        for (int i = 0; i < actigraphSpikes.length; i++) {
+            tfSpikeActig[i].setText(actigraphSpikes[i]);
+        }
+    }
+
+    public void getParameters(PvAParams params) throws ParseException {
+        setFileParam(params, PvAParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[0]);
+        setFileParam(params, PvAParams.ACTIG_FILE_PATH, filePickers.getInputFilePaths()[1]);
+        setFileParam(params, PvAParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[0]);
+        params.deserializeAndSet(PvAParams.START_TIME, tfStartTime.getText());
+        params.deserializeAndSet(PvAParams.STOP_TIME, tfStopTime.getText());
+        params.set(PvAParams.ACTIG_FILE_FORMAT, cBoxActigraphFileFormat.getSelectedItem());
+        params.deserializeAndSet(PvAParams.EPOCH_WIDTH_SEC, tfEpochWidth.getText());
+        String[] phoneSpikes = new String[NB_MAX_SPIKES];
+        String[] actigraphSpikes = new String[NB_MAX_SPIKES];
+        int nbSpikes = 0;
+        for (int i = 0; i < OldPvARawParams.NB_MAX_SPIKES; i++) {
+            phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
+            actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
+            if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {
+                nbSpikes++;
+            }
+        }
+        if (nbSpikes > 0) {
+            params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST,
+                    Arrays.copyOfRange(phoneSpikes, 0, nbSpikes));
+            params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST,
+                    Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes));
+        } else {
+            params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST, new String[0]);
+            params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST, new String[0]);
+        }
     }
 }

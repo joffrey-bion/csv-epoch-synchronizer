@@ -51,7 +51,7 @@ public class Config {
      * deleted.
      */
     public boolean deleteIntermediateFile;
-    /** The cut points set to use to label the actigraph's CPM. */
+    /** The cut points set to use to level the actigraph's CPM. */
     public CutPointsSet cutPointsSet;
     /** Window width in seconds */
     public int windowWidthSec;

@@ -67,8 +67,8 @@ class StatsWindow {
      * Adds the specified samples of values to this group.
      * 
      * @param linesToAdd
-     *            The {@link Sample}s to add, in the order they should be added
-     *            to this window. This list will be cleared and receive the oldest
+     *            The {@link Sample}s to add, in the order they should be added to
+     *            this window. This list will be cleared and receive the oldest
      *            samples in this group that do not fit anymore in the maximum
      *            length. The oldest of these samples is added first in the list, the
      *            newest is added last.
@@ -104,17 +104,32 @@ class StatsWindow {
     }
 
     /**
+     * Removes the specified {@link Sample} from this window.
+     * 
+     * @param line
+     *            The {@code Sample} to remove.
+     * @return Whether the specified {@code Sample} was present or not.
+     */
+    public boolean remove(Sample line) {
+        if (line == null) {
+            return false;
+        }
+        boolean removed = samples.remove(line);
+        if (removed) {
+            stats.remove(line);
+            duration -= line.duration;
+        }
+        return removed;
+    }
+
+    /**
      * Removes the oldest (first) sample from this window.
      * 
      * @return The removed oldest sample.
      */
     public Sample removeOldest() {
-        Sample oldest = samples.pollFirst();
-        if (oldest == null) {
-            return null;
-        }
-        stats.remove(oldest);
-        duration -= oldest.duration;
+        Sample oldest = samples.getFirst();
+        remove(oldest);
         return oldest;
     }
 
@@ -124,12 +139,8 @@ class StatsWindow {
      * @return The removed newest sample.
      */
     public Sample removeNewest() {
-        Sample newest = samples.pollLast();
-        if (newest == null) {
-            return null;
-        }
-        stats.remove(newest);
-        duration -= newest.duration;
+        Sample newest = samples.getLast();
+        remove(newest);
         return newest;
     }
 

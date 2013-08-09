@@ -10,7 +10,7 @@ import com.joffrey_bion.csv.CsvReader;
 import com.joffrey_bion.csv.CsvWriter;
 
 /**
- * A module that appends the label decided by a decision tree to each row of a CSV
+ * A module that appends the level decided by a decision tree to each row of a CSV
  * file according to the values for each feature (column).
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
@@ -19,6 +19,7 @@ public class LabelAppender {
 
     private final DecisionTree tree;
     private HashMap<String, Integer> features;
+    private HashMap<String, Integer> lvlsDistrib;
 
     /**
      * Creates a new {@code LabelAppender} for the specified decision tree.
@@ -34,10 +35,11 @@ public class LabelAppender {
         System.out.println("Parsing tree file '" + decisionTreeFile + "'...");
         tree = TreeParser.parseTree(decisionTreeFile);
         System.out.println("Tree read successfully.");
+        lvlsDistrib = new HashMap<>();
     }
 
     /**
-     * Determines the label of each row of the dataset file according to the decision
+     * Determines the level of each row of the dataset file according to the decision
      * tree, and appends it as a new column in the destination file.
      * 
      * @param datasetFile
@@ -48,7 +50,7 @@ public class LabelAppender {
      * @throws IOException
      *             If any IO error occurs.
      */
-    public void appendLabels(String datasetFile, String outputFile) throws IOException {
+    public HashMap<String, Integer> appendLabels(String datasetFile, String outputFile) throws IOException {
         System.out.println("Opening dataset file '" + datasetFile + "'...");
         CsvReader reader = new CsvReader(datasetFile);
         String[] row = reader.readRow();
@@ -61,6 +63,7 @@ public class LabelAppender {
         }
         reader.close();
         writer.close();
+        return lvlsDistrib;
     }
 
     /**
@@ -81,16 +84,18 @@ public class LabelAppender {
     }
 
     /**
-     * Determines the label of the sepcified row and appends it at the end of this
+     * Determines the level of the sepcified row and appends it at the end of this
      * row.
      * 
      * @param row
-     *            The row to append the label to.
-     * @return The source row with the appended label.
+     *            The row to append the level to.
+     * @return The source row with the appended level.
      */
     private String[] appendLabel(String[] row) {
-        String classStr = tree.classify(row, features);
-        return append(row, classStr);
+        String label = tree.classify(row, features);
+        int oldNb = lvlsDistrib.containsKey(label) ? lvlsDistrib.get(label) : 0;
+        lvlsDistrib.put(label, oldNb + 1);
+        return append(row, label);
     }
 
     /**

@@ -11,7 +11,7 @@ import org.xml.sax.SAXException;
 import com.joffrey_bion.utils.xml.XmlHelper;
 
 /**
- * A {@code PvARawParams} object contains all the raw information read from
+ * A {@code OldPvARawParams} object contains all the raw information read from
  * an XML parameter file or from the GUI. Therefore, most fields are just
  * {@code String}s because they have not been parsed yet.
  * <p>
@@ -21,7 +21,7 @@ import com.joffrey_bion.utils.xml.XmlHelper;
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
-public class PvARawParams {
+public class OldPvARawParams {
 
     private static final String ROOT = "parameters";
     private static final String FILES_LIST = "files";
@@ -50,7 +50,7 @@ public class PvARawParams {
     public String actigraphFileFormat;
     
     /**
-     * Save this {@code PvARawParams} object to the specified XML file.
+     * Save this {@code OldPvARawParams} object to the specified XML file.
      * 
      * @param xmlFilePath
      *            The path to the XML output file.
@@ -85,7 +85,7 @@ public class PvARawParams {
     }
 
     /**
-     * Creates a {@code PvARawParams} object from the specified XML file.
+     * Creates a {@code OldPvARawParams} object from the specified XML file.
      * 
      * @param xmlFilePath
      *            The path to the XML output file.
@@ -94,8 +94,8 @@ public class PvARawParams {
      * @throws SAXException
      *             If any parse error occurs.
      */
-    public static PvARawParams load(String xmlFilePath) throws IOException, SAXException {
-        PvARawParams raw = new PvARawParams();
+    public static OldPvARawParams load(String xmlFilePath) throws IOException, SAXException {
+        OldPvARawParams raw = new OldPvARawParams();
         Document dom = XmlHelper.getDomDocumentFromFile(xmlFilePath);
         Element root = dom.getDocumentElement();
         Element files = (Element) root.getElementsByTagName(FILES_LIST).item(0);

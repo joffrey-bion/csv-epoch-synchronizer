@@ -5,9 +5,9 @@ import java.io.IOException;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.utils.stats.FlowStats;
-import com.joffrey_bion.utlis.xml.serializers.DateArraySerializer;
-import com.joffrey_bion.utlis.xml.serializers.DurationArraySerializer;
-import com.joffrey_bion.utlis.xml.serializers.Serializer;
+import com.joffrey_bion.utils.xml.serializers.DateArraySerializer;
+import com.joffrey_bion.utils.xml.serializers.DurationArraySerializer;
+import com.joffrey_bion.utils.xml.serializers.SimpleSerializer;
 import com.joffrey_bion.xml_parameters_serializer.Parameters;
 import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
@@ -26,12 +26,12 @@ public class PvKParams {
     private static final DateArraySerializer PHONE_SER = new DateArraySerializer(PHONE_FORMAT);
     private static final DurationArraySerializer K4B2_SER = new DurationArraySerializer(K4B2_FORMAT);
 
-    private static final ParamsSchema SCHEMA = new ParamsSchema();
+    private static final ParamsSchema SCHEMA = new ParamsSchema(1);
     static {
-        SCHEMA.addParam(KEY_PHONE_FILE, Serializer.STRING);
-        SCHEMA.addParam(KEY_K4B2_FILE, Serializer.STRING);
-        SCHEMA.addParam(KEY_TREE_FILE, Serializer.STRING);
-        SCHEMA.addParam(KEY_NB_SYNC_MARKERS, Serializer.INTEGER);
+        SCHEMA.addParam(KEY_PHONE_FILE, SimpleSerializer.STRING);
+        SCHEMA.addParam(KEY_K4B2_FILE, SimpleSerializer.STRING);
+        SCHEMA.addParam(KEY_TREE_FILE, SimpleSerializer.STRING);
+        SCHEMA.addParam(KEY_NB_SYNC_MARKERS, SimpleSerializer.INTEGER);
         SCHEMA.addParam(KEY_PHONE_SPIKES, PHONE_SER, "Format: " + PHONE_FORMAT);
         SCHEMA.addParam(KEY_K4B2_SPIKES, K4B2_SER, "Format: " + K4B2_FORMAT);
     }
@@ -58,6 +58,18 @@ public class PvKParams {
      */
     public long delayPhoneToK4b2;
 
+    /**
+     * Creates a new {@code PvKParams} object from the specified XML file.
+     * 
+     * @param paramsFilePath
+     *            The path to the XML file to read the parameters from.
+     * @throws IOException
+     *             If an error occurs while reading the file.
+     * @throws SAXException
+     *             If any XML parse error occurs.
+     * @throws SpecificationNotMetException
+     *             If the XML file does not meet the schema's requirements.
+     */
     public PvKParams(String paramsFilePath) throws IOException, SAXException,
             SpecificationNotMetException {
         Parameters params = Parameters.loadFromXml(paramsFilePath, SCHEMA);

@@ -1,5 +1,9 @@
 package com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats;
 
+import java.util.HashMap;
+
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.METsToLevel;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Sample;
 import com.joffrey_bion.utils.dates.DurationHelper;
 
 /**
@@ -13,6 +17,38 @@ public class PhaseResults extends StatsWindow {
     private static final long END_TRIM_MILLIS = 15 * 1000;
 
     private double restingVO2kg;
+    private HashMap<String, Double> lvlDistrib;
+    private METsToLevel mtl;
+
+    public PhaseResults() {
+        super();
+        lvlDistrib = new HashMap<>();
+        mtl = METsToLevel.STANDARD;
+    }
+
+    @Override
+    public void add(Sample line) {
+        super.add(line);
+        double METs = line.getValue(Sample.COL_METS);
+        String level = mtl.metsToLevel(METs);
+        double oldWeight = lvlDistrib.containsKey(level) ? lvlDistrib.get(level) : 0;
+        lvlDistrib.put(level, line.duration / 1000 + oldWeight);
+    }
+
+    @Override
+    public boolean remove(Sample line) {
+        boolean removed = super.remove(line);
+        if (removed) {
+            double METs = line.getValue(Sample.COL_METS);
+            String level = mtl.metsToLevel(METs);
+            double oldWeight = lvlDistrib.containsKey(level) ? lvlDistrib.get(level) : 0;
+            lvlDistrib.put(level, oldWeight - line.duration / 1000);
+            if (lvlDistrib.get(level) == 0) {
+                lvlDistrib.remove(level);
+            }
+        }
+        return removed;
+    }
 
     /**
      * Removes the beginning and the end of this phase as specified by the protocol.
@@ -70,6 +106,8 @@ public class PhaseResults extends StatsWindow {
         res += "   VO2/kg avg = " + format(getMean(StatsColumn.VO2KG)) + "\n";
         res += " std METs avg = " + format(getMean(StatsColumn.METS)) + "\n";
         res += "pers METs avg = " + format(getPersonalizedMETs()) + "\n";
+        res += "Levels distribution: " + lvlDistrib.toString();
+        res += "\n";
         return res;
     }
 }

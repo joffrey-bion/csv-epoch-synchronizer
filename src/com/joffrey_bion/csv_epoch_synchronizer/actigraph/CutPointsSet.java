@@ -1,6 +1,6 @@
 package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
 
-import java.util.LinkedList;
+import com.joffrey_bion.utils.classifier.Classifier;
 
 /**
  * An enum containing different sets of cut points to determine a level of activity
@@ -25,29 +25,23 @@ public enum CutPointsSet {
      */
     SEDENTARY_VS_ALL(new String[] { "Sedentary", "Active" }, new double[] { 150.0 });
 
-    private LinkedList<CutPoint> cpmCutPoints;
-
-    private class CutPoint {
-        /** The name of the level of activity corresponding to this CutPoint. */
-        public String label;
-        /** The upper limit for the CPM before going to the next level. */
-        public double upperLimit;
-
-        public CutPoint(String label, double upperLimit) {
-            this.label = label;
-            this.upperLimit = upperLimit;
-        }
-    }
-
+    private final Classifier<String> classifier;
+    
+    /**
+     * Creates a set of cut points that separate different levels by different
+     * thresholds.
+     * 
+     * @param labels
+     *            The labels of the different possible levels in this set of cut
+     *            points.
+     * @param thresholds
+     *            The thresholds to decide between the levels. For all {@code i},
+     *            {@code threshold[i]} is the limit between level {@code labels[i]}
+     *            (just below the threshold) and {@code labels[i+1]} (just above the
+     *            threshold).
+     */
     private CutPointsSet(String[] labels, double[] thresholds) {
-        if (labels.length != thresholds.length + 1) {
-            throw new IllegalArgumentException("There must be n-1 values to separate n labels.");
-        }
-        this.cpmCutPoints = new LinkedList<>();
-        for (int i = 0; i < thresholds.length; i++) {
-            this.cpmCutPoints.add(new CutPoint(labels[i], thresholds[i]));
-        }
-        this.cpmCutPoints.add(new CutPoint(labels[labels.length - 1], Double.MAX_VALUE));
+        classifier = new Classifier<>(labels, thresholds);
     }
 
     /**
@@ -60,13 +54,6 @@ public enum CutPointsSet {
      *         as a {@code String}.
      */
     public String countsToLevel(double countsPerMin) {
-        if (countsPerMin < 0)
-            throw new IllegalArgumentException("CPM must be positive");
-        for (CutPoint cutPoint : cpmCutPoints) {
-            if (countsPerMin <= cutPoint.upperLimit) {
-                return cutPoint.label;
-            }
-        }
-        throw new RuntimeException("Internal error: no label matched " + countsPerMin + " CPM.");
+        return classifier.valueToLevel(countsPerMin);
     }
 }

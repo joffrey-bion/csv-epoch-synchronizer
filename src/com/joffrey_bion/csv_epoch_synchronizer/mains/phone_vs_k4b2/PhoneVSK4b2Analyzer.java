@@ -1,6 +1,7 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.swing.SwingUtilities;
 
@@ -62,7 +63,9 @@ public class PhoneVSK4b2Analyzer {
                 converter.createEpochsFile(ppp);
                 String tempFile2 = "temp-" + p + "-labeled.csv";
                 LabelAppender appender = new LabelAppender(params.xmlTreeFile);
-                appender.appendLabels(tempFile, tempFile2);
+                HashMap<String, Integer> lvlsDistrib = appender.appendLabels(tempFile, tempFile2);
+                System.out.println(lvlsDistrib);
+                // TODO actually compare differences between levels' distributions
             }
         } catch (IOException e) {
             System.err.println("I/O error: " + e.getMessage());
