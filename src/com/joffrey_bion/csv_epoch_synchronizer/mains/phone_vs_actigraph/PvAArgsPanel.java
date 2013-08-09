@@ -12,7 +12,6 @@ import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
-import com.joffrey_bion.xml_parameters_serializer.Parameters.ParameterTypeException;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
@@ -50,6 +49,7 @@ class PvAArgsPanel extends JPanel {
      * Create the panel.
      * 
      * @param filePickers
+     *            The file pickers of the parent window.
      */
     public PvAArgsPanel(JFilePickersPanel filePickers) {
         this.filePickers = filePickers;
@@ -262,63 +262,14 @@ class PvAArgsPanel extends JPanel {
         }
     }
 
-    @Deprecated
-    public void setParameters(OldPvARawParams raw) {
-        tfStartTime.setText(raw.startTime);
-        tfStopTime.setText(raw.stopTime);
-        tfEpochWidth.setText(raw.epochWidthSec);
-        if (raw.actigraphFileFormat != null) {
-            cBoxActigraphFileFormat.setSelectedItem(ActigraphFileFormat
-                    .valueOf(raw.actigraphFileFormat));
-        }
-        String date = raw.startTime.substring(0, raw.startTime.indexOf(" ") + 1);
-        for (int i = 0; i < raw.phoneSpikes.length; i++) {
-            if (raw.phoneSpikes[i].length() > 0) {
-                tfSpikePhone[i].setText(date + raw.phoneSpikes[i]);
-                tfSpikeActig[i].setText(date + raw.actigraphSpikes[i]);
-            }
-        }
-    }
-
-    @Deprecated
-    public OldPvARawParams getRawParameters(String phoneRawFile, String actigEpFile,
-            String outputFile) {
-        OldPvARawParams params = new OldPvARawParams();
-        params.phoneRawFile = phoneRawFile;
-        params.actigEpFile = actigEpFile;
-        params.outputFile = outputFile;
-        params.startTime = tfStartTime.getText();
-        params.stopTime = tfStopTime.getText();
-        params.actigraphFileFormat = ((ActigraphFileFormat) cBoxActigraphFileFormat
-                .getSelectedItem()).toString();
-        params.epochWidthSec = tfEpochWidth.getText();
-        String[] phoneSpikes = new String[OldPvARawParams.NB_MAX_SPIKES];
-        String[] actigraphSpikes = new String[OldPvARawParams.NB_MAX_SPIKES];
-        int nbSpikes = 0;
-        for (int i = 0; i < OldPvARawParams.NB_MAX_SPIKES; i++) {
-            phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
-            actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
-            if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {
-                nbSpikes++;
-            }
-        }
-        if (nbSpikes > 0) {
-            params.phoneSpikes = Arrays.copyOfRange(phoneSpikes, 0, nbSpikes);
-            params.actigraphSpikes = Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes);
-        } else {
-            params.phoneSpikes = new String[0];
-            params.actigraphSpikes = new String[0];
-        }
-        return params;
-    }
-
-    private static void setFileParam(PvAParams params, String key, String filePath) {
-        if (filePath != null && !filePath.equals("")) {
-            params.set(key, filePath);
-        }
-    }
-
-    public void setParameters(PvAParams params) throws ParameterTypeException {
+    /**
+     * Populates the fields of this panel (including files paths) with the given
+     * parameters.
+     * 
+     * @param params
+     *            The parameters to use to populate this panel.
+     */
+    public void setParameters(PvAParams params) {
         FilePicker[] inputs = filePickers.getInputFilePickers();
         inputs[0].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
         inputs[1].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
@@ -338,6 +289,15 @@ class PvAArgsPanel extends JPanel {
         }
     }
 
+    /**
+     * Fills the specified {@link PvAParams} object with the current fields of this
+     * panel (including the files paths).
+     * 
+     * @param params
+     *            The params object to populate.
+     * @throws ParseException
+     *             If one field could not be properly parsed.
+     */
     public void getParameters(PvAParams params) throws ParseException {
         setFileParam(params, PvAParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[0]);
         setFileParam(params, PvAParams.ACTIG_FILE_PATH, filePickers.getInputFilePaths()[1]);
@@ -364,6 +324,12 @@ class PvAArgsPanel extends JPanel {
         } else {
             params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST, new String[0]);
             params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST, new String[0]);
+        }
+    }
+
+    private static void setFileParam(PvAParams params, String key, String filePath) {
+        if (filePath != null && !filePath.equals("")) {
+            params.set(key, filePath);
         }
     }
 }
