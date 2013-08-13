@@ -12,6 +12,7 @@ import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
 import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.file_processor_window.parameters.ParamsSaverPanel;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
@@ -20,7 +21,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 import javax.swing.Box;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 
 import java.awt.Component;
@@ -158,13 +158,11 @@ class PvAArgsPanel extends JPanel {
         Component verticalGlue = Box.createVerticalGlue();
         panelArgsLeft.add(verticalGlue);
 
-        Component horizontalStrut_1 = Box.createHorizontalStrut(5);
-        panel.add(horizontalStrut_1);
+        panel.add(Box.createHorizontalStrut(5));
         JSeparator separator = new JSeparator();
-        panel.add(separator);
         separator.setOrientation(SwingConstants.VERTICAL);
-        Component horizontalStrut_2 = Box.createHorizontalStrut(5);
-        panel.add(horizontalStrut_2);
+        panel.add(separator);
+        panel.add(Box.createHorizontalStrut(5));
 
         JPanel panelSpikes = new JPanel();
         panel.add(panelSpikes);
@@ -199,49 +197,31 @@ class PvAArgsPanel extends JPanel {
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
 
-        JPanel savePanel = new JPanel();
-        FlowLayout flowLayout_1 = (FlowLayout) savePanel.getLayout();
-        flowLayout_1.setHgap(0);
-        flowLayout_1.setVgap(0);
-        add(savePanel);
-
-        JButton btnSave = new JButton("Save params...");
-
-        FilePicker saveFilePicker = new FilePicker(this, btnSave, FilePicker.MODE_SAVE) {
+        ParamsSaverPanel psp = new ParamsSaverPanel() {
             @Override
-            protected void onSelect() {
+            public void saveParamsToFile(String paramFilePath) {
                 try {
                     PvAParams params = new PvAParams();
                     getParameters(params);
-                    String paramFilePath = getSelectedFilePath();
                     params.saveToXml(paramFilePath);
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
                 }
             }
-        };
-        saveFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
-        savePanel.add(btnSave);
 
-        JButton btnLoad = new JButton("Load params...");
-
-        FilePicker loadFilePicker = new FilePicker(this, btnLoad, FilePicker.MODE_OPEN) {
             @Override
-            protected void onSelect() {
+            public void loadParamsFromFile(String paramFilePath) {
                 try {
-                    String paramFilePath = getSelectedFilePath();
                     PvAParams params = new PvAParams(paramFilePath);
                     setParameters(params);
                     System.out.println("Parameters loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
-                    e.printStackTrace();
                 }
             }
         };
-        loadFilePicker.addFileTypeFilter(".xml", "XML Parameter File");
-        savePanel.add(btnLoad);
+        add(psp);
 
         tfSpikeLabel = new JLabel[NB_MAX_SPIKES];
         tfSpikePhone = new JTextField[NB_MAX_SPIKES];
@@ -269,7 +249,7 @@ class PvAArgsPanel extends JPanel {
      * @param params
      *            The parameters to use to populate this panel.
      */
-    public void setParameters(PvAParams params) {
+    private void setParameters(PvAParams params) {
         FilePicker[] inputs = filePickers.getInputFilePickers();
         inputs[0].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
         inputs[1].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
@@ -317,10 +297,10 @@ class PvAArgsPanel extends JPanel {
             }
         }
         if (nbSpikes > 0) {
-            params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST,
-                    Arrays.copyOfRange(phoneSpikes, 0, nbSpikes));
-            params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST,
-                    Arrays.copyOfRange(actigraphSpikes, 0, nbSpikes));
+            params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST, Arrays.copyOfRange(phoneSpikes,
+                    0, nbSpikes));
+            params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST, Arrays.copyOfRange(
+                    actigraphSpikes, 0, nbSpikes));
         } else {
             params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST, new String[0]);
             params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST, new String[0]);

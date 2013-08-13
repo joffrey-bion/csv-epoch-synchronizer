@@ -25,7 +25,7 @@ class TreeParser {
     /**
      * Creates a new {@code TreeParser} for the specified decision tree file.
      * 
-     * @param xmlTreeFile
+     * @param classifierFile
      *            The path to the XML file containing the decision tree to parse.
      * @throws SAXException
      *             If any parse error occurs.
@@ -41,7 +41,7 @@ class TreeParser {
      * Returns the {@link DecisionTree} corresponding to the specified decision tree
      * XML file.
      * 
-     * @param xmlTreeFile
+     * @param classifierFile
      *            The path to the XML file containing the decision tree to parse.
      * @throws SAXException
      *             If any parse error occurs.

@@ -78,7 +78,7 @@ public class DecisionSimulator {
      * Appends a column to the specified dataset with the level assigned to each row
      * by the specified decision tree.
      * 
-     * @param xmlTreeFile
+     * @param classifierFile
      *            The decision tree to use.
      * @param datasetFile
      *            The dataset to append a column to.

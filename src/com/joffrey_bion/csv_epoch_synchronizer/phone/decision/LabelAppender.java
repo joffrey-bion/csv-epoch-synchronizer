@@ -43,7 +43,7 @@ public class LabelAppender {
      * Determines the level of each row of the dataset file according to the decision
      * tree, and appends it as a new column to the dataset in the destination file.
      * 
-     * @param xmlTreeFile
+     * @param classifierFile
      *            The decision tree to use.
      * @param datasetFile
      *            The dataset to append a column to.

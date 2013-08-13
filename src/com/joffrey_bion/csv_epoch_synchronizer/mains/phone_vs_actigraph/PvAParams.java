@@ -26,7 +26,7 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     public static final String PHONE_FILE_PATH = "phone-raw-file";
     public static final String OUTPUT_FILE_PATH = "output-file";
     public static final String ACTIG_FILE_PATH = "actigraph-file";
-    public static final String ACTIG_FILE_FORMAT = "actigraph--file-format";
+    public static final String ACTIG_FILE_FORMAT = "actigraph-file-format";
     public static final String START_TIME = "start-time";
     public static final String STOP_TIME = "stop-time";
     public static final String EPOCH_WIDTH_SEC = "epoch-width";
@@ -80,8 +80,6 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     private long windowWidthNano;
     /** Epochs width in nanoseconds. */
     private long epochWidthNano;
-    /** Time between the beginning of the window and the beginning of the epoch. */
-    private long winBeginToEpBegin;
     /**
      * Delay in nanoseconds to add to a phone time to find the corresponding
      * actigraph time.
@@ -165,7 +163,6 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     private void setWindowFields(int epochWidthSec) {
         this.windowWidthNano = Config.get().windowWidthSec * 1000 * 1000000;
         this.epochWidthNano = epochWidthSec * 1000 * 1000000;
-        this.winBeginToEpBegin = (windowWidthNano - epochWidthNano) / 2;
     }
 
     @Override
@@ -185,7 +182,7 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
 
     @Override
     public long getWinBeginToEpBegin() {
-        return winBeginToEpBegin;
+        return (windowWidthNano - epochWidthNano) / 2;
     }
 
     @Override

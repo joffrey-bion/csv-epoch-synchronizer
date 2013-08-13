@@ -57,6 +57,10 @@ public class PhaseResults extends StatsWindow {
         trimBeginningToReach(LENGTH_TRIM_MILLIS + END_TRIM_MILLIS);
         trimEnd(END_TRIM_MILLIS);
     }
+    
+    public HashMap<String, Double> getLevelsDistribution() {
+        return lvlDistrib;
+    }
 
     /**
      * Set the resting VO2/kg determined by the resting phase.

@@ -71,7 +71,7 @@ public class PhasePhoneParams implements PhoneRawToEpParams, LabelAppenderParams
 
     @Override
     public String getClassifierFilePath() {
-        return globalParams.xmlTreeFile;
+        return globalParams.classifierFile;
     }
 
     @Override

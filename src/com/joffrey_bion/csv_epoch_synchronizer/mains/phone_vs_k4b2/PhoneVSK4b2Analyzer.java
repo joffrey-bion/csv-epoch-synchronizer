@@ -1,6 +1,7 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 
 import java.io.IOException;
+import java.text.ParseException;
 import java.util.HashMap;
 
 import javax.swing.SwingUtilities;
@@ -10,8 +11,12 @@ import org.xml.sax.SAXException;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Results;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppender;
+import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
+import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
+import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 public class PhoneVSK4b2Analyzer {
@@ -48,7 +53,34 @@ public class PhoneVSK4b2Analyzer {
      * Starts the GUI.
      */
     private static void openWindow() {
-        // TODO Auto-generated method stub
+        JFileProcessorWindow.setSystemLookAndFeel();
+        // file pickers source and destination
+        final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
+                "Phone raw file", "K4b2 test file", "XML Tree file" }, "Output file");
+        FilePicker[] ifps = filePickers.getInputFilePickers();
+        ifps[0].addFileTypeFilter(".csv", "Comma-Separated Values file");
+        ifps[1].addFileTypeFilter(".csv", "Comma-Separated Values file");
+        ifps[2].addFileTypeFilter(".xml", "XML Classifier file");
+        FilePicker[] ofps = filePickers.getOutputFilePickers();
+        ofps[0].addFileTypeFilter(".txt", "Text file");
+        final PvKArgsPanel pvKArgsPanel = new PvKArgsPanel(filePickers);
+        @SuppressWarnings("serial")
+        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-K4b2 Analyzer",
+                "Process", filePickers, pvKArgsPanel) {
+            @Override
+            public void process(String[] inPaths, String[] outPaths) {
+                this.clearLog();
+                try {
+                    PvKParams params = new PvKParams();
+                    pvKArgsPanel.getParameters(params);
+                    analyze(params);
+                } catch (ParseException e) {
+                    System.err.println(e.getMessage());
+                }
+            }
+        };
+        frame.pack();
+        frame.setVisible(true);
     }
 
     private static void analyze(PvKParams params) {
@@ -57,9 +89,13 @@ public class PhoneVSK4b2Analyzer {
             Results res = k4.getStats(params.nbSyncMarkers);
             PhasePhoneParams ppp = new PhasePhoneParams(params);
             for (Phase p : Phase.values()) {
-                ppp.setPhaseResults(res.get(p));
+                PhaseResults pr = res.get(p);
+                ppp.setPhaseResults(pr);
                 RawToEpConverter.createEpochsFile(ppp);
                 HashMap<String, Integer> lvlsDistrib = LabelAppender.appendLabels(ppp);
+                System.out.println("K4b2 levels distribution:");
+                System.out.println(pr.getLevelsDistribution());
+                System.out.println("Phone levels distribution:");
                 System.out.println(lvlsDistrib);
                 // TODO actually compare differences between levels' distributions
             }
