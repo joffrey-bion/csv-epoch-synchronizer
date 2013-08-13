@@ -309,7 +309,7 @@ class PvAArgsPanel extends JPanel {
         String[] phoneSpikes = new String[NB_MAX_SPIKES];
         String[] actigraphSpikes = new String[NB_MAX_SPIKES];
         int nbSpikes = 0;
-        for (int i = 0; i < OldPvARawParams.NB_MAX_SPIKES; i++) {
+        for (int i = 0; i < NB_MAX_SPIKES; i++) {
             phoneSpikes[nbSpikes] = tfSpikePhone[i].getText();
             actigraphSpikes[nbSpikes] = tfSpikeActig[i].getText();
             if (!phoneSpikes[nbSpikes].equals("") && !actigraphSpikes[nbSpikes].equals("")) {

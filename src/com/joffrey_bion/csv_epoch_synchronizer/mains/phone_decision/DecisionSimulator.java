@@ -99,8 +99,7 @@ public class DecisionSimulator {
             return;
         }
         try {
-            LabelAppender la = new LabelAppender(xmlTreeFile);
-            la.appendLabels(datasetFile, outputPath);
+            LabelAppender.appendLabels(xmlTreeFile, datasetFile, outputPath);
             System.out.println("Success.");
         } catch (FileNotFoundException e) {
             System.err.println("File not found: " + e.getMessage());

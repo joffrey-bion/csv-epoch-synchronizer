@@ -13,6 +13,8 @@ import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 public class PvKParams {
+    
+    static final long PHONE_EPOCH_WIDTH_SEC = 2;
 
     private static final String KEY_PHONE_FILE = "phone-raw-file";
     private static final String KEY_K4B2_FILE = "k4b2-file";

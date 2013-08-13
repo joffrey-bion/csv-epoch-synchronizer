@@ -5,6 +5,7 @@ import java.text.ParseException;
 
 import org.xml.sax.SAXException;
 
+import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
@@ -195,5 +196,15 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     @Override
     public long getPhoneStopTime() {
         return stopTime - delay;
+    }
+
+    @Override
+    public String getInputFilePath() {
+        return phoneRawFilename;
+    }
+
+    @Override
+    public String getPhoneEpochFilePath() {
+        return Csv.removeExtension(phoneRawFilename) + "-temp.csv";
     }
 }

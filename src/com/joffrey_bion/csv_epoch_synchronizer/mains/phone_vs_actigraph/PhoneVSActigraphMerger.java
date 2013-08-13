@@ -8,7 +8,6 @@ import javax.swing.SwingUtilities;
 
 import org.xml.sax.SAXException;
 
-import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
 import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
@@ -54,6 +53,7 @@ public class PhoneVSActigraphMerger {
                 } catch (SAXException e) {
                     System.err.println("XML error: " + e.getMessage());
                 } catch (SpecificationNotMetException e) {
+                    System.err.println("Parameters format error : ");
                     System.err.println(e.getMessage());
                 }
                 System.out.println();
@@ -104,24 +104,21 @@ public class PhoneVSActigraphMerger {
      *            to deal with.
      */
     private static void createDataset(PvAParams params) {
-        long timerStart = System.currentTimeMillis();
+        long start = System.currentTimeMillis();
         try {
             System.out.println("Computing phone-to-actigraph delay...");
-            System.out.println("> Phone-to-actigraph delay average: " + params.getDelay() / 1000000
-                    + "ms");
+            System.out.println("> Delay average: " + params.getDelay() / 1000000 + "ms");
             System.out.println("> Actigraph start time: "
                     + DateHelper.toDateTimeMillis(params.startTime / 1000000));
             long phoneStartTime = params.startTime - params.getDelay();
             System.out.println("> Phone start time: "
                     + DateHelper.toDateTimeMillis(phoneStartTime / 1000000));
-            System.out.println("");
+            System.out.println();
             System.out.println("Accumulating phone raw data into actigraph-timestamped epochs...");
-            String phoneEpFilename = Csv.removeCsvExtension(params.phoneRawFilename)
-                    + "-epochs.csv";
-            RawToEpConverter conv = new RawToEpConverter(params.phoneRawFilename, phoneEpFilename);
-            conv.createEpochsFile(params);
+            String phoneEpFilename = params.getPhoneEpochFilePath();
+            RawToEpConverter.createEpochsFile(params);
             System.out.println("> Intermediate epoch file created (" + phoneEpFilename + ")");
-            System.out.println("");
+            System.out.println();
             System.out.println("Merging phone epochs with actigraph labels...");
             PvAMerger merger = new PvAMerger(phoneEpFilename, params.actigraphEpFilename,
                     params.outputFilename, params.actigraphFileFormat);
@@ -129,20 +126,18 @@ public class PhoneVSActigraphMerger {
             System.out.println("> Dataset file created (" + params.outputFilename + ")");
             if (Config.get().deleteIntermediateFile) {
                 if (new File(phoneEpFilename).delete()) {
-                    System.out.println("> Intermediate epoch file deleted (" + phoneEpFilename
-                            + ")");
+                    System.out.println("> Temporary epoch file deleted (" + phoneEpFilename + ")");
                 } else {
-                    System.err.println("> Delete operation has failed.");
+                    System.err.println("> Temporary file couldn't be deleted.");
                 }
             } else {
-                System.out.println("> Intermediate file kept (" + phoneEpFilename + ")");
+                System.out.println("> Temporary file kept (" + phoneEpFilename + ")");
             }
         } catch (IOException e) {
             System.err.println(e.getMessage());
             return;
         }
-        System.out.println("");
-        System.out.println("Total processing time: " + (System.currentTimeMillis() - timerStart)
-                + "ms");
+        System.out.println();
+        System.out.println("Processing time: " + (System.currentTimeMillis() - start) + "ms");
     }
 }

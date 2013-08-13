@@ -3,30 +3,32 @@ package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppenderParams;
 
-public class PhasePhoneParams implements PhoneRawToEpParams {
+public class PhasePhoneParams implements PhoneRawToEpParams, LabelAppenderParams {
 
-    private static final long PHONE_EPOCH_WIDTH_SEC = 2;
 
+    private PvKParams globalParams;
     private long windowWidthNano;
     private long epochWidthNano;
-    private long winBeginToEpBegin;
-    private long delayPhoneToK4b2;
     private long phoneStartTime;
     private long phoneStopTime;
+    private String phoneEpFilePath;
+    private String phoneLabeledFilePath;
 
-    public PhasePhoneParams(long delayPhoneToK4b2) {
-        this.delayPhoneToK4b2 = delayPhoneToK4b2;
+    public PhasePhoneParams(PvKParams params) {
+        this.globalParams = params;
         this.windowWidthNano = Config.get().windowWidthSec * 1000 * 1000000;
-        this.epochWidthNano = PHONE_EPOCH_WIDTH_SEC * 1000 * 1000000;
-        this.winBeginToEpBegin = (windowWidthNano - epochWidthNano) / 2;
+        this.epochWidthNano = Config.get().epochWidthVsK4b2 * 1000 * 1000000;
     }
 
     public void setPhaseResults(PhaseResults p) {
-        this.phoneStartTime = p.getStartTime() - delayPhoneToK4b2;
-        this.phoneStopTime = p.getEndTime() - delayPhoneToK4b2;
+        this.phoneStartTime = p.getStartTime() - globalParams.delayPhoneToK4b2;
+        this.phoneStopTime = p.getEndTime() - globalParams.delayPhoneToK4b2;
+        this.phoneEpFilePath = "temp-" + p + ".csv";
+        this.phoneLabeledFilePath = "temp-" + p + "-labeled.csv";
     }
-    
+
     @Override
     public long getPhoneStartTime() {
         return phoneStartTime;
@@ -39,7 +41,7 @@ public class PhasePhoneParams implements PhoneRawToEpParams {
 
     @Override
     public long getDelay() {
-        return delayPhoneToK4b2;
+        return globalParams.delayPhoneToK4b2;
     }
 
     @Override
@@ -54,6 +56,31 @@ public class PhasePhoneParams implements PhoneRawToEpParams {
 
     @Override
     public long getWinBeginToEpBegin() {
-        return winBeginToEpBegin;
+        return (windowWidthNano - epochWidthNano) / 2;
+    }
+
+    @Override
+    public String getInputFilePath() {
+        return globalParams.phoneRawFile;
+    }
+
+    @Override
+    public String getPhoneEpochFilePath() {
+        return phoneEpFilePath;
+    }
+
+    @Override
+    public String getClassifierFilePath() {
+        return globalParams.xmlTreeFile;
+    }
+
+    @Override
+    public String getDatasetFilePath() {
+        return getPhoneEpochFilePath();
+    }
+
+    @Override
+    public String getLabeledFilePath() {
+        return phoneLabeledFilePath;
     }
 }

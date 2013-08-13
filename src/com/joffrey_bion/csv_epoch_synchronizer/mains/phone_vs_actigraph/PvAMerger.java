@@ -18,6 +18,15 @@ public class PvAMerger {
     private ActigraphCsvReader actigraph;
     private CsvWriter writer;
 
+    /**
+     * 
+     * @param phoneEpFilename
+     * @param actigraphEpFilename
+     * @param destFilename
+     * @param actigraphFileFormat
+     * @throws IOException
+     * @throws NotACsvFileException
+     */
     public PvAMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename, ActigraphFileFormat actigraphFileFormat)
             throws IOException, NotACsvFileException {
         phone = new PhoneCsvReader(phoneEpFilename);
@@ -31,6 +40,7 @@ public class PvAMerger {
         writer.writeRow(headers);
 
         // reach start time in both files
+        // the phone times must already have been aligned (no delay correction here)
         phone.skipToReachTimestamp(props.startTime);
         actigraph.skipHeaders();
         actigraph.skipToReachTimestamp(props.startTime);
@@ -45,8 +55,8 @@ public class PvAMerger {
             timestampPhone = phone.extractTimestamp(linePhone);
             timestampActigraph = actigraph.extractTimestamp(lineActigraph);
             if (timestampPhone != timestampActigraph) {
-                DateHelper.displayTimestamp("phone startTime", timestampPhone);
-                DateHelper.displayTimestamp("actigraph startTime", timestampActigraph);
+                DateHelper.displayTimestamp("phone time", timestampPhone);
+                DateHelper.displayTimestamp("actigraph time", timestampActigraph);
                 throw new RuntimeException("phone and actigraph timestamps do not correspond");
             } else if (timestampPhone > props.stopTime) {
                 throw new RuntimeException(

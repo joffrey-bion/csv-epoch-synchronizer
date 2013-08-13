@@ -6,6 +6,7 @@ import java.util.HashMap;
 
 import org.xml.sax.SAXException;
 
+import com.joffrey_bion.csv.Csv.NotACsvFileException;
 import com.joffrey_bion.csv.CsvReader;
 import com.joffrey_bion.csv.CsvWriter;
 
@@ -31,7 +32,7 @@ public class LabelAppender {
      * @throws IOException
      *             If any IO error occurs.
      */
-    public LabelAppender(String decisionTreeFile) throws SAXException, IOException {
+    private LabelAppender(String decisionTreeFile) throws SAXException, IOException {
         System.out.println("Parsing tree file '" + decisionTreeFile + "'...");
         tree = TreeParser.parseTree(decisionTreeFile);
         System.out.println("Tree read successfully.");
@@ -40,30 +41,53 @@ public class LabelAppender {
 
     /**
      * Determines the level of each row of the dataset file according to the decision
-     * tree, and appends it as a new column in the destination file.
+     * tree, and appends it as a new column to the dataset in the destination file.
      * 
+     * @param xmlTreeFile
+     *            The decision tree to use.
      * @param datasetFile
-     *            The CSV dataset file to calculate the labels for.
-     * @param outputFile
-     *            The destination file, which will contain the dataset as well as a
-     *            new column with the decided labels.
+     *            The dataset to append a column to.
+     * @param outputPath
+     *            The resulting file.
      * @throws IOException
      *             If any IO error occurs.
+     * @throws SAXException
+     *             If any parse error occurs when reading the classifier XML file.
      */
-    public HashMap<String, Integer> appendLabels(String datasetFile, String outputFile) throws IOException {
+    public static HashMap<String, Integer> appendLabels(String xmlTreeFile, String datasetFile,
+            String outputPath) throws NotACsvFileException, SAXException, IOException {
         System.out.println("Opening dataset file '" + datasetFile + "'...");
         CsvReader reader = new CsvReader(datasetFile);
         String[] row = reader.readRow();
-        indexFeatures(row);
+        LabelAppender la = new LabelAppender(xmlTreeFile);
+        la.indexFeatures(row);
         System.out.println("Classifying...");
-        CsvWriter writer = new CsvWriter(outputFile);
-        writer.writeRow(LabelAppender.append(row, "Classified As"));
+        CsvWriter writer = new CsvWriter(outputPath);
+        writer.writeRow(append(row, "Classified As"));
         while ((row = reader.readRow()) != null) {
-            writer.writeRow(appendLabel(row));
+            writer.writeRow(la.appendLabel(row));
         }
         reader.close();
         writer.close();
-        return lvlsDistrib;
+        return la.lvlsDistrib;
+    }
+
+    /**
+     * Determines the level of each row of the dataset file according to the decision
+     * tree, and appends it as a new column to the dataset in the destination file.
+     * 
+     * @param params
+     *            The {@link LabelAppenderParams} object containing all the
+     *            parameters to use.
+     * @throws IOException
+     *             If any IO error occurs.
+     * @throws SAXException
+     *             If any parse error occurs when reading the classifier XML file.
+     */
+    public static HashMap<String, Integer> appendLabels(LabelAppenderParams params)
+            throws IOException, SAXException {
+        return appendLabels(params.getClassifierFilePath(), params.getDatasetFilePath(),
+                params.getLabeledFilePath());
     }
 
     /**

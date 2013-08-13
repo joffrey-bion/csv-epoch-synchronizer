@@ -55,15 +55,11 @@ public class PhoneVSK4b2Analyzer {
         try {
             K4b2StatsCalculator k4 = new K4b2StatsCalculator(params.k4b2File);
             Results res = k4.getStats(params.nbSyncMarkers);
-            PhasePhoneParams ppp = new PhasePhoneParams(params.delayPhoneToK4b2);
+            PhasePhoneParams ppp = new PhasePhoneParams(params);
             for (Phase p : Phase.values()) {
                 ppp.setPhaseResults(res.get(p));
-                String tempFile = "temp-" + p + ".csv";
-                RawToEpConverter converter = new RawToEpConverter(params.phoneRawFile, tempFile);
-                converter.createEpochsFile(ppp);
-                String tempFile2 = "temp-" + p + "-labeled.csv";
-                LabelAppender appender = new LabelAppender(params.xmlTreeFile);
-                HashMap<String, Integer> lvlsDistrib = appender.appendLabels(tempFile, tempFile2);
+                RawToEpConverter.createEpochsFile(ppp);
+                HashMap<String, Integer> lvlsDistrib = LabelAppender.appendLabels(ppp);
                 System.out.println(lvlsDistrib);
                 // TODO actually compare differences between levels' distributions
             }

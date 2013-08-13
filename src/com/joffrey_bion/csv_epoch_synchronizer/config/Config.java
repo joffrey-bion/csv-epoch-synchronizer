@@ -1,22 +1,24 @@
 package com.joffrey_bion.csv_epoch_synchronizer.config;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
-import com.joffrey_bion.utils.xml.XmlHelper;
+import com.joffrey_bion.utils.paths.Paths;
+import com.joffrey_bion.utils.xml.serializers.EnumSerializer;
+import com.joffrey_bion.utils.xml.serializers.SimpleSerializer;
+import com.joffrey_bion.xml_parameters_serializer.Parameters;
+import com.joffrey_bion.xml_parameters_serializer.Parameters.MissingParameterException;
+import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
+import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 /**
  * A singleton containing the values of the configuration file. If no such file
- * exists, it is created the first time this class is accessed.
+ * exists, it is created with default values the first time this class is accessed.
  * 
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
@@ -24,13 +26,32 @@ public class Config {
 
     private static final String CONFIG_FILENAME = "config.xml";
 
-    private static final String ROOT = "config";
-    private static final String TAG_DELETE_TEMP_FILE = "delete-temp-file";
-    private static final String TAG_CUT_POINTS = "cut-points";
-    private static final String TAG_WINDOW_WIDTH = "window-width";
-    private static final boolean DEFAULT_DELETE_TEMP = true;
+    private static final String CUT_POINTS = "cut-points";
+    private static final String WINDOW_WIDTH = "window-width";
+    private static final String PHONE_EP_WIDTH_VS_K4B2 = "epoch-width-VS-K4b2";
+    private static final String DELETE_TEMP_FILE = "delete-temp-files";
+
     private static final CutPointsSet DEFAULT_CUT_POINTS = CutPointsSet.CUSTOM;
     private static final int DEFAULT_WINDOW_WIDTH = 5;
+    private static final int DEFAULT_EP_WIDTH = 1;
+    private static final boolean DEFAULT_DELETE_TEMP = true;
+
+    private static final EnumSerializer<CutPointsSet> CUT_POINTS_SER = new EnumSerializer<>(
+            CutPointsSet.class);
+
+    private static final ParamsSchema SCHEMA = new ParamsSchema("config", 2);
+    static {
+        SCHEMA.addParam(CUT_POINTS, CUT_POINTS_SER, false, DEFAULT_CUT_POINTS,
+                "The cut points set must be one of CutPointsSet enum constant names");
+        SCHEMA.addParam(WINDOW_WIDTH, SimpleSerializer.INTEGER, false, DEFAULT_WINDOW_WIDTH,
+                "The time window's width to use to smooth the data");
+        SCHEMA.addParam(PHONE_EP_WIDTH_VS_K4B2, SimpleSerializer.INTEGER, false, DEFAULT_EP_WIDTH,
+                "The epoch width to use for the phone when comparing "
+                        + "with the K4b2 (when comparing to the actigraph, the actigraph's "
+                        + "epoch width is used for the phone as well)");
+        SCHEMA.addParam(DELETE_TEMP_FILE, SimpleSerializer.BOOLEAN, false, DEFAULT_DELETE_TEMP,
+                "Indicates if the temporary files should be deleted");
+    }
 
     private static Config instance = null;
 
@@ -55,18 +76,25 @@ public class Config {
     public CutPointsSet cutPointsSet;
     /** Window width in seconds */
     public int windowWidthSec;
+    /**
+     * The epoch width to use for the phone when compared to the K4b2 results, in
+     * seconds
+     */
+    public int epochWidthVsK4b2;
 
+    /**
+     * Creates a {@link Config} object from the specified configuration file.
+     * 
+     * @param configFileName
+     *            The path to the XML configuration file.
+     */
     private Config(String configFileName) {
-        deleteIntermediateFile = DEFAULT_DELETE_TEMP;
-        cutPointsSet = DEFAULT_CUT_POINTS;
-        windowWidthSec = DEFAULT_WINDOW_WIDTH;
         if (configFileName == null) {
+            loadFromParameters(new Parameters(SCHEMA));
             System.out.println("Default config loaded (no config file created).");
-            return;
-        }
-        if (!load(configFileName)) {
+        } else if (!loadFromFile(configFileName)) {
             System.out.println("Creating config file '" + CONFIG_FILENAME + "' with defaults...");
-            save(configFileName);
+            createDefaultConfigFile(configFileName);
             System.out.println("Complete.");
         } else {
             System.out.println("Config file loaded.");
@@ -80,18 +108,9 @@ public class Config {
      * @param xmlFilePath
      *            The path to the XML output file.
      */
-    private void save(String xmlFilePath) {
-        Document doc = XmlHelper.createEmptyDomDocument();
-        Element root = doc.createElement(ROOT);
-        doc.appendChild(root);
-        root.appendChild(doc
-                .createComment("The cut points set must be one of CutPointsSet enum constant names"));
-        XmlHelper.appendField(doc, root, TAG_CUT_POINTS, cutPointsSet.toString());
-        XmlHelper.appendField(doc, root, TAG_WINDOW_WIDTH, Integer.toString(windowWidthSec));
-        XmlHelper.appendField(doc, root, TAG_DELETE_TEMP_FILE,
-                Boolean.toString(deleteIntermediateFile));
+    private static void createDefaultConfigFile(String xmlFilePath) {
         try {
-            XmlHelper.writeXml(xmlFilePath, doc);
+            new Parameters(SCHEMA).saveToXml(xmlFilePath);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -102,39 +121,36 @@ public class Config {
      * 
      * @param xmlFilePath
      *            The path to the XML output file.
-     * @return Whether the configuration file has been read.
+     * @return {@code true} if the configuration file has been found and loaded
+     *         properly.
      */
-    private boolean load(String xmlFilePath) {
-        Document dom;
+    private boolean loadFromFile(String xmlFilePath) {
         try {
-            dom = XmlHelper.getDomDocumentFromFile(xmlFilePath);
+            Parameters p = Parameters.loadFromXml(xmlFilePath, SCHEMA);
+            loadFromParameters(p);
+            return true;
         } catch (FileNotFoundException e) {
-            System.out.println("Config file not found.");
+            System.err.println("The config file does not exist (" + xmlFilePath + ")");
             return false;
-        } catch (SAXException e) {
-            e.printStackTrace();
-            return false;
-        } catch (IOException e) {
+        } catch (IOException | SAXException | SpecificationNotMetException
+                | MissingParameterException e) {
             e.printStackTrace();
             return false;
         }
-        Element root = dom.getDocumentElement();
+    }
 
-        try {
-            cutPointsSet = CutPointsSet.valueOf(XmlHelper.getField(root, TAG_CUT_POINTS));
-        } catch (IllegalArgumentException e) {
-            System.err.println("Unknown cut points set. Using default...");
-            cutPointsSet = DEFAULT_CUT_POINTS;
-        }
-        try {
-            windowWidthSec = Integer.parseInt(XmlHelper.getField(root, TAG_WINDOW_WIDTH));
-        } catch (NumberFormatException e) {
-            System.err.println("The window width must be an integer in seconds. Using default...");
-            windowWidthSec = DEFAULT_WINDOW_WIDTH;
-        }
-        deleteIntermediateFile = Boolean.parseBoolean(XmlHelper
-                .getField(root, TAG_DELETE_TEMP_FILE));
-        return true;
+    /**
+     * Populates the fields of this configuration with the specified
+     * {@link Parameters}.
+     * 
+     * @param p
+     *            The {@link Parameters} object to use.
+     */
+    private void loadFromParameters(Parameters p) {
+        cutPointsSet = (CutPointsSet) p.get(CUT_POINTS);
+        windowWidthSec = p.getInteger(WINDOW_WIDTH);
+        epochWidthVsK4b2 = p.getInteger(PHONE_EP_WIDTH_VS_K4B2);
+        deleteIntermediateFile = p.getBoolean(DELETE_TEMP_FILE);
     }
 
     /**
@@ -142,22 +158,11 @@ public class Config {
      */
     private static String getConfigFilePath() {
         try {
-            String urlString = ClassLoader
-                    .getSystemClassLoader()
-                    .getResource(
-                            "com/joffrey_bion/csv_epoch_synchronizer/mains/phone_vs_actigraph/PhoneVSActigraphMerger.class")
-                    .toString();
-            urlString = urlString.substring(urlString.indexOf("file:"), urlString.indexOf('!'));
-            URL url = new URL(urlString);
-            File file = new File(url.toURI());
-            return file.getParent() + "\\" + CONFIG_FILENAME;
+            return Paths.getJarLocation(Config.class) + "\\" + CONFIG_FILENAME;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {
             e.printStackTrace();
-        } catch (StringIndexOutOfBoundsException e) {
-            System.err
-                    .println("error while parsing config file path (normal if executed from eclipse)");
         }
         return null;
     }

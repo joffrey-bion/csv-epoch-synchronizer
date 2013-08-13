@@ -3,6 +3,24 @@ package com.joffrey_bion.csv_epoch_synchronizer.phone;
 public interface PhoneRawToEpParams {
 
     /**
+     * Returns the relative or absolute path to the CSV file containing the raw
+     * samples from the phone.
+     * 
+     * @return the relative or absolute path to the CSV file containing the raw
+     *         samples from the phone.
+     */
+    public String getInputFilePath();
+
+    /**
+     * Returns the relative or absolute path to the CSV file to create with the
+     * epoch-accumulated data.
+     * 
+     * @return the relative or absolute path to the CSV file to create with the
+     *         epoch-accumulated data.
+     */
+    public String getPhoneEpochFilePath();
+
+    /**
      * Returns the timestamp when the accumulation should start, in the phone
      * reference. It corresponds to the beginning of the output file.
      * 
