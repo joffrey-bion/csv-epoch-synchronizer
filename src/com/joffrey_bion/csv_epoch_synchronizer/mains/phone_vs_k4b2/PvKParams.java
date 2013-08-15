@@ -20,6 +20,7 @@ public class PvKParams extends Parameters {
     static final String PHONE_FILE_PATH = "phone-raw-file";
     static final String K4B2_FILE_PATH = "k4b2-file";
     static final String OUTPUT_FILE_PATH = "output-file";
+    static final String WRITE_OUTPUT = "write-output";
     static final String PROFILE = "profile";
     static final String NB_SYNC_MARKERS = "nb-sync-markers";
     static final String PHONE_SPIKES_LIST = "phone-spikes";
@@ -27,6 +28,7 @@ public class PvKParams extends Parameters {
 
     static final String PHONE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     static final String K4B2_FORMAT = "HH:mm:ss";
+    
     private static final DateArraySerializer PHONE_SER = new DateArraySerializer(PHONE_FORMAT);
     private static final DurationArraySerializer K4B2_SER = new DurationArraySerializer(K4B2_FORMAT);
     private static final EnumSerializer<Profile> PROFILE_SER = new EnumSerializer<>(Profile.class);
@@ -35,7 +37,8 @@ public class PvKParams extends Parameters {
     static {
         SCHEMA.addParam(PHONE_FILE_PATH, SimpleSerializer.STRING);
         SCHEMA.addParam(K4B2_FILE_PATH, SimpleSerializer.STRING);
-        SCHEMA.addParam(OUTPUT_FILE_PATH, SimpleSerializer.STRING);
+        SCHEMA.addParam(OUTPUT_FILE_PATH, SimpleSerializer.STRING, false, "");
+        SCHEMA.addParam(WRITE_OUTPUT, SimpleSerializer.BOOLEAN, false, false);
         SCHEMA.addParam(PROFILE, PROFILE_SER);
         SCHEMA.addParam(NB_SYNC_MARKERS, SimpleSerializer.INTEGER);
         SCHEMA.addParam(PHONE_SPIKES_LIST, PHONE_SER, "Format: " + PHONE_FORMAT);
@@ -54,6 +57,14 @@ public class PvKParams extends Parameters {
      * Path to the XML file containing the decision tree.
      */
     public String classifierFile;
+    /**
+     * Path to the output file to write the results to.
+     */
+    public String outputFile;
+    /**
+     * Indicates whether the results should be written to a file.
+     */
+    public boolean writeOutput;
     /**
      * Number of markers used to synchronize the phone, which have to be skipped.
      */
@@ -100,6 +111,8 @@ public class PvKParams extends Parameters {
     public void populatePublicFields() {
         this.phoneRawFile = getString(PHONE_FILE_PATH);
         this.k4b2File = getString(K4B2_FILE_PATH);
+        this.outputFile = getString(OUTPUT_FILE_PATH);
+        this.writeOutput = getBoolean(WRITE_OUTPUT);
         this.classifierFile = Config.get().getClassifier(get(PROFILE, PROFILE_SER));
         this.nbSyncMarkers = getInteger(NB_SYNC_MARKERS);
         Long[] phoneSpikes = get(PHONE_SPIKES_LIST, PHONE_SER);

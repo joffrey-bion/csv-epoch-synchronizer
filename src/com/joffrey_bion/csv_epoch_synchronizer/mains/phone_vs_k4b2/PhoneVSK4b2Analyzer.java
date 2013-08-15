@@ -76,6 +76,8 @@ public class PhoneVSK4b2Analyzer {
                     analyze(params);
                 } catch (ParseException e) {
                     System.err.println(e.getMessage());
+                } catch (Exception e) {
+                    System.err.println(e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
                 }
             }
         };

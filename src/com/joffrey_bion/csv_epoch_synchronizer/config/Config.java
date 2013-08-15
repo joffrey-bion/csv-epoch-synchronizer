@@ -66,7 +66,10 @@ public class Config {
                 "Indicates if the temporary files should be deleted");
     }
 
+    /** The only instance of this singleton. */
     private static Config instance = null;
+    /** The path to the XML configuration file. */
+    private String configFilePath = null;
 
     /**
      * Returns the current configuration.
@@ -75,7 +78,7 @@ public class Config {
      */
     public static Config get() {
         if (instance == null) {
-            instance = new Config(getConfigFilePath());
+            instance = new Config();
         }
         return instance;
     }
@@ -101,17 +104,12 @@ public class Config {
 
     /**
      * Creates a {@link Config} object from the specified configuration file.
-     * 
-     * @param configFileName
-     *            The path to the XML configuration file.
      */
-    private Config(String configFileName) {
-        if (configFileName == null) {
-            loadFromParameters(new Parameters(SCHEMA));
-            System.out.println("Default config loaded (no config file created).");
-        } else if (!loadFromFile(configFileName)) {
+    private Config() {
+        configFilePath = getConfigFilePath();
+        if (!loadFromConfigFile()) {
             System.out.println("Creating config file '" + CONFIG_FILENAME + "' with defaults...");
-            createDefaultConfigFile(configFileName);
+            createDefaultConfigFile(configFilePath);
             System.out.println("Complete.");
         } else {
             System.out.println("Config file loaded.");
@@ -120,7 +118,7 @@ public class Config {
     }
 
     /**
-     * Save this {@code Config} object to the specified XML file.
+     * Creates a default XML config file, pointing to a default classifier.
      * 
      * @param xmlFilePath
      *            The path to the XML output file.
@@ -141,20 +139,36 @@ public class Config {
     }
 
     /**
-     * Loads this {@code Config} from the specified XML configuration file.
+     * Save this {@code Config} object to the XML configuration file.
+     */
+    public void saveToConfigFile() {
+        try {
+            Parameters p = new Parameters(SCHEMA);
+            p.set(CUT_POINTS, cutPointsSet);
+            p.set(DELETE_TEMP_FILE, deleteIntermediateFile);
+            p.set(WINDOW_WIDTH, windowWidthSec);
+            p.set(PHONE_EP_WIDTH_VS_K4B2, epochWidthVsK4b2);
+            p.set(HOLSTER_CLASSIFIER_PATH, classifierHolster);
+            p.set(POCKET_CLASSIFIER_PATH, classifierPocket);
+            p.saveToXml(configFilePath);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Loads this {@code Config} from the XML configuration file.
      * 
-     * @param xmlFilePath
-     *            The path to the XML output file.
      * @return {@code true} if the configuration file has been found and loaded
      *         properly.
      */
-    private boolean loadFromFile(String xmlFilePath) {
+    private boolean loadFromConfigFile() {
         try {
-            Parameters p = Parameters.loadFromXml(xmlFilePath, SCHEMA);
+            Parameters p = Parameters.loadFromXml(configFilePath, SCHEMA);
             loadFromParameters(p);
             return true;
         } catch (FileNotFoundException e) {
-            System.err.println("The config file does not exist (" + xmlFilePath + ")");
+            System.err.println("The config file does not exist (" + configFilePath + ")");
             return false;
         } catch (IOException | SAXException | SpecificationNotMetException
                 | MissingParameterException e) {
@@ -184,7 +198,11 @@ public class Config {
      */
     private static String getConfigFilePath() {
         try {
-            return Paths.getJarLocation(Config.class) + "\\" + CONFIG_FILENAME;
+            String jarPath = Paths.getJarLocation(Config.class);
+            if (jarPath == null) {
+                jarPath = System.getProperty("user.home");
+            }
+            return jarPath + "\\" + CONFIG_FILENAME;
         } catch (MalformedURLException e) {
             e.printStackTrace();
         } catch (URISyntaxException e) {

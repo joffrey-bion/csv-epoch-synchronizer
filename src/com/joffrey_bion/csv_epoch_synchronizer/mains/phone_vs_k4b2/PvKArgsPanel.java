@@ -14,10 +14,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import com.jgoodies.forms.factories.FormFactory;
-import com.jgoodies.forms.layout.ColumnSpec;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
 import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
@@ -30,6 +26,7 @@ import javax.swing.JSeparator;
 import java.awt.GridBagLayout;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
+import java.awt.BorderLayout;
 
 @SuppressWarnings("serial")
 class PvKArgsPanel extends JPanel {
@@ -46,6 +43,7 @@ class PvKArgsPanel extends JPanel {
     private JLabel[] tfSpikeLabel;
     private JTextField[] tfSpikePhone;
     private JTextField[] tfSpikeK4b2;
+    private JTextField tfEpochWidth;
 
     /**
      * Create the panel.
@@ -61,15 +59,15 @@ class PvKArgsPanel extends JPanel {
         panelLeft.setAlignmentY(Component.TOP_ALIGNMENT);
         panelLeft.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(panelLeft);
-        panelLeft.setLayout(new BoxLayout(panelLeft, BoxLayout.Y_AXIS));
+        panelLeft.setLayout(new BorderLayout(0, 0));
 
         JPanel panel_2 = new JPanel();
-        panelLeft.add(panel_2);
+        panelLeft.add(panel_2, BorderLayout.CENTER);
         GridBagLayout gbl_panel_2 = new GridBagLayout();
         gbl_panel_2.columnWidths = new int[] { 0, 0, 0 };
-        gbl_panel_2.rowHeights = new int[] { 0, 0, 0, 0 };
-        gbl_panel_2.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-        gbl_panel_2.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_panel_2.rowHeights = new int[] { 0, 0, 0, 0, 0 };
+        gbl_panel_2.columnWeights = new double[] { 0.0, 0.0 };
+        gbl_panel_2.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0 };
         panel_2.setLayout(gbl_panel_2);
 
         chckbxOutput = new JCheckBox("Write the output to a file");
@@ -111,13 +109,14 @@ class PvKArgsPanel extends JPanel {
         JLabel lblProfile = new JLabel("Phones' location:");
         GridBagConstraints gbc_lblProfile = new GridBagConstraints();
         gbc_lblProfile.anchor = GridBagConstraints.WEST;
-        gbc_lblProfile.insets = new Insets(0, 0, 0, 5);
+        gbc_lblProfile.insets = new Insets(0, 0, 5, 5);
         gbc_lblProfile.gridx = 0;
         gbc_lblProfile.gridy = 2;
         panel_2.add(lblProfile, gbc_lblProfile);
 
         profileComboBox = new JComboBox<>();
         GridBagConstraints gbc_profileComboBox = new GridBagConstraints();
+        gbc_profileComboBox.insets = new Insets(0, 0, 5, 0);
         gbc_profileComboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_profileComboBox.gridx = 1;
         gbc_profileComboBox.gridy = 2;
@@ -134,6 +133,24 @@ class PvKArgsPanel extends JPanel {
         });
         filePickers.getInputFilePickers()[2].setSelectedFilePath(Config.get().getClassifier(
                 (Profile) profileComboBox.getSelectedItem()));
+        
+        JLabel lblPhoneEpochsLength = new JLabel("Phones epochs' length (sec):");
+        GridBagConstraints gbc_lblPhoneEpochsLength = new GridBagConstraints();
+        gbc_lblPhoneEpochsLength.anchor = GridBagConstraints.WEST;
+        gbc_lblPhoneEpochsLength.insets = new Insets(0, 0, 0, 5);
+        gbc_lblPhoneEpochsLength.gridx = 0;
+        gbc_lblPhoneEpochsLength.gridy = 3;
+        panel_2.add(lblPhoneEpochsLength, gbc_lblPhoneEpochsLength);
+        
+        tfEpochWidth = new JTextField();
+        tfEpochWidth.setText(Integer.toString(Config.get().epochWidthVsK4b2));
+        tfEpochWidth.setColumns(1);
+        GridBagConstraints gbc_textField = new GridBagConstraints();
+        gbc_textField.anchor = GridBagConstraints.WEST;
+        gbc_textField.gridx = 1;
+        gbc_textField.gridy = 3;
+        panel_2.add(tfEpochWidth, gbc_textField);
+        
 
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
@@ -145,6 +162,7 @@ class PvKArgsPanel extends JPanel {
                     PvKParams params = new PvKParams();
                     getParameters(params);
                     params.saveToXml(paramFilePath);
+                    Config.get().saveToConfigFile();
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
@@ -162,7 +180,8 @@ class PvKArgsPanel extends JPanel {
                 }
             }
         };
-        panelLeft.add(psp);
+        psp.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelLeft.add(psp, BorderLayout.SOUTH);
 
         add(Box.createHorizontalStrut(5));
         JSeparator separator = new JSeparator();
@@ -172,59 +191,76 @@ class PvKArgsPanel extends JPanel {
 
         JPanel panelSpikes = new JPanel();
         panelSpikes.setAlignmentY(Component.TOP_ALIGNMENT);
-        panelSpikes.setAlignmentX(Component.LEFT_ALIGNMENT);
         add(panelSpikes);
-        panelSpikes.setLayout(new FormLayout(new ColumnSpec[] { FormFactory.PREF_COLSPEC,
-                FormFactory.RELATED_GAP_COLSPEC, FormFactory.PREF_COLSPEC,
-                FormFactory.RELATED_GAP_COLSPEC, FormFactory.PREF_COLSPEC, }, new RowSpec[] {
-                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                RowSpec.decode("14px"), FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC, FormFactory.RELATED_GAP_ROWSPEC,
-                FormFactory.DEFAULT_ROWSPEC, }));
+        GridBagLayout gbl_panelSpikes = new GridBagLayout();
+        gbl_panelSpikes.columnWidths = new int[] { 0, 0, 0 };
+        gbl_panelSpikes.rowHeights = new int[] { 0, 0 };
+        gbl_panelSpikes.columnWeights = new double[] { 0.0, 1.0, 1.0 };
+        gbl_panelSpikes.rowWeights = new double[] { 0.0, 0.0 };
+        panelSpikes.setLayout(gbl_panelSpikes);
 
-        JLabel lblSpikes = new JLabel("Acceleration Spikes Times");
-        lblSpikes.setFont(new Font("Tahoma", Font.BOLD, 11));
-        panelSpikes.add(lblSpikes, "3, 1, 3, 1, center, center");
+        JLabel lblSpikesTitle = new JLabel("Acceleration Spikes Times");
+        lblSpikesTitle.setFont(new Font("Tahoma", Font.BOLD, 11));
+        GridBagConstraints gbc_lblTitle = new GridBagConstraints();
+        gbc_lblTitle.anchor = GridBagConstraints.CENTER;
+        gbc_lblTitle.gridwidth = 2;
+        gbc_lblTitle.insets = new Insets(0, 0, 5, 5);
+        gbc_lblTitle.gridx = 1;
+        gbc_lblTitle.gridy = 0;
+        panelSpikes.add(lblSpikesTitle, gbc_lblTitle);
 
         JLabel lblPhoneSpikes = new JLabel("Phone (" + PvKParams.PHONE_FORMAT + ")");
-        panelSpikes.add(lblPhoneSpikes, "3, 3, center, default");
+        GridBagConstraints gbc_lblPhone = new GridBagConstraints();
+        gbc_lblPhone.insets = new Insets(0, 0, 5, 5);
+        gbc_lblPhone.gridx = 1;
+        gbc_lblPhone.gridy = 1;
+        panelSpikes.add(lblPhoneSpikes, gbc_lblPhone);
 
         JLabel lblK4b2Spikes = new JLabel("K4b2 (" + PvKParams.K4B2_FORMAT + ")");
-        panelSpikes.add(lblK4b2Spikes, "5, 3, center, default");
+        GridBagConstraints gbc_lblK4b2 = new GridBagConstraints();
+        gbc_lblK4b2.insets = new Insets(0, 0, 5, 0);
+        gbc_lblK4b2.gridx = 2;
+        gbc_lblK4b2.gridy = 1;
+        panelSpikes.add(lblK4b2Spikes, gbc_lblK4b2);
 
         tfSpikeLabel = new JLabel[NB_MAX_SPIKES];
         tfSpikePhone = new JTextField[NB_MAX_SPIKES];
         tfSpikeK4b2 = new JTextField[NB_MAX_SPIKES];
+
         for (int i = 0; i < NB_MAX_SPIKES; i++) {
             tfSpikeLabel[i] = new JLabel(Integer.toString(i + 1));
-            panelSpikes.add(tfSpikeLabel[i], "1, " + (2 * i + 5) + ", right, default");
+            GridBagConstraints gbc_label = new GridBagConstraints();
+            gbc_label.anchor = GridBagConstraints.EAST;
+            gbc_label.insets = new Insets(0, 0, 5, 5);
+            gbc_label.gridx = 0;
+            gbc_label.gridy = i + 3;
+            panelSpikes.add(tfSpikeLabel[i], gbc_label);
 
             tfSpikePhone[i] = new JTextField();
             tfSpikePhone[i].setColumns(DATE_TEXTFIELD_WIDTH);
+            tfSpikePhone[i].setToolTipText(PvKParams.PHONE_FORMAT);
             tfSpikePhone[i].setHorizontalAlignment(SwingConstants.CENTER);
-            panelSpikes.add(tfSpikePhone[i], "3, " + (2 * i + 5) + ", fill, default");
+            GridBagConstraints gbc_tfSpikePhone = new GridBagConstraints();
+            gbc_tfSpikePhone.insets = new Insets(0, 0, 5, 5);
+            gbc_tfSpikePhone.fill = GridBagConstraints.HORIZONTAL;
+            gbc_tfSpikePhone.gridx = 1;
+            gbc_tfSpikePhone.gridy = i + 3;
+            panelSpikes.add(tfSpikePhone[i], gbc_tfSpikePhone);
 
             tfSpikeK4b2[i] = new JTextField();
             tfSpikeK4b2[i].setColumns(TIME_TEXTFIELD_WIDTH);
+            tfSpikeK4b2[i].setToolTipText(PvKParams.K4B2_FORMAT);
             tfSpikeK4b2[i].setHorizontalAlignment(SwingConstants.CENTER);
-            panelSpikes.add(tfSpikeK4b2[i], "5, " + (2 * i + 5) + ", fill, default");
+            GridBagConstraints gbc_tfSpikeK4b2 = new GridBagConstraints();
+            gbc_tfSpikeK4b2.insets = new Insets(0, 0, 5, 0);
+            gbc_tfSpikeK4b2.fill = GridBagConstraints.HORIZONTAL;
+            gbc_tfSpikeK4b2.gridx = 2;
+            gbc_tfSpikeK4b2.gridy = i + 3;
+            panelSpikes.add(tfSpikeK4b2[i], gbc_tfSpikeK4b2);
         }
 
         filePickers.setOutputFilePickerEnabled(0, false);
         filePickers.setInputFilePickerEditable(2, false);
-
-    }
-
-    public Integer getNbSyncMarkers() {
-        return (Integer) nbSyncMarkersBox.getSelectedItem();
-    }
-
-    public boolean shouldWriteOutput() {
-        return chckbxOutput.isSelected();
     }
 
     /**
@@ -241,6 +277,10 @@ class PvKArgsPanel extends JPanel {
         inputs[2].setSelectedFilePath(params.classifierFile);
         FilePicker[] outputs = filePickers.getOutputFilePickers();
         outputs[0].setSelectedFilePath(params.getString(PvKParams.OUTPUT_FILE_PATH));
+        chckbxOutput.setSelected(params.getBoolean(PvKParams.WRITE_OUTPUT));
+        nbSyncMarkersBox.setSelectedItem(params.get(PvKParams.NB_SYNC_MARKERS));
+        profileComboBox.setSelectedItem(params.get(PvKParams.PROFILE));
+        params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
         String[] phoneSpikes = params.getSerializedArray(PvKParams.PHONE_SPIKES_LIST);
         for (int i = 0; i < phoneSpikes.length; i++) {
             tfSpikePhone[i].setText(phoneSpikes[i]);
@@ -264,6 +304,8 @@ class PvKArgsPanel extends JPanel {
         setFileParam(params, PvKParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[0]);
         setFileParam(params, PvKParams.K4B2_FILE_PATH, filePickers.getInputFilePaths()[1]);
         setFileParam(params, PvKParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[0]);
+        params.set(PvKParams.WRITE_OUTPUT, chckbxOutput.isSelected());
+        params.set(PvKParams.NB_SYNC_MARKERS, nbSyncMarkersBox.getSelectedItem());
         params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
         String[] phoneSpikes = new String[NB_MAX_SPIKES];
         String[] actigraphSpikes = new String[NB_MAX_SPIKES];
@@ -284,6 +326,9 @@ class PvKArgsPanel extends JPanel {
             params.deserializeAndSet(PvKParams.PHONE_SPIKES_LIST, new String[0]);
             params.deserializeAndSet(PvKParams.K4B2_SPIKES_LIST, new String[0]);
         }
+        params.populatePublicFields();
+        // update configuration
+        Config.get().epochWidthVsK4b2 = Integer.valueOf(tfEpochWidth.getText());
     }
 
     private static void setFileParam(PvKParams params, String key, String filePath) {
