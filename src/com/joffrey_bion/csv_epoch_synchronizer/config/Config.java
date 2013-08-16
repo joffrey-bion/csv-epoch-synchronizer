@@ -135,6 +135,9 @@ public class Config {
             XmlHelper.writeXml(DEFAULT_CLASSIFIER_PATH, doc);
         } catch (IOException e) {
             e.printStackTrace();
+        } catch (SpecificationNotMetException e) {
+            // should not happen
+            e.printStackTrace();
         }
     }
 
@@ -152,6 +155,9 @@ public class Config {
             p.set(POCKET_CLASSIFIER_PATH, classifierPocket);
             p.saveToXml(configFilePath);
         } catch (IOException e) {
+            e.printStackTrace();
+        } catch (SpecificationNotMetException e) {
+            // should not happen
             e.printStackTrace();
         }
     }

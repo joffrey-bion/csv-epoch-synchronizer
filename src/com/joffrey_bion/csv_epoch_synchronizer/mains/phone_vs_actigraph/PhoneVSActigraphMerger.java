@@ -10,9 +10,10 @@ import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
-import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
-import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.LookAndFeel;
+import com.joffrey_bion.generic_guis.file_picker.FilePicker;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.file_processor.JFileProcessorWindow;
 import com.joffrey_bion.utils.dates.DateHelper;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
@@ -65,7 +66,7 @@ public class PhoneVSActigraphMerger {
      * Starts the GUI.
      */
     private static void openWindow() {
-        JFileProcessorWindow.setSystemLookAndFeel();
+        LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
                 "Phone raw file", "Actigraph epoch file" }, "Output file");

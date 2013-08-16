@@ -7,9 +7,10 @@ import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
-import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
-import com.joffrey_bion.file_processor_window.parameters.ParamsSaverPanel;
+import com.joffrey_bion.generic_guis.file_picker.FilePicker;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.parameters.SaveLoadPanel;
+import com.joffrey_bion.xml_parameters_serializer.Parameters.MissingParameterException;
 
 import javax.swing.SwingConstants;
 import javax.swing.JSeparator;
@@ -289,9 +290,9 @@ class PvAArgsPanel extends JPanel {
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
 
-        ParamsSaverPanel psp = new ParamsSaverPanel() {
+        SaveLoadPanel psp = new SaveLoadPanel("Save params...", "Load params...") {
             @Override
-            public void saveParamsToFile(String paramFilePath) {
+            public void saveToFile(String paramFilePath) {
                 try {
                     PvAParams params = new PvAParams();
                     getParameters(params);
@@ -304,7 +305,7 @@ class PvAArgsPanel extends JPanel {
             }
 
             @Override
-            public void loadParamsFromFile(String paramFilePath) {
+            public void loadFromFile(String paramFilePath) {
                 try {
                     PvAParams params = new PvAParams(paramFilePath);
                     setParameters(params);
@@ -314,6 +315,7 @@ class PvAArgsPanel extends JPanel {
                 }
             }
         };
+        psp.addFileTypeFilter(".xml", "XML Parameter File");
         add(psp);
     }
 
@@ -323,8 +325,10 @@ class PvAArgsPanel extends JPanel {
      * 
      * @param params
      *            The parameters to use to populate this panel.
+     * @throws MissingParameterException
+     *             If a parameter is required and missing.
      */
-    private void setParameters(PvAParams params) {
+    private void setParameters(PvAParams params) throws MissingParameterException {
         FilePicker[] inputs = filePickers.getInputFilePickers();
         inputs[0].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
         inputs[1].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
@@ -357,10 +361,10 @@ class PvAArgsPanel extends JPanel {
         setFileParam(params, PvAParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[0]);
         setFileParam(params, PvAParams.ACTIG_FILE_PATH, filePickers.getInputFilePaths()[1]);
         setFileParam(params, PvAParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[0]);
-        params.deserializeAndSet(PvAParams.START_TIME, tfStartTime.getText());
-        params.deserializeAndSet(PvAParams.STOP_TIME, tfStopTime.getText());
+        setIfNotEmpty(params, PvAParams.START_TIME, tfStartTime.getText());
+        setIfNotEmpty(params, PvAParams.STOP_TIME, tfStopTime.getText());
         params.set(PvAParams.ACTIG_FILE_FORMAT, cBoxActigraphFileFormat.getSelectedItem());
-        params.deserializeAndSet(PvAParams.EPOCH_WIDTH_SEC, tfEpochWidth.getText());
+        setIfNotEmpty(params, PvAParams.EPOCH_WIDTH_SEC, tfEpochWidth.getText());
         String[] phoneSpikes = new String[NB_MAX_SPIKES];
         String[] actigraphSpikes = new String[NB_MAX_SPIKES];
         int nbSpikes = 0;
@@ -383,6 +387,13 @@ class PvAArgsPanel extends JPanel {
         // update configuration
         Config.get().windowWidthSec = Integer.valueOf(tfWindowWidth.getText());
         Config.get().deleteIntermediateFile = chckbxDeleteTemp.isSelected();
+    }
+
+    private static void setIfNotEmpty(PvAParams params, String key, String value)
+            throws ParseException {
+        if (!"".equals(value)) {
+            params.deserializeAndSet(key, value);
+        }
     }
 
     private static void setFileParam(PvAParams params, String key, String filePath) {

@@ -8,15 +8,17 @@ import javax.swing.SwingUtilities;
 
 import org.xml.sax.SAXException;
 
+import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Results;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppender;
-import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
-import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.LookAndFeel;
+import com.joffrey_bion.generic_guis.file_picker.FilePicker;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.file_processor.JFileProcessorWindow;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 public class PhoneVSK4b2Analyzer {
@@ -53,7 +55,7 @@ public class PhoneVSK4b2Analyzer {
      * Starts the GUI.
      */
     private static void openWindow() {
-        JFileProcessorWindow.setSystemLookAndFeel();
+        LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
                 "Phone raw file", "K4b2 test file", "XML Tree file" }, "Output file");
@@ -65,8 +67,8 @@ public class PhoneVSK4b2Analyzer {
         ofps[0].addFileTypeFilter(".txt", "Text file");
         final PvKArgsPanel pvKArgsPanel = new PvKArgsPanel(filePickers);
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-K4b2 Analyzer",
-                "Process", filePickers, pvKArgsPanel) {
+        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-K4b2 Analyzer", "Process",
+                filePickers, pvKArgsPanel) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
@@ -90,17 +92,24 @@ public class PhoneVSK4b2Analyzer {
             K4b2StatsCalculator k4 = new K4b2StatsCalculator(params.k4b2File);
             Results res = k4.getStats(params.nbSyncMarkers);
             PhasePhoneParams ppp = new PhasePhoneParams(params);
+            HashMap<Phase, Accuracy> accuracies = new HashMap<>();
             for (Phase p : Phase.values()) {
                 PhaseResults pr = res.get(p);
                 ppp.setPhaseResults(pr);
                 RawToEpConverter.createEpochsFile(ppp);
-                HashMap<String, Integer> lvlsDistrib = LabelAppender.appendLabels(ppp);
                 System.out.println("K4b2 levels distribution:");
                 System.out.println(pr.getLevelsDistribution());
+                HashMap<String, Integer> lvlsDistrib = LabelAppender.appendLabels(ppp);
+                HashMap<String, Double> lvlsTimeDistrib = new HashMap<>();
+                for (String level : lvlsDistrib.keySet()) {
+                    lvlsTimeDistrib.put(level, (double) (lvlsDistrib.get(level)
+                            * Config.get().epochWidthVsK4b2));
+                }
                 System.out.println("Phone levels distribution:");
-                System.out.println(lvlsDistrib);
-                // TODO actually compare differences between levels' distributions
+                System.out.println(lvlsTimeDistrib);
+                accuracies.put(p, new Accuracy(lvlsTimeDistrib, pr.getLevelsDistribution()));
             }
+            System.out.println(accuracies);
         } catch (IOException e) {
             System.err.println("I/O error: " + e.getMessage());
         } catch (SAXException e) {

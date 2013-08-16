@@ -11,9 +11,10 @@ import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Results;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.RestingResults;
-import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
-import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.LookAndFeel;
+import com.joffrey_bion.generic_guis.file_picker.FilePicker;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.file_processor.JFileProcessorWindow;
 
 /**
  * A program that displays the statistics of each phase of a K4b2 file.
@@ -59,7 +60,7 @@ public class K4b2StatsPrinter {
      * Starts the GUI.
      */
     private static void openWindow() {
-        JFileProcessorWindow.setSystemLookAndFeel();
+        LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel("K4b2 CSV file", "Output file");
         for (FilePicker fp : filePickers.getInputFilePickers()) {

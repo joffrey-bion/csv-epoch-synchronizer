@@ -8,9 +8,10 @@ import javax.swing.SwingUtilities;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppender;
-import com.joffrey_bion.file_processor_window.JFileProcessorWindow;
-import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.LookAndFeel;
+import com.joffrey_bion.generic_guis.file_picker.FilePicker;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.file_processor.JFileProcessorWindow;
 
 /**
  * A program that uses a decision tree to assign a level to each row of a dataset and
@@ -51,7 +52,7 @@ public class DecisionSimulator {
      * Starts the GUI.
      */
     private static void openWindow() {
-        JFileProcessorWindow.setSystemLookAndFeel();
+        LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
                 "Decision Tree (XML)", "Dataset (CSV)" }, "Output file");

@@ -32,7 +32,7 @@ public class PhaseResults extends StatsWindow {
         double METs = line.getValue(Sample.COL_METS);
         String level = mtl.metsToLevel(METs);
         double oldWeight = lvlDistrib.containsKey(level) ? lvlDistrib.get(level) : 0;
-        lvlDistrib.put(level, line.duration / 1000 + oldWeight);
+        lvlDistrib.put(level, oldWeight + line.duration / 1000);
     }
 
     @Override
@@ -57,7 +57,13 @@ public class PhaseResults extends StatsWindow {
         trimBeginningToReach(LENGTH_TRIM_MILLIS + END_TRIM_MILLIS);
         trimEnd(END_TRIM_MILLIS);
     }
-    
+
+    /**
+     * Returns the time spent in each level in seconds.
+     * 
+     * @return A map between the level names and the associated cumulated duration in
+     *         seconds.
+     */
     public HashMap<String, Double> getLevelsDistribution() {
         return lvlDistrib;
     }

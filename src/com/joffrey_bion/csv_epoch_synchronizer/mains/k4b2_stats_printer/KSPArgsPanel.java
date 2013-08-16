@@ -12,7 +12,8 @@ import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+
 import java.awt.FlowLayout;
 
 @SuppressWarnings("serial")

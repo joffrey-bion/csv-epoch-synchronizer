@@ -16,9 +16,9 @@ import java.awt.event.ActionListener;
 
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
-import com.joffrey_bion.file_processor_window.file_picker.FilePicker;
-import com.joffrey_bion.file_processor_window.file_picker.JFilePickersPanel;
-import com.joffrey_bion.file_processor_window.parameters.ParamsSaverPanel;
+import com.joffrey_bion.generic_guis.file_picker.FilePicker;
+import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
+import com.joffrey_bion.generic_guis.parameters.SaveLoadPanel;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -155,9 +155,9 @@ class PvKArgsPanel extends JPanel {
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
 
-        ParamsSaverPanel psp = new ParamsSaverPanel() {
+        SaveLoadPanel psp = new SaveLoadPanel("Save params...", "Load params...") {
             @Override
-            public void saveParamsToFile(String paramFilePath) {
+            public void saveToFile(String paramFilePath) {
                 try {
                     PvKParams params = new PvKParams();
                     getParameters(params);
@@ -170,7 +170,7 @@ class PvKArgsPanel extends JPanel {
             }
 
             @Override
-            public void loadParamsFromFile(String paramFilePath) {
+            public void loadFromFile(String paramFilePath) {
                 try {
                     PvKParams params = new PvKParams(paramFilePath);
                     setParameters(params);
@@ -180,7 +180,7 @@ class PvKArgsPanel extends JPanel {
                 }
             }
         };
-        psp.setAlignmentX(Component.LEFT_ALIGNMENT);
+        psp.addFileTypeFilter(".xml", "XML Parameter File");
         panelLeft.add(psp, BorderLayout.SOUTH);
 
         add(Box.createHorizontalStrut(5));
