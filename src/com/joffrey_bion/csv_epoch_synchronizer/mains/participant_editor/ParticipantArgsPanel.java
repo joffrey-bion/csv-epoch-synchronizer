@@ -183,19 +183,19 @@ public class ParticipantArgsPanel extends JPanel {
     public void setParameters(Participant p) throws MissingParameterException {
         tfId.setText(p.getString(Participant.ID));
         cbGender.setSelectedItem(p.get(Participant.GENDER));
+        tfDateOfBirth.setText(p.getSerialized(Participant.DATE_OF_BIRTH));
         tfHeight.setText(p.getSerialized(Participant.HEIGHT));
         tfWeight.setText(p.getSerialized(Participant.WEIGHT));
-        tfWaist.setText(p.getSerialized(Participant.WAIST_CIRCOMFERENCE));
-        tfDateOfBirth.setText(p.getSerialized(Participant.DATE_OF_BIRTH));
+        tfWaist.setText(p.getSerialized(Participant.WAIST_CIRCUMFERENCE));
     }
 
     public void getParameters(Participant p) throws ParseException {
         setIfNotEmpty(p, Participant.ID, tfId.getText());
         p.set(Participant.GENDER, cbGender.getSelectedItem());
+        setIfNotEmpty(p, Participant.DATE_OF_BIRTH, tfDateOfBirth.getText());
         setIfNotEmpty(p, Participant.HEIGHT, tfHeight.getText());
         setIfNotEmpty(p, Participant.WEIGHT, tfWeight.getText());
-        setIfNotEmpty(p, Participant.WAIST_CIRCOMFERENCE, tfWaist.getText());
-        setIfNotEmpty(p, Participant.DATE_OF_BIRTH, tfDateOfBirth.getText());
+        setIfNotEmpty(p, Participant.WAIST_CIRCUMFERENCE, tfWaist.getText());
     }
     
     private static void setIfNotEmpty(Participant p, String key, String value) throws ParseException {
