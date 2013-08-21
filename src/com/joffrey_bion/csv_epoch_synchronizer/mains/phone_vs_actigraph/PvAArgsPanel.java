@@ -183,14 +183,14 @@ class PvAArgsPanel extends JPanel {
         lblActigraphEpochFile.setHorizontalAlignment(SwingConstants.TRAILING);
 
         cBoxActigraphFileFormat = new JComboBox<>();
+        cBoxActigraphFileFormat.setModel(new DefaultComboBoxModel<>(ActigraphFileFormat.values()));
         GridBagConstraints gbc_cBoxActigraphFileFormat = new GridBagConstraints();
         gbc_cBoxActigraphFileFormat.insets = new Insets(0, 0, 5, 0);
         gbc_cBoxActigraphFileFormat.gridwidth = 2;
         gbc_cBoxActigraphFileFormat.gridx = 1;
         gbc_cBoxActigraphFileFormat.gridy = 2;
         panelSettings.add(cBoxActigraphFileFormat, gbc_cBoxActigraphFileFormat);
-        cBoxActigraphFileFormat.setModel(new DefaultComboBoxModel<>(ActigraphFileFormat.values()));
-
+        
         chckbxDeleteTemp = new JCheckBox("Delete temporary file");
         GridBagConstraints gbc_chckbxDeleteTemp = new GridBagConstraints();
         gbc_chckbxDeleteTemp.anchor = GridBagConstraints.WEST;

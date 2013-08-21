@@ -40,10 +40,10 @@ class StatsWindowsGroup {
      * Adds the specified lines of values to this group.
      * 
      * @param linesToAdd
-     *            The {@link Sample}s to add, in the order they should be added
-     *            to this window. This list will be cleared and receive the oldest
-     *            lines in this group that do not fit anymore in the maximum length.
-     *            The oldest of these lines is added first in the list, the newest is
+     *            The {@link Sample}s to add, in the order they should be added to
+     *            this window. This list will be cleared and receive the oldest lines
+     *            in this group that do not fit anymore in the maximum length. The
+     *            oldest of these lines is added first in the list, the newest is
      *            added last.
      */
     public void add(LinkedList<Sample> linesToAdd) {
@@ -120,14 +120,15 @@ class StatsWindowsGroup {
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append(getStartTime() + " to " + getEndTime());
-        sb.append(" (" + DurationHelper.toTime(duration) + ")\n");
-        sb.append(" VO2 CV = " + getCV(StatsColumn.VO2) + "\n");
-        sb.append("VCO2 CV = " + getCV(StatsColumn.VCO2) + "\n");
-        sb.append("   R CV = " + getCV(StatsColumn.R) + "\n");
-        sb.append("Resting VO2/kg avg = "
-                + String.format("%2.2f", getStats(StatsColumn.VO2KG).mean()) + "\n");
-        return sb.toString();
+        String newLine = System.getProperty("line.separator");
+        String res = getStartTime() + " to " + getEndTime();
+        res += " (" + DurationHelper.toTime(duration) + ")" + newLine;
+        res += " VO2 CV = " + getCV(StatsColumn.VO2) + newLine;
+        res += "VCO2 CV = " + getCV(StatsColumn.VCO2) + newLine;
+        res += "   R CV = " + getCV(StatsColumn.R) + newLine;
+        res += "Resting VO2/kg avg = ";
+        res += String.format("%2.2f", getStats(StatsColumn.VO2KG).mean());
+        res += newLine;
+        return res;
     }
 }

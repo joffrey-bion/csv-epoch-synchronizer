@@ -29,7 +29,8 @@ public class K4b2StatsCalculator {
 
     /**
      * Skips the headers and the given number of sync markers, and calculates
-     * statistics on each phase of the K4b2 file.
+     * statistics on each phase of the K4b2 file. Do not use this
+     * method in addition to {@link #getRestingStats(int)}. Use one or the other.
      * 
      * @param nbSyncMarkers
      *            The number of markers that were used for synchronization.
@@ -37,7 +38,7 @@ public class K4b2StatsCalculator {
      * @throws IOException
      *             If an error occurs while reading the file.
      */
-    public Results getStats(int nbSyncMarkers) throws IOException {
+    public Results getAllStats(int nbSyncMarkers) throws IOException {
         Results fullResults = new Results();
         reader.skipHeaders();
         reader.skipMarkers(nbSyncMarkers);
@@ -56,6 +57,25 @@ public class K4b2StatsCalculator {
             fullResults.put(p, pr);
         }
         return fullResults;
+    }
+
+    /**
+     * Skips the headers and the given number of sync markers, and calculates
+     * statistics on the first (resting) phase of the K4b2 file. Do not use this
+     * method in addition to {@link #getAllStats(int)}. Use one or the other.
+     * 
+     * @param nbSyncMarkers
+     *            The number of markers that were used for synchronization.
+     * @return The stats of the resting phase.
+     * @throws IOException
+     *             If an error occurs while reading the file.
+     */
+    public RestingResults getRestingStats(int nbSyncMarkers) throws IOException {
+        reader.skipHeaders();
+        reader.skipMarkers(nbSyncMarkers);
+        RestingResults rr = new RestingResults();
+        getPhaseStats(rr);
+        return rr;
     }
 
     /**

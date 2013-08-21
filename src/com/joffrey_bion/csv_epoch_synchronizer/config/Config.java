@@ -57,9 +57,9 @@ public class Config {
                 DEFAULT_CLASSIFIER_PATH,
                 "The path to the XML classifier to use for the simulated phone decisions (holster profile)");
         SCHEMA.addParam(WINDOW_WIDTH, SimpleSerializer.INTEGER, false, DEFAULT_WINDOW_WIDTH,
-                "The time window's width to use to smooth the data");
+                "The time window's length to use to smooth the data, in seconds.");
         SCHEMA.addParam(PHONE_EP_WIDTH_VS_K4B2, SimpleSerializer.INTEGER, false, DEFAULT_EP_WIDTH,
-                "The epoch width to use for the phone when comparing "
+                "The epoch length (in seconds) to use for the phone when comparing "
                         + "with the K4b2 (when comparing to the actigraph, the actigraph's "
                         + "epoch width is used for the phone as well)");
         SCHEMA.addParam(DELETE_TEMP_FILE, SimpleSerializer.BOOLEAN, false, DEFAULT_DELETE_TEMP,
@@ -111,9 +111,9 @@ public class Config {
             System.out.println("Creating config file '" + CONFIG_FILENAME + "' with defaults...");
             createDefaultConfigFile(configFilePath);
             System.out.println("Complete.");
-        } else {
-            System.out.println("Config file loaded.");
+            loadFromConfigFile();
         }
+        System.out.println("Config file loaded.");
         System.out.println();
     }
 
@@ -234,5 +234,15 @@ public class Config {
             return classifierHolster;
         }
         return null;
+    }
+
+    public void setClassifier(Profile profile, String classifierPath) {
+        String nonEmptyPath = "".equals(classifierPath) ? null : classifierPath;
+        switch (profile) {
+        case POCKET:
+            classifierPocket = nonEmptyPath;
+        case HOLSTER:
+            classifierHolster = nonEmptyPath;
+        }
     }
 }

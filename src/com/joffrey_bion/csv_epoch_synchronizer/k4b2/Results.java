@@ -28,7 +28,7 @@ public class Results extends HashMap<Phase, PhaseResults> {
             sb.append(p);
             sb.append(" ");
             sb.append(get(p));
-            sb.append("\n");
+            sb.append(System.getProperty("line.separator"));
         }
         return sb.toString();
     }

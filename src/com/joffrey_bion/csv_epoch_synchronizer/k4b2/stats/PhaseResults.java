@@ -109,15 +109,16 @@ public class PhaseResults extends StatsWindow {
         if (isEmpty()) {
             return "This phase does not contain any sample.\n";
         }
+        String newLine = System.getProperty("line.separator");
         String res = DurationHelper.toTime(getStartTime()) + " to "
                 + DurationHelper.toTime(getEndTime()) + " (" + DurationHelper.toTime(getDuration())
                 + ")\n";
-        res += "        R avg = " + format(getMean(StatsColumn.R)) + "\n";
-        res += "   VO2/kg avg = " + format(getMean(StatsColumn.VO2KG)) + "\n";
-        res += " std METs avg = " + format(getMean(StatsColumn.METS)) + "\n";
-        res += "pers METs avg = " + format(getPersonalizedMETs()) + "\n";
+        res += "        R avg = " + format(getMean(StatsColumn.R)) + newLine;
+        res += "   VO2/kg avg = " + format(getMean(StatsColumn.VO2KG)) + newLine;
+        res += " std METs avg = " + format(getMean(StatsColumn.METS)) + newLine;
+        res += "pers METs avg = " + format(getPersonalizedMETs()) + newLine;
         res += "Levels distribution: " + lvlDistrib.toString();
-        res += "\n";
+        res += newLine;
         return res;
     }
 }

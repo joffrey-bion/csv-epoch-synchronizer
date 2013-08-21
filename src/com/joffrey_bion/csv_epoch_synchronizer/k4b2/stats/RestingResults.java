@@ -77,10 +77,11 @@ public class RestingResults extends PhaseResults {
     public String allToString() {
         StringBuilder sb = new StringBuilder();
         Iterator<StatsWindowsGroup> it = windows.descendingIterator();
+        String newLine = System.getProperty("line.separator");
         while (it.hasNext()) {
             sb.append(it.next().toString());
             if (it.hasNext()) {
-                sb.append("\n");
+                sb.append(newLine);
             }
         }
         return sb.toString();

@@ -6,15 +6,15 @@ import javax.swing.JLabel;
 import javax.swing.BoxLayout;
 import javax.swing.SwingConstants;
 import javax.swing.JCheckBox;
-import javax.swing.Box;
 import javax.swing.JComboBox;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 
-import java.awt.FlowLayout;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 
 @SuppressWarnings("serial")
 class KSPArgsPanel extends JPanel {
@@ -23,6 +23,7 @@ class KSPArgsPanel extends JPanel {
     private final JFilePickersPanel filePickers;
     private JCheckBox chckbxOutput;
     private JComboBox<Integer> nbSyncMarkersBox;
+    private JCheckBox chckbxRestingPhaseOnly;
 
     /**
      * Create the panel.
@@ -34,38 +35,54 @@ class KSPArgsPanel extends JPanel {
 
         setLayout(new BoxLayout(this, BoxLayout.X_AXIS));
 
-        JPanel panel = new JPanel();
-        add(panel);
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        JPanel panel_1 = new JPanel();
+        add(panel_1);
+        GridBagLayout gbl_panel_1 = new GridBagLayout();
+        gbl_panel_1.columnWidths = new int[] { 0, 0, 0 };
+        gbl_panel_1.rowHeights = new int[] { 0, 0, 0, 0 };
+        gbl_panel_1.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+        gbl_panel_1.rowWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        panel_1.setLayout(gbl_panel_1);
 
         chckbxOutput = new JCheckBox("Write the output to a file");
-        panel.add(chckbxOutput);
+        GridBagConstraints gbc_chckbxOutput = new GridBagConstraints();
+        gbc_chckbxOutput.anchor = GridBagConstraints.WEST;
+        gbc_chckbxOutput.insets = new Insets(0, 0, 5, 5);
+        gbc_chckbxOutput.gridx = 0;
+        gbc_chckbxOutput.gridy = 0;
+        panel_1.add(chckbxOutput, gbc_chckbxOutput);
         chckbxOutput.setSelected(false);
         chckbxOutput.setHorizontalAlignment(SwingConstants.TRAILING);
+
+        chckbxRestingPhaseOnly = new JCheckBox("Resting phase only");
+        GridBagConstraints gbc_chckbxRestingPhaseOnly = new GridBagConstraints();
+        gbc_chckbxRestingPhaseOnly.anchor = GridBagConstraints.WEST;
+        gbc_chckbxRestingPhaseOnly.insets = new Insets(0, 0, 5, 5);
+        gbc_chckbxRestingPhaseOnly.gridx = 0;
+        gbc_chckbxRestingPhaseOnly.gridy = 1;
+        panel_1.add(chckbxRestingPhaseOnly, gbc_chckbxRestingPhaseOnly);
+
+        JLabel lblNbSyncMarkers = new JLabel("Number of sync markers to skip:");
+        GridBagConstraints gbc_lblNbSyncMarkers = new GridBagConstraints();
+        gbc_lblNbSyncMarkers.anchor = GridBagConstraints.WEST;
+        gbc_lblNbSyncMarkers.insets = new Insets(0, 0, 0, 5);
+        gbc_lblNbSyncMarkers.gridx = 0;
+        gbc_lblNbSyncMarkers.gridy = 2;
+        panel_1.add(lblNbSyncMarkers, gbc_lblNbSyncMarkers);
+
+        nbSyncMarkersBox = new JComboBox<>();
+        GridBagConstraints gbc_nbSyncMarkersBox = new GridBagConstraints();
+        gbc_nbSyncMarkersBox.gridx = 1;
+        gbc_nbSyncMarkersBox.gridy = 2;
+        panel_1.add(nbSyncMarkersBox, gbc_nbSyncMarkersBox);
+        nbSyncMarkersBox.setModel(new DefaultComboBoxModel<>(NB_SYNC_MARKERS_LIST));
         chckbxOutput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                KSPArgsPanel.this.filePickers.setOutputFilePickerEnabled(0, chckbxOutput.isSelected());
+                KSPArgsPanel.this.filePickers.setOutputFilePickerEnabled(0, chckbxOutput
+                        .isSelected());
             }
         });
-        
-        JPanel panel_3 = new JPanel();
-        panel_3.setAlignmentX(Component.LEFT_ALIGNMENT);
-        FlowLayout flowLayout = (FlowLayout) panel_3.getLayout();
-        flowLayout.setVgap(0);
-        flowLayout.setHgap(0);
-        flowLayout.setAlignment(FlowLayout.LEFT);
-        panel.add(panel_3);
-
-        JLabel lblNbSyncMarkers = new JLabel("Number of sync markers to skip:");
-        panel_3.add(lblNbSyncMarkers);
-
-        Component horizontalStrut = Box.createHorizontalStrut(5);
-        panel_3.add(horizontalStrut);
-
-        nbSyncMarkersBox = new JComboBox<>();
-        nbSyncMarkersBox.setModel(new DefaultComboBoxModel<>(NB_SYNC_MARKERS_LIST));
-        panel_3.add(nbSyncMarkersBox);
 
         this.filePickers.setOutputFilePickerEnabled(0, false);
     }
@@ -76,5 +93,9 @@ class KSPArgsPanel extends JPanel {
 
     public boolean shouldWriteOutput() {
         return chckbxOutput.isSelected();
+    }
+
+    public boolean isRestingOnly() {
+        return chckbxRestingPhaseOnly.isSelected();
     }
 }

@@ -45,7 +45,7 @@ public class K4b2StatsPrinter {
         } else if (args.length == NB_ARGS) {
             try {
                 calculateStats(args[ARG_SOURCE], null, Integer.parseInt(args[ARG_NB_MARKERS]),
-                        false);
+                        false, false);
             } catch (NumberFormatException e) {
                 System.err.println("The number of synchronization markers must be an integer.");
             } catch (IOException e) {
@@ -71,14 +71,14 @@ public class K4b2StatsPrinter {
         }
         final KSPArgsPanel kSPArgsPanel = new KSPArgsPanel(filePickers);
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Resting Stats Calculator",
+        JFileProcessorWindow frame = new JFileProcessorWindow("K4b2 Phases Stats Calculator",
                 "Calculate", filePickers, kSPArgsPanel) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
                 this.clearLog();
                 try {
                     calculateStats(inPaths[0], outPaths[0], kSPArgsPanel.getNbSyncMarkers(),
-                            kSPArgsPanel.shouldWriteOutput());
+                            kSPArgsPanel.shouldWriteOutput(), kSPArgsPanel.isRestingOnly());
                 } catch (NotACsvFileException e) {
                     System.err.println(e.getMessage());
                     System.err.println("Please open the file in Excel and save it as a CSV file.");
@@ -92,20 +92,34 @@ public class K4b2StatsPrinter {
     }
 
     private static void calculateStats(String inputFilename, String outputFilename,
-            Integer nbSyncMarkers, boolean output) throws IOException {
+            Integer nbSyncMarkers, boolean output, boolean restingOnly) throws IOException {
         System.out.println("Opening file...");
         K4b2StatsCalculator k4 = new K4b2StatsCalculator(inputFilename);
         BufferedWriter writer = output ? new BufferedWriter(new FileWriter(outputFilename)) : null;
         System.out.println("Computing stats...");
-        Results stats = k4.getStats(nbSyncMarkers);
-        System.out.println("Done.\n");
-        System.out.println("*** RESTING STABILITY ***");
-        System.out.println(((RestingResults) stats.get(Phase.RESTING)).allToString());
-        System.out.println("*** STATISTICS PER PHASE ***");
-        System.out.println(stats.toString());
+        if (restingOnly) {
+            RestingResults rr = k4.getRestingStats(nbSyncMarkers);
+            System.out.println("Done.\n");
+            output(writer, "*** RESTING STABILITY ***");
+            output(writer, rr.allToString());
+        } else {
+            Results stats = k4.getAllStats(nbSyncMarkers);
+            System.out.println("Done.\n");
+            output(writer, "*** RESTING STABILITY ***");
+            output(writer, ((RestingResults) stats.get(Phase.RESTING)).allToString());
+            output(writer, "*** STATISTICS PER PHASE ***");
+            output(writer, stats.toString());
+        }
         if (output) {
-            writer.write(stats.toString());
             writer.close();
+        }
+    }
+    
+    private static void output(BufferedWriter writer, String msg) throws IOException {
+        System.out.println(msg);
+        if (writer != null) {
+            writer.write(msg);
+            writer.newLine();
         }
     }
 }

@@ -90,7 +90,7 @@ public class PhoneVSK4b2Analyzer {
     private static void analyze(PvKParams params) {
         try {
             K4b2StatsCalculator k4 = new K4b2StatsCalculator(params.k4b2File);
-            Results res = k4.getStats(params.nbSyncMarkers);
+            Results res = k4.getAllStats(params.nbSyncMarkers);
             PhasePhoneParams ppp = new PhasePhoneParams(params);
             HashMap<Phase, Accuracy> accuracies = new HashMap<>();
             for (Phase p : Phase.values()) {
