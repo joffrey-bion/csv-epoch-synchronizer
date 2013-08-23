@@ -14,6 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
+import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
 import com.joffrey_bion.generic_guis.file_picker.FilePicker;
 import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 
@@ -121,8 +122,10 @@ public class ConfigArgsPanel extends JPanel {
     private void fillWithConfig() {
         Config config = Config.get();
         FilePicker[] inputs = filePickers.getInputFilePickers();
-        inputs[0].setSelectedFilePath(config.getClassifier(Profile.POCKET));
-        inputs[1].setSelectedFilePath(config.getClassifier(Profile.HOLSTER));
+        inputs[0].setSelectedFilePath(config.getClassifier(Profile.POCKET, PhoneType.GYRO));
+        inputs[1].setSelectedFilePath(config.getClassifier(Profile.HOLSTER, PhoneType.GYRO));
+        inputs[2].setSelectedFilePath(config.getClassifier(Profile.POCKET, PhoneType.NO_GYRO));
+        inputs[3].setSelectedFilePath(config.getClassifier(Profile.HOLSTER, PhoneType.NO_GYRO));
         cbCutPoints.setSelectedItem(config.cutPointsSet);
         tfEpochWidth.setText(Integer.toString(config.epochWidthVsK4b2));
         tfWindowWidth.setText(Integer.toString(config.windowWidthSec));
@@ -140,8 +143,10 @@ public class ConfigArgsPanel extends JPanel {
      */
     public void updateConfig() throws ParseException {
         Config config = Config.get();
-        config.setClassifier(Profile.POCKET, filePickers.getInputFilePaths()[0]);
-        config.setClassifier(Profile.HOLSTER, filePickers.getInputFilePaths()[1]);
+        config.setClassifier(Profile.POCKET, PhoneType.GYRO, filePickers.getInputFilePaths()[0]);
+        config.setClassifier(Profile.HOLSTER, PhoneType.GYRO, filePickers.getInputFilePaths()[1]);
+        config.setClassifier(Profile.POCKET, PhoneType.NO_GYRO, filePickers.getInputFilePaths()[0]);
+        config.setClassifier(Profile.HOLSTER, PhoneType.NO_GYRO, filePickers.getInputFilePaths()[1]);
         config.cutPointsSet = (CutPointsSet) cbCutPoints.getSelectedItem();
         config.deleteIntermediateFile = chckbxDeleteTemp.isSelected();
         try {

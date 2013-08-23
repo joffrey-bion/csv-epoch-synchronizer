@@ -1,12 +1,12 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
+import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppenderParams;
 
 public class PhasePhoneParams implements PhoneRawToEpParams, LabelAppenderParams {
-
 
     private PvKParams globalParams;
     private long windowWidthNano;
@@ -22,25 +22,25 @@ public class PhasePhoneParams implements PhoneRawToEpParams, LabelAppenderParams
         this.epochWidthNano = Config.get().epochWidthVsK4b2 * 1000 * 1000000;
     }
 
-    public void setPhaseResults(PhaseResults p) {
-        this.phoneStartTime = p.getStartTime() - globalParams.delayPhoneToK4b2;
-        this.phoneStopTime = p.getEndTime() - globalParams.delayPhoneToK4b2;
+    public void setPhaseResults(Phase p, PhaseResults pr) {
+        this.phoneStartTime = pr.getStartTime() * 1000000 - globalParams.delayPhoneToK4b2;
+        this.phoneStopTime = pr.getEndTime() * 1000000 - globalParams.delayPhoneToK4b2;
         this.phoneEpFilePath = "temp-" + p + ".csv";
         this.phoneLabeledFilePath = "temp-" + p + "-labeled.csv";
     }
 
     @Override
-    public long getPhoneStartTime() {
+    public long getPhoneStartTimeNano() {
         return phoneStartTime;
     }
 
     @Override
-    public long getPhoneStopTime() {
+    public long getPhoneStopTimeNano() {
         return phoneStopTime;
     }
 
     @Override
-    public long getDelay() {
+    public long getDelayNano() {
         return globalParams.delayPhoneToK4b2;
     }
 

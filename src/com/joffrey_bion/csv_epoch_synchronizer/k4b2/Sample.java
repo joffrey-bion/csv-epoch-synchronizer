@@ -33,12 +33,17 @@ public class Sample {
     public String[] cols;
     /**
      * The start time of this {@code Sample}, corresponding to the previous row's
-     * timestamp.
+     * timestamp, in milliseconds.
      */
     public long startTime;
-    /** The end time of this {@code Sample}, corresponding to this row's timestamp. */
+    /**
+     * The end time of this {@code Sample}, corresponding to this row's timestamp, in
+     * milliseconds.
+     */
     public long endTime;
-    /** The duration of this {@code Sample}, in milliseconds. */
+    /** 
+     * The duration of this {@code Sample}, in milliseconds. 
+     */
     public double duration;
 
     /**
@@ -47,8 +52,8 @@ public class Sample {
      * @param cols
      *            The row to wrap in a {@code Sample} object.
      * @param previousTime
-     *            The timestamp of the previous row (in milliseconds), to be able to know the duration
-     *            of this {@code Sample}.
+     *            The timestamp of the previous row (in milliseconds), to be able to
+     *            know the duration of this {@code Sample}.
      * @throws ParseException
      *             If any parse error occurs while reading the specified row.
      */

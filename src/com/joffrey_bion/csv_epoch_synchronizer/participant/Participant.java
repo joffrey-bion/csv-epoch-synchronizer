@@ -1,6 +1,7 @@
 package com.joffrey_bion.csv_epoch_synchronizer.participant;
 
 import java.io.IOException;
+import java.util.LinkedList;
 
 import org.xml.sax.SAXException;
 
@@ -50,5 +51,27 @@ public class Participant extends Parameters {
             SpecificationNotMetException {
         super(SCHEMA);
         loadFromXml(participantFile);
+    }
+    
+    public LinkedList<String> getHeaders() {
+        LinkedList<String> headers = new LinkedList<>();
+        headers.add("ID");
+        headers.add("Gender");
+        headers.add("DOB");
+        headers.add("Weight");
+        headers.add("Height");
+        headers.add("WaistCirc");
+        return headers;
+    }
+    
+    public LinkedList<String> getValues() {
+        LinkedList<String> values = new LinkedList<>();
+        values.add(getSerialized(ID));
+        values.add(getSerialized(GENDER));
+        values.add(getSerialized(DATE_OF_BIRTH));
+        values.add(getSerialized(WEIGHT));
+        values.add(getSerialized(HEIGHT));
+        values.add(getSerialized(WAIST_CIRCUMFERENCE));
+        return values;
     }
 }

@@ -31,6 +31,12 @@ import java.awt.BorderLayout;
 @SuppressWarnings("serial")
 class PvKArgsPanel extends JPanel {
 
+    private static final int INPUT_PHONE = 0;
+    private static final int INPUT_K4B2 = 1;
+    private static final int INPUT_PARTICIPANT = 2;
+    private static final int INPUT_XML_TREE = 3;
+    private static final int OUTPUT = 0;
+
     private static final int NB_MAX_SPIKES = 6;
     private static final int DATE_TEXTFIELD_WIDTH = 17;
     private static final int TIME_TEXTFIELD_WIDTH = 10;
@@ -39,11 +45,12 @@ class PvKArgsPanel extends JPanel {
     private final JFilePickersPanel filePickers;
     private JCheckBox chckbxOutput;
     private JComboBox<Integer> nbSyncMarkersBox;
-    private JComboBox<Profile> profileComboBox;
     private JLabel[] tfSpikeLabel;
     private JTextField[] tfSpikePhone;
     private JTextField[] tfSpikeK4b2;
-    private JTextField tfEpochWidth;
+    private JComboBox<PhoneType> cbGyro;
+    private JComboBox<Profile> profileComboBox;
+    private JComboBox<PhoneLocation> cbLocation;
 
     /**
      * Create the panel.
@@ -65,29 +72,29 @@ class PvKArgsPanel extends JPanel {
         panelLeft.add(panel_2, BorderLayout.CENTER);
         GridBagLayout gbl_panel_2 = new GridBagLayout();
         gbl_panel_2.columnWidths = new int[] { 0, 0, 0 };
-        gbl_panel_2.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-        gbl_panel_2.columnWeights = new double[] { 0.0, 0.0 };
-        gbl_panel_2.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0 };
+        gbl_panel_2.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
+        gbl_panel_2.columnWeights = new double[] { 0.0, 0.0, 1.0 };
+        gbl_panel_2.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
         panel_2.setLayout(gbl_panel_2);
 
         chckbxOutput = new JCheckBox("Write the output to a file");
+        chckbxOutput.setEnabled(false);
         GridBagConstraints gbc_chckbxOutput = new GridBagConstraints();
         gbc_chckbxOutput.anchor = GridBagConstraints.WEST;
         gbc_chckbxOutput.gridwidth = 2;
-        gbc_chckbxOutput.insets = new Insets(0, 0, 5, 0);
+        gbc_chckbxOutput.insets = new Insets(0, 0, 5, 5);
         gbc_chckbxOutput.gridx = 0;
         gbc_chckbxOutput.gridy = 0;
         panel_2.add(chckbxOutput, gbc_chckbxOutput);
-        chckbxOutput.setSelected(false);
+        chckbxOutput.setSelected(true);
         chckbxOutput.setHorizontalAlignment(SwingConstants.TRAILING);
         chckbxOutput.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                PvKArgsPanel.this.filePickers.setOutputFilePickerEnabled(0, chckbxOutput
+                PvKArgsPanel.this.filePickers.setOutputFilePickerEnabled(OUTPUT, chckbxOutput
                         .isSelected());
             }
         });
-        filePickers.setOutputFilePickerEnabled(0, chckbxOutput.isSelected());
 
         JLabel lblNbSyncMarkers = new JLabel("Number of sync markers to skip:");
         GridBagConstraints gbc_lblNbSyncMarkers = new GridBagConstraints();
@@ -98,59 +105,72 @@ class PvKArgsPanel extends JPanel {
         panel_2.add(lblNbSyncMarkers, gbc_lblNbSyncMarkers);
 
         nbSyncMarkersBox = new JComboBox<>();
+        nbSyncMarkersBox.setModel(new DefaultComboBoxModel<>(NB_SYNC_MARKERS_LIST));
+        nbSyncMarkersBox.setSelectedIndex(0);
         GridBagConstraints gbc_nbSyncMarkersBox = new GridBagConstraints();
         gbc_nbSyncMarkersBox.fill = GridBagConstraints.HORIZONTAL;
-        gbc_nbSyncMarkersBox.insets = new Insets(0, 0, 5, 0);
+        gbc_nbSyncMarkersBox.insets = new Insets(0, 0, 5, 5);
         gbc_nbSyncMarkersBox.gridx = 1;
         gbc_nbSyncMarkersBox.gridy = 1;
         panel_2.add(nbSyncMarkersBox, gbc_nbSyncMarkersBox);
-        nbSyncMarkersBox.setModel(new DefaultComboBoxModel<>(NB_SYNC_MARKERS_LIST));
 
-        JLabel lblProfile = new JLabel("Phones' location:");
-        GridBagConstraints gbc_lblProfile = new GridBagConstraints();
-        gbc_lblProfile.anchor = GridBagConstraints.WEST;
-        gbc_lblProfile.insets = new Insets(0, 0, 5, 5);
-        gbc_lblProfile.gridx = 0;
-        gbc_lblProfile.gridy = 2;
-        panel_2.add(lblProfile, gbc_lblProfile);
+        JLabel lblPhonesType = new JLabel("Phone's type:");
+        GridBagConstraints gbc_lblPhonesType = new GridBagConstraints();
+        gbc_lblPhonesType.anchor = GridBagConstraints.WEST;
+        gbc_lblPhonesType.insets = new Insets(0, 0, 5, 5);
+        gbc_lblPhonesType.gridx = 0;
+        gbc_lblPhonesType.gridy = 2;
+        panel_2.add(lblPhonesType, gbc_lblPhonesType);
+
+        cbGyro = new JComboBox<>();
+        cbGyro.setModel(new DefaultComboBoxModel<>(PhoneType.values()));
+        cbGyro.setSelectedIndex(0);
+        GridBagConstraints gbc_cbGyro = new GridBagConstraints();
+        gbc_cbGyro.insets = new Insets(0, 0, 5, 5);
+        gbc_cbGyro.fill = GridBagConstraints.HORIZONTAL;
+        gbc_cbGyro.gridx = 1;
+        gbc_cbGyro.gridy = 2;
+        panel_2.add(cbGyro, gbc_cbGyro);
+        cbGyro.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateClassifierPath();
+            }
+        });
+
+        JLabel lblLocation = new JLabel("Phone's location:");
+        GridBagConstraints gbc_lblLocation = new GridBagConstraints();
+        gbc_lblLocation.anchor = GridBagConstraints.WEST;
+        gbc_lblLocation.insets = new Insets(0, 0, 5, 5);
+        gbc_lblLocation.gridx = 0;
+        gbc_lblLocation.gridy = 3;
+        panel_2.add(lblLocation, gbc_lblLocation);
 
         profileComboBox = new JComboBox<>();
-        GridBagConstraints gbc_profileComboBox = new GridBagConstraints();
-        gbc_profileComboBox.insets = new Insets(0, 0, 5, 0);
-        gbc_profileComboBox.fill = GridBagConstraints.HORIZONTAL;
-        gbc_profileComboBox.gridx = 1;
-        gbc_profileComboBox.gridy = 2;
-        panel_2.add(profileComboBox, gbc_profileComboBox);
         profileComboBox.setModel(new DefaultComboBoxModel<>(Profile.values()));
         profileComboBox.setSelectedIndex(0);
+        GridBagConstraints gbc_profileComboBox = new GridBagConstraints();
+        gbc_profileComboBox.insets = new Insets(0, 0, 5, 5);
+        gbc_profileComboBox.fill = GridBagConstraints.HORIZONTAL;
+        gbc_profileComboBox.gridx = 1;
+        gbc_profileComboBox.gridy = 3;
+        panel_2.add(profileComboBox, gbc_profileComboBox);
         profileComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                FilePicker[] inputs = PvKArgsPanel.this.filePickers.getInputFilePickers();
-                inputs[2].setSelectedFilePath(Config.get().getClassifier(
-                        (Profile) profileComboBox.getSelectedItem()));
+                updateClassifierPath();
             }
         });
-        filePickers.getInputFilePickers()[2].setSelectedFilePath(Config.get().getClassifier(
-                (Profile) profileComboBox.getSelectedItem()));
-        
-        JLabel lblPhoneEpochsLength = new JLabel("Phones epochs' length (sec):");
-        GridBagConstraints gbc_lblPhoneEpochsLength = new GridBagConstraints();
-        gbc_lblPhoneEpochsLength.anchor = GridBagConstraints.WEST;
-        gbc_lblPhoneEpochsLength.insets = new Insets(0, 0, 0, 5);
-        gbc_lblPhoneEpochsLength.gridx = 0;
-        gbc_lblPhoneEpochsLength.gridy = 3;
-        panel_2.add(lblPhoneEpochsLength, gbc_lblPhoneEpochsLength);
-        
-        tfEpochWidth = new JTextField();
-        tfEpochWidth.setText(Integer.toString(Config.get().epochWidthVsK4b2));
-        tfEpochWidth.setColumns(1);
-        GridBagConstraints gbc_textField = new GridBagConstraints();
-        gbc_textField.anchor = GridBagConstraints.WEST;
-        gbc_textField.gridx = 1;
-        gbc_textField.gridy = 3;
-        panel_2.add(tfEpochWidth, gbc_textField);
-        
+
+        cbLocation = new JComboBox<>();
+        cbLocation.setModel(new DefaultComboBoxModel<>(PhoneLocation.values()));
+        cbLocation.setSelectedIndex(0);
+        GridBagConstraints gbc_cbLocation = new GridBagConstraints();
+        gbc_cbLocation.insets = new Insets(0, 0, 5, 5);
+        gbc_cbLocation.fill = GridBagConstraints.HORIZONTAL;
+        gbc_cbLocation.gridx = 1;
+        gbc_cbLocation.gridy = 4;
+        panel_2.add(cbLocation, gbc_cbLocation);
 
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
@@ -162,7 +182,6 @@ class PvKArgsPanel extends JPanel {
                     PvKParams params = new PvKParams();
                     getParameters(params);
                     params.saveToXml(paramFilePath);
-                    Config.get().saveToConfigFile();
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
@@ -259,8 +278,9 @@ class PvKArgsPanel extends JPanel {
             panelSpikes.add(tfSpikeK4b2[i], gbc_tfSpikeK4b2);
         }
 
-        filePickers.setOutputFilePickerEnabled(0, false);
-        filePickers.setInputFilePickerEditable(2, false);
+        filePickers.setOutputFilePickerEnabled(OUTPUT, chckbxOutput.isSelected());
+        filePickers.setInputFilePickerEditable(INPUT_XML_TREE, false);
+        updateClassifierPath();
     }
 
     /**
@@ -301,12 +321,15 @@ class PvKArgsPanel extends JPanel {
      *             If one field could not be properly parsed.
      */
     public void getParameters(PvKParams params) throws ParseException {
-        setFileParam(params, PvKParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[0]);
-        setFileParam(params, PvKParams.K4B2_FILE_PATH, filePickers.getInputFilePaths()[1]);
-        setFileParam(params, PvKParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[0]);
+        setFileParam(params, PvKParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[INPUT_PHONE]);
+        setFileParam(params, PvKParams.K4B2_FILE_PATH, filePickers.getInputFilePaths()[INPUT_K4B2]);
+        setFileParam(params, PvKParams.PARTICIPANT_FILE_PATH, filePickers.getInputFilePaths()[INPUT_PARTICIPANT]);
+        setFileParam(params, PvKParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[OUTPUT]);
         params.set(PvKParams.WRITE_OUTPUT, chckbxOutput.isSelected());
         params.set(PvKParams.NB_SYNC_MARKERS, nbSyncMarkersBox.getSelectedItem());
         params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
+        params.set(PvKParams.PHONE_TYPE, cbGyro.getSelectedItem());
+        params.set(PvKParams.PHONE_LOCATION, cbLocation.getSelectedItem());
         String[] phoneSpikes = new String[NB_MAX_SPIKES];
         String[] actigraphSpikes = new String[NB_MAX_SPIKES];
         int nbSpikes = 0;
@@ -327,8 +350,12 @@ class PvKArgsPanel extends JPanel {
             params.deserializeAndSet(PvKParams.K4B2_SPIKES_LIST, new String[0]);
         }
         params.populatePublicFields();
-        // update configuration
-        Config.get().epochWidthVsK4b2 = Integer.valueOf(tfEpochWidth.getText());
+    }
+
+    private void updateClassifierPath() {
+        FilePicker[] inputs = PvKArgsPanel.this.filePickers.getInputFilePickers();
+        inputs[INPUT_XML_TREE].setSelectedFilePath(Config.get().getClassifier(
+                (Profile) profileComboBox.getSelectedItem(), (PhoneType) cbGyro.getSelectedItem()));
     }
 
     private static void setFileParam(PvKParams params, String key, String filePath) {

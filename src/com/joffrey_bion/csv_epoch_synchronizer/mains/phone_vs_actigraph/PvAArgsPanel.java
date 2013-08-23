@@ -6,7 +6,9 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
-import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
+import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
+import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneLocation;
+import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
 import com.joffrey_bion.generic_guis.file_picker.FilePicker;
 import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 import com.joffrey_bion.generic_guis.parameters.SaveLoadPanel;
@@ -19,7 +21,6 @@ import java.text.ParseException;
 import java.util.Arrays;
 
 import javax.swing.Box;
-import javax.swing.JCheckBox;
 
 import java.awt.Component;
 import javax.swing.JComboBox;
@@ -41,9 +42,10 @@ class PvAArgsPanel extends JPanel {
     private JTextField[] tfSpikePhone;
     private JTextField[] tfSpikeActig;
     private JTextField tfEpochWidth;
-    private JTextField tfWindowWidth;
-    private JCheckBox chckbxDeleteTemp;
     private JComboBox<ActigraphFileFormat> cBoxActigraphFileFormat;
+    private JComboBox<PhoneType> cbGyro;
+    private JComboBox<Profile> profileComboBox;
+    private JComboBox<PhoneLocation> cbLocation;
 
     /**
      * Create the panel.
@@ -71,7 +73,7 @@ class PvAArgsPanel extends JPanel {
         GridBagLayout gbl_panelLimits = new GridBagLayout();
         gbl_panelLimits.columnWidths = new int[] { 0, 0, 0 };
         gbl_panelLimits.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-        gbl_panelLimits.columnWeights = new double[] { 0.0, 1.0 };
+        gbl_panelLimits.columnWeights = new double[] { 0.0, 0.0, 1.0 };
         gbl_panelLimits.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
         panelLimits.setLayout(gbl_panelLimits);
 
@@ -79,8 +81,8 @@ class PvAArgsPanel extends JPanel {
         lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 11));
         GridBagConstraints gbc_lblNewLabel = new GridBagConstraints();
         gbc_lblNewLabel.anchor = GridBagConstraints.CENTER;
-        gbc_lblNewLabel.gridwidth = 2;
-        gbc_lblNewLabel.insets = new Insets(0, 0, 5, 0);
+        gbc_lblNewLabel.gridwidth = 3;
+        gbc_lblNewLabel.insets = new Insets(0, 0, 5, 5);
         gbc_lblNewLabel.gridx = 0;
         gbc_lblNewLabel.gridy = 0;
         panelLimits.add(lblNewLabel, gbc_lblNewLabel);
@@ -96,7 +98,7 @@ class PvAArgsPanel extends JPanel {
         tfStartTime.setHorizontalAlignment(SwingConstants.CENTER);
         tfStartTime.setColumns(DATE_TEXTFIELD_WIDTH);
         GridBagConstraints gbc_tfStartTime = new GridBagConstraints();
-        gbc_tfStartTime.insets = new Insets(0, 0, 5, 0);
+        gbc_tfStartTime.insets = new Insets(0, 0, 5, 5);
         gbc_tfStartTime.fill = GridBagConstraints.HORIZONTAL;
         gbc_tfStartTime.gridx = 1;
         gbc_tfStartTime.gridy = 1;
@@ -104,6 +106,7 @@ class PvAArgsPanel extends JPanel {
 
         JLabel lblStopTime = new JLabel("Stop time:");
         GridBagConstraints gbc_lblStopTime = new GridBagConstraints();
+        gbc_lblStopTime.anchor = GridBagConstraints.WEST;
         gbc_lblStopTime.insets = new Insets(0, 0, 5, 5);
         gbc_lblStopTime.gridx = 0;
         gbc_lblStopTime.gridy = 2;
@@ -113,7 +116,7 @@ class PvAArgsPanel extends JPanel {
         tfStopTime.setHorizontalAlignment(SwingConstants.CENTER);
         tfStopTime.setColumns(DATE_TEXTFIELD_WIDTH);
         GridBagConstraints gbc_tfStopTime = new GridBagConstraints();
-        gbc_tfStopTime.insets = new Insets(0, 0, 5, 0);
+        gbc_tfStopTime.insets = new Insets(0, 0, 5, 5);
         gbc_tfStopTime.fill = GridBagConstraints.HORIZONTAL;
         gbc_tfStopTime.gridx = 1;
         gbc_tfStopTime.gridy = 2;
@@ -121,6 +124,7 @@ class PvAArgsPanel extends JPanel {
 
         JLabel lblFormat = new JLabel("(" + PvAParams.TIMESTAMP_FORMAT + ")");
         GridBagConstraints gbc_lblFormat = new GridBagConstraints();
+        gbc_lblFormat.insets = new Insets(0, 0, 5, 5);
         gbc_lblFormat.gridx = 1;
         gbc_lblFormat.gridy = 3;
         panelLimits.add(lblFormat, gbc_lblFormat);
@@ -133,10 +137,10 @@ class PvAArgsPanel extends JPanel {
         panelSettings.setAlignmentX(Component.LEFT_ALIGNMENT);
         panelArgsLeft.add(panelSettings);
         GridBagLayout gbl_panelSettings = new GridBagLayout();
-        gbl_panelSettings.columnWidths = new int[] { 0, 0, 0, 0 };
-        gbl_panelSettings.rowHeights = new int[] { 0, 0, 0, 0, 0 };
-        gbl_panelSettings.columnWeights = new double[] { 0.0, 0.0, 0.0, Double.MIN_VALUE };
-        gbl_panelSettings.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, Double.MIN_VALUE };
+        gbl_panelSettings.columnWidths = new int[] { 0, 0, 0 };
+        gbl_panelSettings.rowHeights = new int[] { 0, 0, 0 };
+        gbl_panelSettings.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
+        gbl_panelSettings.rowWeights = new double[] { 0.0, 0.0, 0.0 };
         panelSettings.setLayout(gbl_panelSettings);
 
         JLabel lblEpochWidth = new JLabel("Actigraph epochs length (sec):");
@@ -151,57 +155,75 @@ class PvAArgsPanel extends JPanel {
         tfEpochWidth.setText("1");
         tfEpochWidth.setColumns(1);
         GridBagConstraints gbc_tfEpochWidth = new GridBagConstraints();
-        gbc_tfEpochWidth.insets = new Insets(0, 0, 5, 5);
+        gbc_tfEpochWidth.anchor = GridBagConstraints.WEST;
+        gbc_tfEpochWidth.insets = new Insets(0, 0, 5, 0);
         gbc_tfEpochWidth.gridx = 1;
         gbc_tfEpochWidth.gridy = 0;
         panelSettings.add(tfEpochWidth, gbc_tfEpochWidth);
-
-        JLabel lblWindowWidth = new JLabel("Window width (sec):");
-        GridBagConstraints gbc_lblWindowWidth = new GridBagConstraints();
-        gbc_lblWindowWidth.anchor = GridBagConstraints.WEST;
-        gbc_lblWindowWidth.insets = new Insets(0, 0, 5, 5);
-        gbc_lblWindowWidth.gridx = 0;
-        gbc_lblWindowWidth.gridy = 1;
-        panelSettings.add(lblWindowWidth, gbc_lblWindowWidth);
-
-        tfWindowWidth = new JTextField();
-        tfWindowWidth.setText(Integer.toString(Config.get().windowWidthSec));
-        tfWindowWidth.setColumns(1);
-        GridBagConstraints gbc_tfWindowWidth = new GridBagConstraints();
-        gbc_tfWindowWidth.insets = new Insets(0, 0, 5, 5);
-        gbc_tfWindowWidth.gridx = 1;
-        gbc_tfWindowWidth.gridy = 1;
-        panelSettings.add(tfWindowWidth, gbc_tfWindowWidth);
 
         JLabel lblActigraphEpochFile = new JLabel("Actigraph file format:");
         GridBagConstraints gbc_lblActigraphEpochFile = new GridBagConstraints();
         gbc_lblActigraphEpochFile.anchor = GridBagConstraints.WEST;
         gbc_lblActigraphEpochFile.insets = new Insets(0, 0, 5, 5);
         gbc_lblActigraphEpochFile.gridx = 0;
-        gbc_lblActigraphEpochFile.gridy = 2;
+        gbc_lblActigraphEpochFile.gridy = 1;
         panelSettings.add(lblActigraphEpochFile, gbc_lblActigraphEpochFile);
         lblActigraphEpochFile.setHorizontalAlignment(SwingConstants.TRAILING);
 
         cBoxActigraphFileFormat = new JComboBox<>();
         cBoxActigraphFileFormat.setModel(new DefaultComboBoxModel<>(ActigraphFileFormat.values()));
         GridBagConstraints gbc_cBoxActigraphFileFormat = new GridBagConstraints();
+        gbc_cBoxActigraphFileFormat.fill = GridBagConstraints.HORIZONTAL;
         gbc_cBoxActigraphFileFormat.insets = new Insets(0, 0, 5, 0);
-        gbc_cBoxActigraphFileFormat.gridwidth = 2;
         gbc_cBoxActigraphFileFormat.gridx = 1;
-        gbc_cBoxActigraphFileFormat.gridy = 2;
+        gbc_cBoxActigraphFileFormat.gridy = 1;
         panelSettings.add(cBoxActigraphFileFormat, gbc_cBoxActigraphFileFormat);
-        
-        chckbxDeleteTemp = new JCheckBox("Delete temporary file");
-        GridBagConstraints gbc_chckbxDeleteTemp = new GridBagConstraints();
-        gbc_chckbxDeleteTemp.anchor = GridBagConstraints.WEST;
-        gbc_chckbxDeleteTemp.gridwidth = 3;
-        gbc_chckbxDeleteTemp.insets = new Insets(0, 0, 0, 5);
-        gbc_chckbxDeleteTemp.gridx = 0;
-        gbc_chckbxDeleteTemp.gridy = 3;
-        panelSettings.add(chckbxDeleteTemp, gbc_chckbxDeleteTemp);
-        chckbxDeleteTemp.setSelected(Config.get().deleteIntermediateFile);
-        chckbxDeleteTemp.setHorizontalAlignment(SwingConstants.TRAILING);
 
+        JLabel lblLocation = new JLabel("Phone's location:");
+        GridBagConstraints gbc_lblLocation = new GridBagConstraints();
+        gbc_lblLocation.anchor = GridBagConstraints.WEST;
+        gbc_lblLocation.insets = new Insets(0, 0, 5, 5);
+        gbc_lblLocation.gridx = 0;
+        gbc_lblLocation.gridy = 2;
+        panelSettings.add(lblLocation, gbc_lblLocation);
+
+        profileComboBox = new JComboBox<>();
+        profileComboBox.setModel(new DefaultComboBoxModel<>(Profile.values()));
+        profileComboBox.setSelectedIndex(0);
+        GridBagConstraints gbc_profileComboBox = new GridBagConstraints();
+        gbc_profileComboBox.insets = new Insets(0, 0, 5, 0);
+        gbc_profileComboBox.fill = GridBagConstraints.HORIZONTAL;
+        gbc_profileComboBox.gridx = 1;
+        gbc_profileComboBox.gridy = 2;
+        panelSettings.add(profileComboBox, gbc_profileComboBox);
+        
+        
+        cbLocation = new JComboBox<>();
+        cbLocation.setModel(new DefaultComboBoxModel<>(PhoneLocation.values()));
+        GridBagConstraints gbc_cbLocation = new GridBagConstraints();
+        gbc_cbLocation.insets = new Insets(0, 0, 5, 0);
+        gbc_cbLocation.fill = GridBagConstraints.HORIZONTAL;
+        gbc_cbLocation.gridx = 1;
+        gbc_cbLocation.gridy = 3;
+        panelSettings.add(cbLocation, gbc_cbLocation);
+
+        JLabel lblPhonesType = new JLabel("Phone's type:");
+        GridBagConstraints gbc_lblPhonesType = new GridBagConstraints();
+        gbc_lblPhonesType.anchor = GridBagConstraints.WEST;
+        gbc_lblPhonesType.insets = new Insets(0, 0, 0, 5);
+        gbc_lblPhonesType.gridx = 0;
+        gbc_lblPhonesType.gridy = 4;
+        panelSettings.add(lblPhonesType, gbc_lblPhonesType);
+
+        cbGyro = new JComboBox<>();
+        cbGyro.setModel(new DefaultComboBoxModel<>(PhoneType.values()));
+        cbGyro.setSelectedIndex(0);
+        GridBagConstraints gbc_cbGyro = new GridBagConstraints();
+        gbc_cbGyro.fill = GridBagConstraints.HORIZONTAL;
+        gbc_cbGyro.gridx = 1;
+        gbc_cbGyro.gridy = 4;
+        panelSettings.add(cbGyro, gbc_cbGyro);
+        
         panel.add(Box.createHorizontalStrut(5));
         JSeparator separator = new JSeparator();
         separator.setAlignmentY(Component.TOP_ALIGNMENT);
@@ -297,7 +319,6 @@ class PvAArgsPanel extends JPanel {
                     PvAParams params = new PvAParams();
                     getParameters(params);
                     params.saveToXml(paramFilePath);
-                    Config.get().saveToConfigFile();
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
@@ -384,9 +405,7 @@ class PvAArgsPanel extends JPanel {
             params.deserializeAndSet(PvAParams.PHONE_SPIKES_LIST, new String[0]);
             params.deserializeAndSet(PvAParams.ACTIG_SPIKES_LIST, new String[0]);
         }
-        // update configuration
-        Config.get().windowWidthSec = Integer.valueOf(tfWindowWidth.getText());
-        Config.get().deleteIntermediateFile = chckbxDeleteTemp.isSelected();
+        params.populatePublicFields();
     }
 
     private static void setIfNotEmpty(PvAParams params, String key, String value)

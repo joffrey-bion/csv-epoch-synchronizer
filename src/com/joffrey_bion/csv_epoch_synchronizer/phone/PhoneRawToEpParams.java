@@ -24,25 +24,25 @@ public interface PhoneRawToEpParams {
      * Returns the timestamp when the accumulation should start, in the phone
      * reference. It corresponds to the beginning of the output file.
      * 
-     * @return the timestamp when the accumulation should start.
+     * @return the timestamp when the accumulation should start, in nanoseconds.
      */
-    public long getPhoneStartTime();
+    public long getPhoneStartTimeNano();
 
     /**
      * Returns the timestamp when the accumulation should stop, in the phone
      * reference. It corresponds to the end of the output file.
      * 
-     * @return the timestamp when the accumulation should stop.
+     * @return the timestamp when the accumulation should stop, in nanoseconds.
      */
-    public long getPhoneStopTime();
+    public long getPhoneStopTimeNano();
 
     /**
-     * Returns the delay in milliseconds to add to a phone time to find the target
+     * Returns the delay in nanoseconds to add to a phone time to find the target
      * time.
      * 
      * @return the delay between the phone time and the target time.
      */
-    public long getDelay();
+    public long getDelayNano();
 
     /**
      * Returns the width of the phone time window in nanoseconds. The time window is
@@ -64,11 +64,11 @@ public interface PhoneRawToEpParams {
     public long getEpochWidthNano();
 
     /**
-     * Returns the delay between the beginning of a time window and the beginning of
-     * the corresponding epoch.
+     * Returns the delay in nanoseconds between the beginning of a time window and
+     * the beginning of the corresponding epoch.
      * 
-     * @return the delay between the beginning of a time window and the beginning of
-     *         the corresponding epoch.
+     * @return the delay in nanoseconds between the beginning of a time window and
+     *         the beginning of the corresponding epoch.
      */
     public long getWinBeginToEpBegin();
 

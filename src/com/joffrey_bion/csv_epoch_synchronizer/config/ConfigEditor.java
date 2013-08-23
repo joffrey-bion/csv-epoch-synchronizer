@@ -28,10 +28,13 @@ public class ConfigEditor {
         LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
-                "XML Classifier (pocket)",  "XML Classifier (holster)"}, new String[]{});
+                "Classifier (pocket, gyro)",  "Classifier (holster, gyro)", 
+                "Classifier (pocket, no gyro)",  "Classifier (holster, no gyro)"}, new String[]{});
         FilePicker[] ifps = filePickers.getInputFilePickers();
         ifps[0].addFileTypeFilter(".xml", "XML Classifier file");
         ifps[1].addFileTypeFilter(".xml", "XML Classifier file");
+        ifps[2].addFileTypeFilter(".xml", "XML Classifier file");
+        ifps[3].addFileTypeFilter(".xml", "XML Classifier file");
         final ConfigArgsPanel configArgsPanel = new ConfigArgsPanel(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("Config Editor", "Save",

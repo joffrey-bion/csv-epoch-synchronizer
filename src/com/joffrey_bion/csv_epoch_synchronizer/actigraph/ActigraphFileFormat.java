@@ -13,8 +13,9 @@ package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
  * @author <a href="mailto:joffrey.bion@gmail.com">Joffrey BION</a>
  */
 public enum ActigraphFileFormat {
-    EXPORTED("hh:mm:ss a", 5, 2),
-    CONVERTED("HH:mm:ss", 11, 11);
+
+    CONVERTED("HH:mm:ss", 11, 11),
+    EXPORTED("hh:mm:ss a", 5, 2);
 
     /**
      * The format of the timestamps in the Date column.

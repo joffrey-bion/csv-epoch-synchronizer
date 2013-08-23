@@ -78,7 +78,7 @@ public class PhoneVSActigraphMerger {
         }
         final PvAArgsPanel pvAArgsPanel = new PvAArgsPanel(filePickers);
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-Actigraph Synchronizer",
+        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-Actigraph Analyzer",
                 "Process", filePickers, pvAArgsPanel) {
             @Override
             public void process(String[] inPaths, String[] outPaths) {
@@ -101,17 +101,16 @@ public class PhoneVSActigraphMerger {
      * actigraph's epochs.
      * 
      * @param params
-     *            The com.joffrey_bion.csv_epoch_synchronizer.config for the instance
-     *            to deal with.
+     *            The parameters for the instance to deal with.
      */
     private static void createDataset(PvAParams params) {
         long start = System.currentTimeMillis();
         try {
             System.out.println("Computing phone-to-actigraph delay...");
-            System.out.println("> Delay average: " + params.getDelay() / 1000000 + "ms");
+            System.out.println("> Delay average: " + params.getDelayNano() / 1000000 + "ms");
             System.out.println("> Actigraph start time: "
                     + DateHelper.toDateTimeMillis(params.startTime / 1000000));
-            long phoneStartTime = params.startTime - params.getDelay();
+            long phoneStartTime = params.startTime - params.getDelayNano();
             System.out.println("> Phone start time: "
                     + DateHelper.toDateTimeMillis(phoneStartTime / 1000000));
             System.out.println();

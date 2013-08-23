@@ -1,17 +1,20 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import java.io.IOException;
-import java.text.ParseException;
 
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
+import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
+import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneLocation;
+import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
 import com.joffrey_bion.utils.stats.FlowStats;
 import com.joffrey_bion.utils.xml.serializers.DateArraySerializer;
 import com.joffrey_bion.utils.xml.serializers.DateSerializer;
+import com.joffrey_bion.utils.xml.serializers.EnumSerializer;
 import com.joffrey_bion.utils.xml.serializers.SimpleSerializer;
 import com.joffrey_bion.xml_parameters_serializer.Parameters;
 import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
@@ -23,27 +26,27 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     private static final ActigraphFileFormat DEFAULT_ACTIG_FILE_FORMAT = ActigraphFileFormat.EXPORTED;
     private static final String DEFAULT_OUTPUT_FILE_PATH = "dataset.csv";
 
-    public static final String PHONE_FILE_PATH = "phone-raw-file";
-    public static final String OUTPUT_FILE_PATH = "output-file";
-    public static final String ACTIG_FILE_PATH = "actigraph-file";
-    public static final String ACTIG_FILE_FORMAT = "actigraph-file-format";
-    public static final String START_TIME = "start-time";
-    public static final String STOP_TIME = "stop-time";
-    public static final String EPOCH_WIDTH_SEC = "epoch-width";
-    public static final String PHONE_SPIKES_LIST = "phone-spikes";
-    public static final String ACTIG_SPIKES_LIST = "actig-spikes";
+    static final String PHONE_FILE_PATH = "phone-raw-file";
+    static final String OUTPUT_FILE_PATH = "output-file";
+    static final String ACTIG_FILE_PATH = "actigraph-file";
+    static final String ACTIG_FILE_FORMAT = "actigraph-file-format";
+    static final String START_TIME = "start-time";
+    static final String STOP_TIME = "stop-time";
+    static final String EPOCH_WIDTH_SEC = "epoch-width";
+    static final String PHONE_SPIKES_LIST = "phone-spikes";
+    static final String ACTIG_SPIKES_LIST = "actig-spikes";
+    static final String PROFILE = "profile";
+    static final String PHONE_TYPE = "phone-type";
+    static final String PHONE_LOCATION = "phone-location";
 
     static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final DateSerializer TIMESTAMP_SER = new DateSerializer(TIMESTAMP_FORMAT);
     private static final DateArraySerializer SPIKES_SER = new DateArraySerializer(TIMESTAMP_FORMAT);
-    private static final SimpleSerializer<ActigraphFileFormat> FORMAT_SER = new SimpleSerializer<ActigraphFileFormat>(
-            ActigraphFileFormat.class) {
-        @Override
-        public ActigraphFileFormat deserialize(String s) throws ParseException {
-            return ActigraphFileFormat.valueOf(s);
-        }
-    };
-
+    private static final EnumSerializer<ActigraphFileFormat> FORMAT_SER = new EnumSerializer<>(ActigraphFileFormat.class);
+    private static final EnumSerializer<PhoneType> PHONE_TYPE_SER = new EnumSerializer<>(PhoneType.class);
+    private static final EnumSerializer<PhoneLocation> PHONE_LOCATION_SER = new EnumSerializer<>(PhoneLocation.class);
+    private static final EnumSerializer<Profile> PROFILE_SER = new EnumSerializer<>(Profile.class);
+    
     private static final ParamsSchema SCHEMA = new ParamsSchema("parameters", 3);
     static {
         SCHEMA.addParam(OUTPUT_FILE_PATH, SimpleSerializer.STRING, false, DEFAULT_OUTPUT_FILE_PATH,
@@ -58,6 +61,9 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
                 + TIMESTAMP_FORMAT + ")");
         SCHEMA.addParam(STOP_TIME, TIMESTAMP_SER, "Stop time in actigraph reference ("
                 + TIMESTAMP_FORMAT + ")");
+        SCHEMA.addParam(PROFILE, PROFILE_SER, false, Profile.POCKET);
+        SCHEMA.addParam(PHONE_LOCATION, PHONE_LOCATION_SER, false, PhoneLocation.LEFT);
+        SCHEMA.addParam(PHONE_TYPE, PHONE_TYPE_SER, false, PhoneType.GYRO);
         SCHEMA.addParam(PHONE_SPIKES_LIST, SPIKES_SER,
                 "Phone acceleration spikes, in the right order (" + TIMESTAMP_FORMAT + ")");
         SCHEMA.addParam(ACTIG_SPIKES_LIST, SPIKES_SER,
@@ -85,7 +91,19 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
      * actigraph time.
      */
     private long delay;
-
+    /**
+     * Holster or Pocket profile.
+     */
+    public Profile profile;
+    /**
+     * Whether the phone has a gyroscope or not.
+     */
+    public PhoneType phoneType;
+    /**
+     * Whether the phone was worn on the left or right side.
+     */
+    public PhoneLocation phoneLocation;
+    
     /**
      * Creates a new {@link PvAParams} object from the specified XML file.
      * 
@@ -123,9 +141,12 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
         this.phoneRawFilename = getString(PHONE_FILE_PATH);
         this.actigraphEpFilename = getString(ACTIG_FILE_PATH);
         this.outputFilename = getString(OUTPUT_FILE_PATH);
-        this.startTime = get(START_TIME, TIMESTAMP_SER);
-        this.stopTime = get(STOP_TIME, TIMESTAMP_SER);
+        this.startTime = get(START_TIME, TIMESTAMP_SER) * 1000000;
+        this.stopTime = get(STOP_TIME, TIMESTAMP_SER) * 1000000;
         this.actigraphFileFormat = get(ACTIG_FILE_FORMAT, FORMAT_SER);
+        this.profile = get(PROFILE, PROFILE_SER);
+        this.phoneType = get(PHONE_TYPE, PHONE_TYPE_SER);
+        this.phoneLocation = get(PHONE_LOCATION, PHONE_LOCATION_SER);
         setWindowFields(getInteger(EPOCH_WIDTH_SEC));
         Long[] phoneSpikes = get(PHONE_SPIKES_LIST, SPIKES_SER);
         Long[] actigSpikes = get(ACTIG_SPIKES_LIST, SPIKES_SER);
@@ -138,9 +159,11 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
      * obtained by shaking both devices together.
      * 
      * @param phoneSpikes
-     *            Timestamps of the spikes in the phone's time reference.
+     *            Timestamps of the spikes in the phone's time reference, in
+     *            milliseconds.
      * @param actigraphSpikes
-     *            Timestamps of the same spikes in the actigraph's reference.
+     *            Timestamps of the same spikes in the actigraph's reference, in
+     *            milliseconds.
      */
     private void setDelay(Long[] phoneSpikes, Long[] actigraphSpikes) {
         FlowStats delayStats = new FlowStats();
@@ -151,7 +174,7 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
             actigraphTime = actigraphSpikes[i];
             delayStats.add(actigraphTime - phoneTime);
         }
-        delay = Double.valueOf(delayStats.mean()).longValue();
+        delay = Double.valueOf(delayStats.mean()).longValue() * 1000000;
     }
 
     /**
@@ -166,7 +189,7 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     }
 
     @Override
-    public long getDelay() {
+    public long getDelayNano() {
         return delay;
     }
 
@@ -186,12 +209,12 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     }
 
     @Override
-    public long getPhoneStartTime() {
+    public long getPhoneStartTimeNano() {
         return startTime - delay;
     }
 
     @Override
-    public long getPhoneStopTime() {
+    public long getPhoneStopTimeNano() {
         return stopTime - delay;
     }
 

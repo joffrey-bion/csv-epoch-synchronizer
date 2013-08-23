@@ -32,8 +32,8 @@ public class RawToEpConverter {
 
     private static void writeSmoothEpochs(PhoneCsvReader reader, CsvWriter writer, int nbOfColumns,
             PhoneRawToEpParams props) throws IOException {
-        final long phoneStartTime = props.getPhoneStartTime();
-        final long phoneStopTime = props.getPhoneStopTime();
+        final long phoneStartTime = props.getPhoneStartTimeNano();
+        final long phoneStopTime = props.getPhoneStopTimeNano();
         final TimeWindow win = new TimeWindow(phoneStartTime, nbOfColumns, props);
         reader.skipToReachTimestamp(phoneStartTime - props.getWinBeginToEpBegin());
         String[] line;
@@ -41,7 +41,7 @@ public class RawToEpConverter {
             long timestamp = reader.extractTimestamp(line);
             win.add(timestamp, line);
             if (win.hasMovedEnough()) {
-                writer.writeRow(win.accumulate(props.getDelay()));
+                writer.writeRow(win.accumulate(props.getDelayNano()));
                 if (win.getLastEpEnd() >= phoneStopTime) {
                     break;
                 }

@@ -8,15 +8,14 @@ public class Accuracy {
     private double overallAccuracy;
 
     public Accuracy(HashMap<String, Double> phoneDistrib, HashMap<String, Double> k4b2Distrib) {
-        if (!phoneDistrib.keySet().equals(k4b2Distrib.keySet())) {
-            throw new IllegalArgumentException("The 2 distributions must contain the same levels.");
-        }
         perLvlAccuracy = new HashMap<>();
         double totalSum = 0;
         double minSum = 0;
         for (String level : phoneDistrib.keySet()) {
-            double phone = phoneDistrib.get(level);
-            double k4b2 = k4b2Distrib.get(level);
+            Double phone = phoneDistrib.get(level);
+            Double k4b2 = k4b2Distrib.get(level);
+            phone = phone == null ? 0 : phone;
+            k4b2 = k4b2 == null ? 0 : k4b2;
             totalSum += k4b2;
             minSum += Math.min(phone, k4b2);
             double acc = Math.min(phone, k4b2) / Math.max(phone, k4b2);
