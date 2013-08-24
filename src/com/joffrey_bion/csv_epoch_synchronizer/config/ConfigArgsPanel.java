@@ -14,7 +14,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
-import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
 import com.joffrey_bion.generic_guis.file_picker.FilePicker;
 import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 
@@ -109,7 +109,7 @@ public class ConfigArgsPanel extends JPanel {
         gbc_chckbxDeleteTemp.gridx = 0;
         gbc_chckbxDeleteTemp.gridy = 3;
         add(chckbxDeleteTemp, gbc_chckbxDeleteTemp);
-        chckbxDeleteTemp.setSelected(Config.get().deleteIntermediateFile);
+        chckbxDeleteTemp.setSelected(Config.get().deleteTempFiles);
         chckbxDeleteTemp.setHorizontalAlignment(SwingConstants.TRAILING);
 
         fillWithConfig();
@@ -129,7 +129,7 @@ public class ConfigArgsPanel extends JPanel {
         cbCutPoints.setSelectedItem(config.cutPointsSet);
         tfEpochWidth.setText(Integer.toString(config.epochWidthVsK4b2));
         tfWindowWidth.setText(Integer.toString(config.windowWidthSec));
-        chckbxDeleteTemp.setSelected(config.deleteIntermediateFile);
+        chckbxDeleteTemp.setSelected(config.deleteTempFiles);
     }
 
     /**
@@ -148,7 +148,7 @@ public class ConfigArgsPanel extends JPanel {
         config.setClassifier(Profile.POCKET, PhoneType.NO_GYRO, filePickers.getInputFilePaths()[0]);
         config.setClassifier(Profile.HOLSTER, PhoneType.NO_GYRO, filePickers.getInputFilePaths()[1]);
         config.cutPointsSet = (CutPointsSet) cbCutPoints.getSelectedItem();
-        config.deleteIntermediateFile = chckbxDeleteTemp.isSelected();
+        config.deleteTempFiles = chckbxDeleteTemp.isSelected();
         try {
             config.epochWidthVsK4b2 = Integer.valueOf(tfEpochWidth.getText());
         } catch (NumberFormatException e) {

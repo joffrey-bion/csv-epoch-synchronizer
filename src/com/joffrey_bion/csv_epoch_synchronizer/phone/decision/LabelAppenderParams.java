@@ -16,7 +16,7 @@ public interface LabelAppenderParams {
      * 
      * @return the dataset CSV file.
      */
-    public String getDatasetFilePath();
+    public String getUnlabeledDatasetFilePath();
 
     /**
      * Returns the relative or absolute path to the CSV file to create, which will
@@ -24,6 +24,13 @@ public interface LabelAppenderParams {
      * 
      * @return the output CSV file.
      */
-    public String getLabeledFilePath();
+    public String getLabeledDatasetFilePath();
+
+    /**
+     * Whether the timestamps should be removed or not.
+     * 
+     * @return {@code true} if the timestamps should be removed.
+     */
+    public boolean shouldRemoveTimestamps();
 
 }

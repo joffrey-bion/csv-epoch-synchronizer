@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.CutPointsSet;
-import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
 import com.joffrey_bion.utils.paths.Paths;
 import com.joffrey_bion.utils.xml.serializers.EnumSerializer;
 import com.joffrey_bion.utils.xml.serializers.SimpleSerializer;
@@ -99,7 +99,7 @@ public class Config {
      * Whether or not the intermediate file (containing phone epochs) must be
      * deleted.
      */
-    public boolean deleteIntermediateFile;
+    public boolean deleteTempFiles;
     /**
      * The path to the XML classifiers for the different profiles.
      */
@@ -146,7 +146,7 @@ public class Config {
         try {
             Parameters p = new Parameters(SCHEMA);
             p.set(CUT_POINTS, cutPointsSet);
-            p.set(DELETE_TEMP_FILE, deleteIntermediateFile);
+            p.set(DELETE_TEMP_FILE, deleteTempFiles);
             p.set(WINDOW_WIDTH, windowWidthSec);
             p.set(PHONE_EP_WIDTH_VS_K4B2, epochWidthVsK4b2);
             p.set(PKT_GYR_CLASSIFIER_PATH, getClassifier(Profile.POCKET, PhoneType.GYRO));
@@ -194,7 +194,7 @@ public class Config {
         cutPointsSet = (CutPointsSet) p.get(CUT_POINTS);
         windowWidthSec = p.getInteger(WINDOW_WIDTH);
         epochWidthVsK4b2 = p.getInteger(PHONE_EP_WIDTH_VS_K4B2);
-        deleteIntermediateFile = p.getBoolean(DELETE_TEMP_FILE);
+        deleteTempFiles = p.getBoolean(DELETE_TEMP_FILE);
         setClassifier(Profile.POCKET, PhoneType.GYRO, p.getString(PKT_GYR_CLASSIFIER_PATH));
         setClassifier(Profile.HOLSTER, PhoneType.GYRO, p.getString(HOL_GYR_CLASSIFIER_PATH));
         setClassifier(Profile.POCKET, PhoneType.NO_GYRO, p.getString(PKT_NGYR_CLASSIFIER_PATH));

@@ -1,6 +1,6 @@
 package com.joffrey_bion.csv_epoch_synchronizer.actigraph;
 
-import com.joffrey_bion.utils.classifier.Classifier;
+import com.joffrey_bion.utils.classification.Classifier;
 
 /**
  * An enum containing different sets of cut points to determine a level of activity
@@ -26,7 +26,7 @@ public enum CutPointsSet {
     SEDENTARY_VS_ALL(new String[] { "Sedentary", "Active" }, new double[] { 150.0 });
 
     private final Classifier<String> classifier;
-    
+
     /**
      * Creates a set of cut points that separate different levels by different
      * thresholds.
@@ -55,5 +55,14 @@ public enum CutPointsSet {
      */
     public String countsToLevel(double countsPerMin) {
         return classifier.valueToLevel(countsPerMin);
+    }
+
+    /**
+     * Return the possible levels of classification.
+     * 
+     * @return the possible levels of classification.
+     */
+    public String[] getLevels() {
+        return classifier.getLevels();
     }
 }

@@ -6,6 +6,8 @@ import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneLocation;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
 import com.joffrey_bion.utils.stats.FlowStats;
 import com.joffrey_bion.utils.xml.serializers.DateArraySerializer;
 import com.joffrey_bion.utils.xml.serializers.DurationArraySerializer;
@@ -19,9 +21,6 @@ public class PvKParams extends Parameters {
 
     static final String PHONE_FILE_PATH = "phone-raw-file";
     static final String K4B2_FILE_PATH = "k4b2-file";
-    static final String PARTICIPANT_FILE_PATH = "participant";
-    static final String OUTPUT_FILE_PATH = "output-file";
-    static final String WRITE_OUTPUT = "write-output";
     static final String PROFILE = "profile";
     static final String PHONE_TYPE = "phone-type";
     static final String PHONE_LOCATION = "phone-location";
@@ -31,20 +30,19 @@ public class PvKParams extends Parameters {
 
     static final String PHONE_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     static final String K4B2_FORMAT = "HH:mm:ss";
-    
+
     private static final DateArraySerializer PHONE_SER = new DateArraySerializer(PHONE_FORMAT);
     private static final DurationArraySerializer K4B2_SER = new DurationArraySerializer(K4B2_FORMAT);
-    private static final EnumSerializer<PhoneType> PHONE_TYPE_SER = new EnumSerializer<>(PhoneType.class);
-    private static final EnumSerializer<PhoneLocation> PHONE_LOCATION_SER = new EnumSerializer<>(PhoneLocation.class);
+    private static final EnumSerializer<PhoneType> PHONE_TYPE_SER = new EnumSerializer<>(
+            PhoneType.class);
+    private static final EnumSerializer<PhoneLocation> PHONE_LOCATION_SER = new EnumSerializer<>(
+            PhoneLocation.class);
     private static final EnumSerializer<Profile> PROFILE_SER = new EnumSerializer<>(Profile.class);
-    
-    private static final ParamsSchema SCHEMA = new ParamsSchema(1);
+
+    private static final ParamsSchema SCHEMA = new ParamsSchema(3);
     static {
         SCHEMA.addParam(PHONE_FILE_PATH, SimpleSerializer.STRING);
         SCHEMA.addParam(K4B2_FILE_PATH, SimpleSerializer.STRING);
-        SCHEMA.addParam(PARTICIPANT_FILE_PATH, SimpleSerializer.STRING);
-        SCHEMA.addParam(OUTPUT_FILE_PATH, SimpleSerializer.STRING, false, "");
-        SCHEMA.addParam(WRITE_OUTPUT, SimpleSerializer.BOOLEAN, false, true);
         SCHEMA.addParam(PROFILE, PROFILE_SER);
         SCHEMA.addParam(PHONE_LOCATION, PHONE_LOCATION_SER);
         SCHEMA.addParam(PHONE_TYPE, PHONE_TYPE_SER);
@@ -53,51 +51,25 @@ public class PvKParams extends Parameters {
         SCHEMA.addParam(K4B2_SPIKES_LIST, K4B2_SER, "Format: " + K4B2_FORMAT);
     }
 
-    /**
-     * Path to the CSV file containing the raw data from the phone.
-     */
+    /** Path to the CSV file containing the raw data from the phone. */
     public String phoneRawFile;
-    /**
-     * Path to the CSV file containing the epochs from the K4b2.
-     */
+    /** Path to the CSV file containing the epochs from the K4b2. */
     public String k4b2File;
-    /**
-     * Path to the XML file containing the participant's info.
-     */
-    public String participantFile;
-    /**
-     * Path to the XML file containing the decision tree.
-     */
+    /** Path to the XML file containing the decision tree. */
     public String classifierFile;
-    /**
-     * Path to the output file to write the results to.
-     */
-    public String outputFile;
-    /**
-     * Indicates whether the results should be written to a file.
-     */
-    public boolean writeOutput;
-    /**
-     * Number of markers used to synchronize the phone, which have to be skipped.
-     */
+    /** Number of markers used to synchronize the phone, which have to be skipped. */
     public Integer nbSyncMarkers;
+    /** Holster or Pocket profile. */
+    public Profile profile;
+    /** Whether the phone has a gyroscope or not. */
+    public PhoneType phoneType;
+    /** Whether the phone was worn on the left or right side. */
+    public PhoneLocation phoneLocation;
     /**
      * Delay in nanoseconds to add to a phone time to find the corresponding
      * actigraph time.
      */
     public long delayPhoneToK4b2;
-    /**
-     * Holster or Pocket profile.
-     */
-    public Profile profile;
-    /**
-     * Whether the phone has a gyroscope or not.
-     */
-    public PhoneType phoneType;
-    /**
-     * Whether the phone was worn on the left or right side.
-     */
-    public PhoneLocation phoneLocation;
 
     /**
      * Creates a new {@link PvKParams} object from the specified XML file.
@@ -135,10 +107,8 @@ public class PvKParams extends Parameters {
     public void populatePublicFields() {
         this.phoneRawFile = getString(PHONE_FILE_PATH);
         this.k4b2File = getString(K4B2_FILE_PATH);
-        this.participantFile = getString(K4B2_FILE_PATH);
-        this.outputFile = getString(OUTPUT_FILE_PATH);
-        this.writeOutput = getBoolean(WRITE_OUTPUT);
-        this.classifierFile = Config.get().getClassifier(get(PROFILE, PROFILE_SER), get(PHONE_TYPE, PHONE_TYPE_SER));
+        this.classifierFile = Config.get().getClassifier(get(PROFILE, PROFILE_SER),
+                get(PHONE_TYPE, PHONE_TYPE_SER));
         this.nbSyncMarkers = getInteger(NB_SYNC_MARKERS);
         this.profile = get(PROFILE, PROFILE_SER);
         this.phoneType = get(PHONE_TYPE, PHONE_TYPE_SER);

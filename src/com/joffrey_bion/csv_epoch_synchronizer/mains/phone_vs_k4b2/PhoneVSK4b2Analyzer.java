@@ -1,5 +1,6 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 
+import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -8,13 +9,11 @@ import javax.swing.SwingUtilities;
 
 import org.xml.sax.SAXException;
 
-import com.joffrey_bion.csv.CsvWriter;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.K4b2StatsCalculator;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Phase;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.Results;
 import com.joffrey_bion.csv_epoch_synchronizer.k4b2.stats.PhaseResults;
-import com.joffrey_bion.csv_epoch_synchronizer.participant.Participant;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.RawToEpConverter;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppender;
 import com.joffrey_bion.generic_guis.LookAndFeel;
@@ -24,7 +23,11 @@ import com.joffrey_bion.generic_guis.file_processor.JFileProcessorWindow;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 public class PhoneVSK4b2Analyzer {
-
+    
+    static final int INPUT_PHONE = 0;
+    static final int INPUT_K4B2 = 1;
+    static final int INPUT_XML_TREE = 2;
+    
     public static void main(String[] args) {
         if (args.length == 0) {
             SwingUtilities.invokeLater(new Runnable() {
@@ -46,14 +49,11 @@ public class PhoneVSK4b2Analyzer {
         LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
-                "Phone raw file", "K4b2 test file", "Participant file", "XML Tree file" },
-                "Output file");
+                "Phone raw file", "K4b2 test file", "XML Tree file" }, new String[]{});
         FilePicker[] ifps = filePickers.getInputFilePickers();
-        ifps[0].addFileTypeFilter(".csv", "Comma-Separated Values file");
-        ifps[1].addFileTypeFilter(".csv", "Comma-Separated Values file");
-        ifps[2].addFileTypeFilter(".xml", "XML Classifier file");
-        FilePicker[] ofps = filePickers.getOutputFilePickers();
-        ofps[0].addFileTypeFilter(".txt", "Text file");
+        ifps[INPUT_PHONE].addFileTypeFilter(".csv", "Comma-Separated Values file");
+        ifps[INPUT_K4B2].addFileTypeFilter(".csv", "Comma-Separated Values file");
+        ifps[INPUT_XML_TREE].addFileTypeFilter(".xml", "XML Classifier file");
         final PvKArgsPanel pvKArgsPanel = new PvKArgsPanel(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-K4b2 Analyzer", "Process",
@@ -76,15 +76,17 @@ public class PhoneVSK4b2Analyzer {
         frame.setVisible(true);
     }
 
-    public static HashMap<String, HashMap<Phase, Accuracy>> processSeveralParams(
-            String[] paramsFiles) {
-        HashMap<String, HashMap<Phase, Accuracy>> res = new HashMap<>();
+    public static void processSeveralParams(String[] paramsFiles) {
         for (String xmlParamsFile : paramsFiles) {
             System.out.println("------[ " + xmlParamsFile + " ]---------------------");
             System.out.println();
             try {
                 PvKParams params = new PvKParams(xmlParamsFile);
-                res.put(xmlParamsFile, analyze(params));
+                HashMap<Phase, Accuracy> accuracies = analyze(params);
+                for (Phase p : accuracies.keySet()) {
+                    System.out.println(p);
+                    System.out.println(accuracies.get(p));
+                }
             } catch (IOException e) {
                 System.err.println("I/O error: " + e.getMessage());
             } catch (SAXException e) {
@@ -94,7 +96,6 @@ public class PhoneVSK4b2Analyzer {
             }
             System.out.println();
         }
-        return res;
     }
 
     public static HashMap<Phase, Accuracy> analyze(PvKParams params) {
@@ -108,6 +109,14 @@ public class PhoneVSK4b2Analyzer {
                 ppp.setPhaseResults(p, pr);
                 RawToEpConverter.createEpochsFile(ppp);
                 HashMap<String, Integer> lvlsDistrib = LabelAppender.appendLabels(ppp);
+                if (Config.get().deleteTempFiles) {
+                    if (new File(ppp.getUnlabeledDatasetFilePath()).delete()) {
+                        System.out.println("Temp file deleted (" + ppp.getUnlabeledDatasetFilePath() + ")");
+                    }
+                    if (new File(ppp.getLabeledDatasetFilePath()).delete()) {
+                        System.out.println("Temp file deleted (" + ppp.getUnlabeledDatasetFilePath() + ")");
+                    }
+                }
                 HashMap<String, Double> lvlsTimeDistrib = new HashMap<>();
                 for (String level : lvlsDistrib.keySet()) {
                     lvlsTimeDistrib.put(level,
@@ -119,30 +128,12 @@ public class PhoneVSK4b2Analyzer {
                 System.out.println(lvlsTimeDistrib);
                 accuracies.put(p, new Accuracy(lvlsTimeDistrib, pr.getLevelsDistribution()));
             }
-            for (Phase p : accuracies.keySet()) {
-                System.out.println(p);
-                System.out.println(accuracies.get(p));
-            }
-            writeResults(params, accuracies);
             return accuracies;
         } catch (IOException e) {
             System.err.println("I/O error: " + e.getMessage());
         } catch (SAXException e) {
-            System.err.println("Incorrect decision tree file: " + e.getMessage());
-        } catch (SpecificationNotMetException e) {
-            System.err.println("Incorrect participant file: " + e.getMessage());
+            System.err.println("Incorrect XML file: " + e.getMessage());
         }
         return null;
-    }
-
-    private static void writeResults(PvKParams params, HashMap<Phase, Accuracy> accuracies)
-            throws IOException, SAXException, SpecificationNotMetException {
-        if (!params.writeOutput) {
-            return;
-        }
-        Participant participant = new Participant(params.participantFile);
-        CsvWriter writer = new CsvWriter(params.outputFile);
-        // TODO create headers list for accuracies and append it to the participant's
-        // TODO create values list for accuracies and append it to the participant's
     }
 }

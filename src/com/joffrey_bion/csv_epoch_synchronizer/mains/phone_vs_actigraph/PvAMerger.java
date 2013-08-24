@@ -14,6 +14,8 @@ import com.joffrey_bion.utils.dates.DateHelper;
 
 public class PvAMerger {
 
+    public static final String APPENDED_HEADER = "ActigraphLevel";
+    
     private PhoneCsvReader phone;
     private ActigraphCsvReader actigraph;
     private CsvWriter writer;
@@ -36,7 +38,7 @@ public class PvAMerger {
 
     public void createLabeledFile(PvAParams props) throws IOException {
         // write new columns headers
-        String[] headers = shiftLeftAndAppend(phone.readRow(), "Activity Level");
+        String[] headers = shiftLeftAndAppend(phone.readRow(), APPENDED_HEADER);
         writer.writeRow(headers);
 
         // reach start time in both files

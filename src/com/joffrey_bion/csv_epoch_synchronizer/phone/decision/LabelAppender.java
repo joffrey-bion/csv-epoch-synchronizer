@@ -18,6 +18,8 @@ import com.joffrey_bion.csv.CsvWriter;
  */
 public class LabelAppender {
 
+    public static final String APPENDED_HEADER = "Classified As";
+
     private final DecisionTree tree;
     private HashMap<String, Integer> features;
     private HashMap<String, Integer> lvlsDistrib;
@@ -55,7 +57,7 @@ public class LabelAppender {
      *             If any parse error occurs when reading the classifier XML file.
      */
     public static HashMap<String, Integer> appendLabels(String xmlTreeFile, String datasetFile,
-            String outputPath) throws NotACsvFileException, SAXException, IOException {
+            String outputPath, boolean removeTimestamps) throws NotACsvFileException, SAXException, IOException {
         System.out.println("Opening dataset file '" + datasetFile + "'...");
         CsvReader reader = new CsvReader(datasetFile);
         String[] row = reader.readRow();
@@ -63,9 +65,9 @@ public class LabelAppender {
         la.indexFeatures(row);
         System.out.println("Classifying...");
         CsvWriter writer = new CsvWriter(outputPath);
-        writer.writeRow(append(row, "Classified As"));
+        writer.writeRow(append(row, APPENDED_HEADER, removeTimestamps));
         while ((row = reader.readRow()) != null) {
-            writer.writeRow(la.appendLabel(row));
+            writer.writeRow(la.appendLabel(row, removeTimestamps));
         }
         reader.close();
         writer.close();
@@ -86,8 +88,8 @@ public class LabelAppender {
      */
     public static HashMap<String, Integer> appendLabels(LabelAppenderParams params)
             throws IOException, SAXException {
-        return appendLabels(params.getClassifierFilePath(), params.getDatasetFilePath(),
-                params.getLabeledFilePath());
+        return appendLabels(params.getClassifierFilePath(), params.getUnlabeledDatasetFilePath(),
+                params.getLabeledDatasetFilePath(), params.shouldRemoveTimestamps());
     }
 
     /**
@@ -108,18 +110,20 @@ public class LabelAppender {
     }
 
     /**
-     * Determines the level of the sepcified row and appends it at the end of this
+     * Determines the level of the specified row and appends it at the end of this
      * row.
      * 
      * @param row
      *            The row to append the level to.
+     * @param removeTimestamp
+     *            Whether the timestamp (first column) should be removed.
      * @return The source row with the appended level.
      */
-    private String[] appendLabel(String[] row) {
+    private String[] appendLabel(String[] row, boolean removeTimestamp) {
         String label = tree.classify(row, features);
         int oldNb = lvlsDistrib.containsKey(label) ? lvlsDistrib.get(label) : 0;
         lvlsDistrib.put(label, oldNb + 1);
-        return append(row, label);
+        return append(row, label, removeTimestamp);
     }
 
     /**
@@ -129,10 +133,17 @@ public class LabelAppender {
      *            The original array to append a value to.
      * @param element
      *            The element to append at the end of the original array.
+     * @param removeFirstCol
+     *            Whether the first column should be removed (shift left when
+     *            appending).
      * @return The array with the appended element.
      */
-    private static String[] append(String[] tab, String element) {
-        String[] res = Arrays.copyOfRange(tab, 1, tab.length + 1);
+    private static String[] append(String[] tab, String element, boolean removeFirstCol) {
+        int startIndex = 0;
+        if (removeFirstCol) {
+            startIndex = 1;
+        }
+        String[] res = Arrays.copyOfRange(tab, startIndex, tab.length + 1);
         res[res.length - 1] = element;
         return res;
     }

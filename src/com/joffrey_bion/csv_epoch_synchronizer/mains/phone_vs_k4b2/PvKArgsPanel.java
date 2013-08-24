@@ -6,7 +6,6 @@ import javax.swing.JLabel;
 import javax.swing.BoxLayout;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
-import javax.swing.JCheckBox;
 import javax.swing.Box;
 import javax.swing.JComboBox;
 import java.awt.Component;
@@ -16,6 +15,8 @@ import java.awt.event.ActionListener;
 
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneLocation;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
 import com.joffrey_bion.generic_guis.file_picker.FilePicker;
 import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 import com.joffrey_bion.generic_guis.parameters.SaveLoadPanel;
@@ -31,19 +32,12 @@ import java.awt.BorderLayout;
 @SuppressWarnings("serial")
 class PvKArgsPanel extends JPanel {
 
-    private static final int INPUT_PHONE = 0;
-    private static final int INPUT_K4B2 = 1;
-    private static final int INPUT_PARTICIPANT = 2;
-    private static final int INPUT_XML_TREE = 3;
-    private static final int OUTPUT = 0;
-
     private static final int NB_MAX_SPIKES = 6;
     private static final int DATE_TEXTFIELD_WIDTH = 17;
     private static final int TIME_TEXTFIELD_WIDTH = 10;
     private static final Integer[] NB_SYNC_MARKERS_LIST = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
 
     private final JFilePickersPanel filePickers;
-    private JCheckBox chckbxOutput;
     private JComboBox<Integer> nbSyncMarkersBox;
     private JLabel[] tfSpikeLabel;
     private JTextField[] tfSpikePhone;
@@ -68,41 +62,22 @@ class PvKArgsPanel extends JPanel {
         add(panelLeft);
         panelLeft.setLayout(new BorderLayout(0, 0));
 
-        JPanel panel_2 = new JPanel();
-        panelLeft.add(panel_2, BorderLayout.CENTER);
+        JPanel panelSettings = new JPanel();
+        panelLeft.add(panelSettings, BorderLayout.CENTER);
         GridBagLayout gbl_panel_2 = new GridBagLayout();
         gbl_panel_2.columnWidths = new int[] { 0, 0, 0 };
-        gbl_panel_2.rowHeights = new int[] { 0, 0, 0, 0, 0, 0 };
+        gbl_panel_2.rowHeights = new int[] { 0, 0, 0, 0, 0 };
         gbl_panel_2.columnWeights = new double[] { 0.0, 0.0, 1.0 };
-        gbl_panel_2.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0, 1.0 };
-        panel_2.setLayout(gbl_panel_2);
-
-        chckbxOutput = new JCheckBox("Write the output to a file");
-        chckbxOutput.setEnabled(false);
-        GridBagConstraints gbc_chckbxOutput = new GridBagConstraints();
-        gbc_chckbxOutput.anchor = GridBagConstraints.WEST;
-        gbc_chckbxOutput.gridwidth = 2;
-        gbc_chckbxOutput.insets = new Insets(0, 0, 5, 5);
-        gbc_chckbxOutput.gridx = 0;
-        gbc_chckbxOutput.gridy = 0;
-        panel_2.add(chckbxOutput, gbc_chckbxOutput);
-        chckbxOutput.setSelected(true);
-        chckbxOutput.setHorizontalAlignment(SwingConstants.TRAILING);
-        chckbxOutput.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                PvKArgsPanel.this.filePickers.setOutputFilePickerEnabled(OUTPUT, chckbxOutput
-                        .isSelected());
-            }
-        });
+        gbl_panel_2.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 1.0 };
+        panelSettings.setLayout(gbl_panel_2);
 
         JLabel lblNbSyncMarkers = new JLabel("Number of sync markers to skip:");
         GridBagConstraints gbc_lblNbSyncMarkers = new GridBagConstraints();
         gbc_lblNbSyncMarkers.anchor = GridBagConstraints.WEST;
         gbc_lblNbSyncMarkers.insets = new Insets(0, 0, 5, 5);
         gbc_lblNbSyncMarkers.gridx = 0;
-        gbc_lblNbSyncMarkers.gridy = 1;
-        panel_2.add(lblNbSyncMarkers, gbc_lblNbSyncMarkers);
+        gbc_lblNbSyncMarkers.gridy = 0;
+        panelSettings.add(lblNbSyncMarkers, gbc_lblNbSyncMarkers);
 
         nbSyncMarkersBox = new JComboBox<>();
         nbSyncMarkersBox.setModel(new DefaultComboBoxModel<>(NB_SYNC_MARKERS_LIST));
@@ -111,16 +86,16 @@ class PvKArgsPanel extends JPanel {
         gbc_nbSyncMarkersBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_nbSyncMarkersBox.insets = new Insets(0, 0, 5, 5);
         gbc_nbSyncMarkersBox.gridx = 1;
-        gbc_nbSyncMarkersBox.gridy = 1;
-        panel_2.add(nbSyncMarkersBox, gbc_nbSyncMarkersBox);
+        gbc_nbSyncMarkersBox.gridy = 0;
+        panelSettings.add(nbSyncMarkersBox, gbc_nbSyncMarkersBox);
 
         JLabel lblPhonesType = new JLabel("Phone's type:");
         GridBagConstraints gbc_lblPhonesType = new GridBagConstraints();
         gbc_lblPhonesType.anchor = GridBagConstraints.WEST;
         gbc_lblPhonesType.insets = new Insets(0, 0, 5, 5);
         gbc_lblPhonesType.gridx = 0;
-        gbc_lblPhonesType.gridy = 2;
-        panel_2.add(lblPhonesType, gbc_lblPhonesType);
+        gbc_lblPhonesType.gridy = 1;
+        panelSettings.add(lblPhonesType, gbc_lblPhonesType);
 
         cbGyro = new JComboBox<>();
         cbGyro.setModel(new DefaultComboBoxModel<>(PhoneType.values()));
@@ -129,8 +104,8 @@ class PvKArgsPanel extends JPanel {
         gbc_cbGyro.insets = new Insets(0, 0, 5, 5);
         gbc_cbGyro.fill = GridBagConstraints.HORIZONTAL;
         gbc_cbGyro.gridx = 1;
-        gbc_cbGyro.gridy = 2;
-        panel_2.add(cbGyro, gbc_cbGyro);
+        gbc_cbGyro.gridy = 1;
+        panelSettings.add(cbGyro, gbc_cbGyro);
         cbGyro.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -143,8 +118,8 @@ class PvKArgsPanel extends JPanel {
         gbc_lblLocation.anchor = GridBagConstraints.WEST;
         gbc_lblLocation.insets = new Insets(0, 0, 5, 5);
         gbc_lblLocation.gridx = 0;
-        gbc_lblLocation.gridy = 3;
-        panel_2.add(lblLocation, gbc_lblLocation);
+        gbc_lblLocation.gridy = 2;
+        panelSettings.add(lblLocation, gbc_lblLocation);
 
         profileComboBox = new JComboBox<>();
         profileComboBox.setModel(new DefaultComboBoxModel<>(Profile.values()));
@@ -153,8 +128,8 @@ class PvKArgsPanel extends JPanel {
         gbc_profileComboBox.insets = new Insets(0, 0, 5, 5);
         gbc_profileComboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_profileComboBox.gridx = 1;
-        gbc_profileComboBox.gridy = 3;
-        panel_2.add(profileComboBox, gbc_profileComboBox);
+        gbc_profileComboBox.gridy = 2;
+        panelSettings.add(profileComboBox, gbc_profileComboBox);
         profileComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -169,8 +144,8 @@ class PvKArgsPanel extends JPanel {
         gbc_cbLocation.insets = new Insets(0, 0, 5, 5);
         gbc_cbLocation.fill = GridBagConstraints.HORIZONTAL;
         gbc_cbLocation.gridx = 1;
-        gbc_cbLocation.gridy = 4;
-        panel_2.add(cbLocation, gbc_cbLocation);
+        gbc_cbLocation.gridy = 3;
+        panelSettings.add(cbLocation, gbc_cbLocation);
 
         Component verticalStrut_1 = Box.createVerticalStrut(5);
         add(verticalStrut_1);
@@ -278,8 +253,7 @@ class PvKArgsPanel extends JPanel {
             panelSpikes.add(tfSpikeK4b2[i], gbc_tfSpikeK4b2);
         }
 
-        filePickers.setOutputFilePickerEnabled(OUTPUT, chckbxOutput.isSelected());
-        filePickers.setInputFilePickerEditable(INPUT_XML_TREE, false);
+        filePickers.setInputFilePickerEditable(PhoneVSK4b2Analyzer.INPUT_XML_TREE, false);
         updateClassifierPath();
     }
 
@@ -292,12 +266,9 @@ class PvKArgsPanel extends JPanel {
      */
     private void setParameters(PvKParams params) {
         FilePicker[] inputs = filePickers.getInputFilePickers();
-        inputs[0].setSelectedFilePath(params.getString(PvKParams.PHONE_FILE_PATH));
-        inputs[1].setSelectedFilePath(params.getString(PvKParams.K4B2_FILE_PATH));
-        inputs[2].setSelectedFilePath(params.classifierFile);
-        FilePicker[] outputs = filePickers.getOutputFilePickers();
-        outputs[0].setSelectedFilePath(params.getString(PvKParams.OUTPUT_FILE_PATH));
-        chckbxOutput.setSelected(params.getBoolean(PvKParams.WRITE_OUTPUT));
+        inputs[PhoneVSK4b2Analyzer.INPUT_PHONE].setSelectedFilePath(params.getString(PvKParams.PHONE_FILE_PATH));
+        inputs[PhoneVSK4b2Analyzer.INPUT_K4B2].setSelectedFilePath(params.getString(PvKParams.K4B2_FILE_PATH));
+        inputs[PhoneVSK4b2Analyzer.INPUT_XML_TREE].setSelectedFilePath(params.classifierFile);
         nbSyncMarkersBox.setSelectedItem(params.get(PvKParams.NB_SYNC_MARKERS));
         profileComboBox.setSelectedItem(params.get(PvKParams.PROFILE));
         params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
@@ -321,11 +292,8 @@ class PvKArgsPanel extends JPanel {
      *             If one field could not be properly parsed.
      */
     public void getParameters(PvKParams params) throws ParseException {
-        setFileParam(params, PvKParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[INPUT_PHONE]);
-        setFileParam(params, PvKParams.K4B2_FILE_PATH, filePickers.getInputFilePaths()[INPUT_K4B2]);
-        setFileParam(params, PvKParams.PARTICIPANT_FILE_PATH, filePickers.getInputFilePaths()[INPUT_PARTICIPANT]);
-        setFileParam(params, PvKParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[OUTPUT]);
-        params.set(PvKParams.WRITE_OUTPUT, chckbxOutput.isSelected());
+        setFileParam(params, PvKParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[PhoneVSK4b2Analyzer.INPUT_PHONE]);
+        setFileParam(params, PvKParams.K4B2_FILE_PATH, filePickers.getInputFilePaths()[PhoneVSK4b2Analyzer.INPUT_K4B2]);
         params.set(PvKParams.NB_SYNC_MARKERS, nbSyncMarkersBox.getSelectedItem());
         params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
         params.set(PvKParams.PHONE_TYPE, cbGyro.getSelectedItem());
@@ -354,7 +322,7 @@ class PvKArgsPanel extends JPanel {
 
     private void updateClassifierPath() {
         FilePicker[] inputs = PvKArgsPanel.this.filePickers.getInputFilePickers();
-        inputs[INPUT_XML_TREE].setSelectedFilePath(Config.get().getClassifier(
+        inputs[PhoneVSK4b2Analyzer.INPUT_XML_TREE].setSelectedFilePath(Config.get().getClassifier(
                 (Profile) profileComboBox.getSelectedItem(), (PhoneType) cbGyro.getSelectedItem()));
     }
 

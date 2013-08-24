@@ -7,8 +7,8 @@ import javax.swing.JTextField;
 import javax.swing.BoxLayout;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
-import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneLocation;
-import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneLocation;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
 import com.joffrey_bion.generic_guis.file_picker.FilePicker;
 import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 import com.joffrey_bion.generic_guis.parameters.SaveLoadPanel;
@@ -74,7 +74,7 @@ class PvAArgsPanel extends JPanel {
         gbl_panelLimits.columnWidths = new int[] { 0, 0, 0 };
         gbl_panelLimits.rowHeights = new int[] { 0, 0, 0, 0, 0 };
         gbl_panelLimits.columnWeights = new double[] { 0.0, 0.0, 1.0 };
-        gbl_panelLimits.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
+        gbl_panelLimits.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0, 0.0 };
         panelLimits.setLayout(gbl_panelLimits);
 
         JLabel lblNewLabel = new JLabel("Processing Limits (actigraph time)");
@@ -138,9 +138,9 @@ class PvAArgsPanel extends JPanel {
         panelArgsLeft.add(panelSettings);
         GridBagLayout gbl_panelSettings = new GridBagLayout();
         gbl_panelSettings.columnWidths = new int[] { 0, 0, 0 };
-        gbl_panelSettings.rowHeights = new int[] { 0, 0, 0 };
+        gbl_panelSettings.rowHeights = new int[] { 0, 0, 0, 0 };
         gbl_panelSettings.columnWeights = new double[] { 0.0, 0.0, Double.MIN_VALUE };
-        gbl_panelSettings.rowWeights = new double[] { 0.0, 0.0, 0.0 };
+        gbl_panelSettings.rowWeights = new double[] { 0.0, 0.0, 0.0, 0.0 };
         panelSettings.setLayout(gbl_panelSettings);
 
         JLabel lblEpochWidth = new JLabel("Actigraph epochs length (sec):");
@@ -178,13 +178,31 @@ class PvAArgsPanel extends JPanel {
         gbc_cBoxActigraphFileFormat.gridx = 1;
         gbc_cBoxActigraphFileFormat.gridy = 1;
         panelSettings.add(cBoxActigraphFileFormat, gbc_cBoxActigraphFileFormat);
+        
+                JLabel lblPhonesType = new JLabel("Phone's type:");
+                GridBagConstraints gbc_lblPhonesType = new GridBagConstraints();
+                gbc_lblPhonesType.anchor = GridBagConstraints.WEST;
+                gbc_lblPhonesType.insets = new Insets(0, 0, 5, 5);
+                gbc_lblPhonesType.gridx = 0;
+                gbc_lblPhonesType.gridy = 2;
+                panelSettings.add(lblPhonesType, gbc_lblPhonesType);
+        
+                cbGyro = new JComboBox<>();
+                cbGyro.setModel(new DefaultComboBoxModel<>(PhoneType.values()));
+                cbGyro.setSelectedIndex(0);
+                GridBagConstraints gbc_cbGyro = new GridBagConstraints();
+                gbc_cbGyro.insets = new Insets(0, 0, 5, 0);
+                gbc_cbGyro.fill = GridBagConstraints.HORIZONTAL;
+                gbc_cbGyro.gridx = 1;
+                gbc_cbGyro.gridy = 2;
+                panelSettings.add(cbGyro, gbc_cbGyro);
 
         JLabel lblLocation = new JLabel("Phone's location:");
         GridBagConstraints gbc_lblLocation = new GridBagConstraints();
         gbc_lblLocation.anchor = GridBagConstraints.WEST;
         gbc_lblLocation.insets = new Insets(0, 0, 5, 5);
         gbc_lblLocation.gridx = 0;
-        gbc_lblLocation.gridy = 2;
+        gbc_lblLocation.gridy = 3;
         panelSettings.add(lblLocation, gbc_lblLocation);
 
         profileComboBox = new JComboBox<>();
@@ -194,7 +212,7 @@ class PvAArgsPanel extends JPanel {
         gbc_profileComboBox.insets = new Insets(0, 0, 5, 0);
         gbc_profileComboBox.fill = GridBagConstraints.HORIZONTAL;
         gbc_profileComboBox.gridx = 1;
-        gbc_profileComboBox.gridy = 2;
+        gbc_profileComboBox.gridy = 3;
         panelSettings.add(profileComboBox, gbc_profileComboBox);
         
         
@@ -204,25 +222,8 @@ class PvAArgsPanel extends JPanel {
         gbc_cbLocation.insets = new Insets(0, 0, 5, 0);
         gbc_cbLocation.fill = GridBagConstraints.HORIZONTAL;
         gbc_cbLocation.gridx = 1;
-        gbc_cbLocation.gridy = 3;
+        gbc_cbLocation.gridy = 4;
         panelSettings.add(cbLocation, gbc_cbLocation);
-
-        JLabel lblPhonesType = new JLabel("Phone's type:");
-        GridBagConstraints gbc_lblPhonesType = new GridBagConstraints();
-        gbc_lblPhonesType.anchor = GridBagConstraints.WEST;
-        gbc_lblPhonesType.insets = new Insets(0, 0, 0, 5);
-        gbc_lblPhonesType.gridx = 0;
-        gbc_lblPhonesType.gridy = 4;
-        panelSettings.add(lblPhonesType, gbc_lblPhonesType);
-
-        cbGyro = new JComboBox<>();
-        cbGyro.setModel(new DefaultComboBoxModel<>(PhoneType.values()));
-        cbGyro.setSelectedIndex(0);
-        GridBagConstraints gbc_cbGyro = new GridBagConstraints();
-        gbc_cbGyro.fill = GridBagConstraints.HORIZONTAL;
-        gbc_cbGyro.gridx = 1;
-        gbc_cbGyro.gridy = 4;
-        panelSettings.add(cbGyro, gbc_cbGyro);
         
         panel.add(Box.createHorizontalStrut(5));
         JSeparator separator = new JSeparator();

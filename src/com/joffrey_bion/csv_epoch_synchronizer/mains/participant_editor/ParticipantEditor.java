@@ -35,7 +35,7 @@ public class ParticipantEditor {
      */
     private static void openWindow() {
         LookAndFeel.setSystemLookAndFeel();
-        final ParticipantArgsPanel pap = new ParticipantArgsPanel();
+        final PEArgsPanel pap = new PEArgsPanel();
         @SuppressWarnings("serial")
         JFileEditorWindow frame = new JFileEditorWindow("Participant Editor", pap) {
             @Override

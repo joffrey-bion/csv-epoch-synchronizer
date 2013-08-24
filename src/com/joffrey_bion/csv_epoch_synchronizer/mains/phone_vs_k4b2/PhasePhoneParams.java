@@ -75,12 +75,17 @@ public class PhasePhoneParams implements PhoneRawToEpParams, LabelAppenderParams
     }
 
     @Override
-    public String getDatasetFilePath() {
+    public String getUnlabeledDatasetFilePath() {
         return getPhoneEpochFilePath();
     }
 
     @Override
-    public String getLabeledFilePath() {
+    public String getLabeledDatasetFilePath() {
         return phoneLabeledFilePath;
+    }
+
+    @Override
+    public boolean shouldRemoveTimestamps() {
+        return true;
     }
 }

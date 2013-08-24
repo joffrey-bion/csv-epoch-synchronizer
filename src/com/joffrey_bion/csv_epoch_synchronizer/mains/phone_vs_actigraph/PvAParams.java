@@ -1,6 +1,8 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import org.xml.sax.SAXException;
 
@@ -8,9 +10,11 @@ import com.joffrey_bion.csv.Csv;
 import com.joffrey_bion.csv_epoch_synchronizer.actigraph.ActigraphFileFormat;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
-import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneLocation;
-import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PhoneType;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneLocation;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppender;
+import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppenderParams;
 import com.joffrey_bion.utils.stats.FlowStats;
 import com.joffrey_bion.utils.xml.serializers.DateArraySerializer;
 import com.joffrey_bion.utils.xml.serializers.DateSerializer;
@@ -20,7 +24,7 @@ import com.joffrey_bion.xml_parameters_serializer.Parameters;
 import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
-public class PvAParams extends Parameters implements PhoneRawToEpParams {
+public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAppenderParams, ClassificationAnalysisParams {
 
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
     private static final ActigraphFileFormat DEFAULT_ACTIG_FILE_FORMAT = ActigraphFileFormat.EXPORTED;
@@ -74,6 +78,8 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     public String phoneRawFilename;
     /** Path to the file containing the epochs from the actigraph. */
     public String actigraphEpFilename;
+    /** Path to the XML file containing the decision tree. */
+    public String classifierFile;
     /** Path to the output file. */
     public String outputFilename;
     /** Start time in actigraph reference in nanoseconds. */
@@ -147,6 +153,8 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
         this.profile = get(PROFILE, PROFILE_SER);
         this.phoneType = get(PHONE_TYPE, PHONE_TYPE_SER);
         this.phoneLocation = get(PHONE_LOCATION, PHONE_LOCATION_SER);
+        this.classifierFile = Config.get().getClassifier(get(PROFILE, PROFILE_SER),
+                get(PHONE_TYPE, PHONE_TYPE_SER));
         setWindowFields(getInteger(EPOCH_WIDTH_SEC));
         Long[] phoneSpikes = get(PHONE_SPIKES_LIST, SPIKES_SER);
         Long[] actigSpikes = get(ACTIG_SPIKES_LIST, SPIKES_SER);
@@ -226,5 +234,45 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams {
     @Override
     public String getPhoneEpochFilePath() {
         return Csv.removeExtension(phoneRawFilename) + "-temp.csv";
+    }
+
+    @Override
+    public String getClassifierFilePath() {
+        return classifierFile;
+    }
+
+    @Override
+    public String getUnlabeledDatasetFilePath() {
+        return getPhoneEpochFilePath();
+    }
+
+    @Override
+    public String getLabeledDatasetFilePath() {
+        return Csv.removeExtension(phoneRawFilename) + "-temp-labeled.csv";
+    }
+
+    @Override
+    public String getTwoLabeledFile() {
+        return Csv.removeExtension(phoneRawFilename) + "-temp-double-labeled.csv";
+    }
+
+    @Override
+    public String getHeaderClassifiedAs() {
+        return LabelAppender.APPENDED_HEADER;
+    }
+
+    @Override
+    public String getHeaderTruth() {
+        return PvAMerger.APPENDED_HEADER;
+    }
+
+    @Override
+    public List<String> getLevels() {
+        return Arrays.asList(Config.get().cutPointsSet.getLevels());
+    }
+    
+    @Override
+    public boolean shouldRemoveTimestamps() {
+        return false;
     }
 }

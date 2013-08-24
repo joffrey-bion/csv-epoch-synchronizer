@@ -1,6 +1,7 @@
 package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 
 public class Accuracy {
 
@@ -30,6 +31,18 @@ public class Accuracy {
 
     public HashMap<String, Double> getPerLvlAccuracy() {
         return perLvlAccuracy;
+    }
+    
+    public LinkedList<String> getHeaders(String prefix) {
+        LinkedList<String> headers = new LinkedList<>();
+        headers.add(prefix + "OverallAccuracy");
+        return headers;
+    }
+    
+    public LinkedList<String> getValues() {
+        LinkedList<String> values = new LinkedList<>();
+        values.add(Double.toString(overallAccuracy));
+        return values;
     }
 
     @Override
