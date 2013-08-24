@@ -21,6 +21,11 @@ import com.joffrey_bion.xml_parameters_serializer.Parameters.MissingParameterExc
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 public class PhoneVSActigraphAnalyzer {
+    
+    static final int INPUT_PHONE = 0;
+    static final int INPUT_ACTIGRAPH = 1;
+    static final int OUTPUT = 0;
+    
     /**
      * Choose between GUI or console version according to the number of arguments.
      * 

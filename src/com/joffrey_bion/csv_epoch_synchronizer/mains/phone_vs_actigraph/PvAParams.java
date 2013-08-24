@@ -15,6 +15,7 @@ import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneRawToEpParams;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppender;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.decision.LabelAppenderParams;
+import com.joffrey_bion.utils.paths.Paths;
 import com.joffrey_bion.utils.stats.FlowStats;
 import com.joffrey_bion.utils.xml.serializers.DateArraySerializer;
 import com.joffrey_bion.utils.xml.serializers.DateSerializer;
@@ -24,7 +25,8 @@ import com.joffrey_bion.xml_parameters_serializer.Parameters;
 import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
-public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAppenderParams, ClassificationAnalysisParams {
+public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAppenderParams,
+        ClassificationAnalysisParams {
 
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
     private static final ActigraphFileFormat DEFAULT_ACTIG_FILE_FORMAT = ActigraphFileFormat.EXPORTED;
@@ -46,11 +48,14 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
     static final String TIMESTAMP_FORMAT = "yyyy-MM-dd HH:mm:ss.SSS";
     private static final DateSerializer TIMESTAMP_SER = new DateSerializer(TIMESTAMP_FORMAT);
     private static final DateArraySerializer SPIKES_SER = new DateArraySerializer(TIMESTAMP_FORMAT);
-    private static final EnumSerializer<ActigraphFileFormat> FORMAT_SER = new EnumSerializer<>(ActigraphFileFormat.class);
-    private static final EnumSerializer<PhoneType> PHONE_TYPE_SER = new EnumSerializer<>(PhoneType.class);
-    private static final EnumSerializer<PhoneLocation> PHONE_LOCATION_SER = new EnumSerializer<>(PhoneLocation.class);
+    private static final EnumSerializer<ActigraphFileFormat> FORMAT_SER = new EnumSerializer<>(
+            ActigraphFileFormat.class);
+    private static final EnumSerializer<PhoneType> PHONE_TYPE_SER = new EnumSerializer<>(
+            PhoneType.class);
+    private static final EnumSerializer<PhoneLocation> PHONE_LOCATION_SER = new EnumSerializer<>(
+            PhoneLocation.class);
     private static final EnumSerializer<Profile> PROFILE_SER = new EnumSerializer<>(Profile.class);
-    
+
     private static final ParamsSchema SCHEMA = new ParamsSchema("parameters", 3);
     static {
         SCHEMA.addParam(OUTPUT_FILE_PATH, SimpleSerializer.STRING, false, DEFAULT_OUTPUT_FILE_PATH,
@@ -109,7 +114,7 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
      * Whether the phone was worn on the left or right side.
      */
     public PhoneLocation phoneLocation;
-    
+
     /**
      * Creates a new {@link PvAParams} object from the specified XML file.
      * 
@@ -159,6 +164,48 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
         Long[] phoneSpikes = get(PHONE_SPIKES_LIST, SPIKES_SER);
         Long[] actigSpikes = get(ACTIG_SPIKES_LIST, SPIKES_SER);
         setDelay(phoneSpikes, actigSpikes);
+    }
+
+    @Override
+    public void loadFromXml(String xmlFilePath) throws IOException, SAXException,
+            SpecificationNotMetException {
+        super.loadFromXml(xmlFilePath);
+        resolve(PHONE_FILE_PATH, xmlFilePath);
+        resolve(ACTIG_FILE_PATH, xmlFilePath);
+        resolve(OUTPUT_FILE_PATH, xmlFilePath);
+    }
+
+    @Override
+    public void saveToXml(String xmlFilePath) throws IOException, SpecificationNotMetException {
+        relativize(PHONE_FILE_PATH, xmlFilePath);
+        relativize(ACTIG_FILE_PATH, xmlFilePath);
+        relativize(OUTPUT_FILE_PATH, xmlFilePath);
+        super.saveToXml(xmlFilePath);
+    }
+
+    /**
+     * Replace an absolute path parameter by a path relative to the specified
+     * {@code basePath}.
+     * 
+     * @param key
+     *            The key of the parameter to relativize.
+     * @param basePath
+     *            The base path to use.
+     */
+    private void relativize(String key, String basePath) {
+        set(key, Paths.relativizeSibling(basePath, getString(key)));
+    }
+
+    /**
+     * Replace a relative path parameter by an absolute path.
+     * 
+     * @param key
+     *            The key of the parameter to relativize.
+     * @param basePath
+     *            The base path to use to resolve the relative path.
+     */
+    private void resolve(String key, String basePath) {
+        set(key, Paths.resolveSibling(basePath, getString(key)));
     }
 
     /**
@@ -270,7 +317,7 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
     public List<String> getLevels() {
         return Arrays.asList(Config.get().cutPointsSet.getLevels());
     }
-    
+
     @Override
     public boolean shouldRemoveTimestamps() {
         return false;

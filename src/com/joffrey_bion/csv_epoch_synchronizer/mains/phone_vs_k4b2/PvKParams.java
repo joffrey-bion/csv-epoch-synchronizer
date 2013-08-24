@@ -8,6 +8,7 @@ import com.joffrey_bion.csv_epoch_synchronizer.config.Config;
 import com.joffrey_bion.csv_epoch_synchronizer.config.Profile;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneLocation;
 import com.joffrey_bion.csv_epoch_synchronizer.phone.PhoneType;
+import com.joffrey_bion.utils.paths.Paths;
 import com.joffrey_bion.utils.stats.FlowStats;
 import com.joffrey_bion.utils.xml.serializers.DateArraySerializer;
 import com.joffrey_bion.utils.xml.serializers.DurationArraySerializer;
@@ -120,5 +121,45 @@ public class PvKParams extends Parameters {
             delayStats.add(k4b2Spikes[i] - phoneSpikes[i]);
         }
         delayPhoneToK4b2 = Double.valueOf(delayStats.mean()).longValue() * 1000000;
+    }
+
+    @Override
+    public void loadFromXml(String xmlFilePath) throws IOException, SAXException,
+            SpecificationNotMetException {
+        super.loadFromXml(xmlFilePath);
+        resolve(PHONE_FILE_PATH, xmlFilePath);
+        resolve(K4B2_FILE_PATH, xmlFilePath);
+    }
+
+    @Override
+    public void saveToXml(String xmlFilePath) throws IOException, SpecificationNotMetException {
+        relativize(PHONE_FILE_PATH, xmlFilePath);
+        relativize(K4B2_FILE_PATH, xmlFilePath);
+        super.saveToXml(xmlFilePath);
+    }
+
+    /**
+     * Replace an absolute path parameter by a path relative to the specified
+     * {@code basePath}.
+     * 
+     * @param key
+     *            The key of the parameter to relativize.
+     * @param basePath
+     *            The base path to use.
+     */
+    private void relativize(String key, String basePath) {
+        set(key, Paths.relativizeSibling(basePath, getString(key)));
+    }
+
+    /**
+     * Replace a relative path parameter by an absolute path.
+     * 
+     * @param key
+     *            The key of the parameter to relativize.
+     * @param basePath
+     *            The base path to use to resolve the relative path.
+     */
+    private void resolve(String key, String basePath) {
+        set(key, Paths.resolveSibling(basePath, getString(key)));
     }
 }

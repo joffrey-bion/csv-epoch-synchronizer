@@ -32,11 +32,12 @@ public class PVArgsPanel extends JPanel {
             public void saveToFile(String paramFilePath) {
                 try {
                     PVParams params = new PVParams();
-                    getUnpopulatedParameters(params);
+                    getParameters(params);
                     params.saveToXml(paramFilePath);
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
+                    e.printStackTrace();
                 }
             }
 
@@ -48,6 +49,7 @@ public class PVArgsPanel extends JPanel {
                     System.out.println("Parameters loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
                     System.err.println(e.getMessage());
+                    e.printStackTrace();
                 }
             }
         };

@@ -6,6 +6,7 @@ import org.xml.sax.SAXException;
 
 import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_actigraph.PvAParams;
 import com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2.PvKParams;
+import com.joffrey_bion.utils.paths.Paths;
 import com.joffrey_bion.utils.xml.serializers.SimpleSerializer;
 import com.joffrey_bion.xml_parameters_serializer.Parameters;
 import com.joffrey_bion.xml_parameters_serializer.ParamsSchema;
@@ -30,7 +31,6 @@ public class PVParams extends Parameters {
     public PvKParams pvkParams;
     public String participantFile;
     public String outputFile;
-    
 
     /**
      * Creates a new {@link PVParams} object from the specified XML file.
@@ -64,14 +64,60 @@ public class PVParams extends Parameters {
     /**
      * Pull the data from this {@link Parameters} object and make it available more
      * efficiently through the public fields and getters.
-     * @throws SpecificationNotMetException 
-     * @throws SAXException 
+     * 
+     * @throws SpecificationNotMetException
+     * @throws SAXException
      * @throws IOException
      */
-    public void populatePublicFields() throws IOException, SAXException, SpecificationNotMetException {
+    public void populatePublicFields() throws IOException, SAXException,
+            SpecificationNotMetException {
         this.pvaParams = new PvAParams(getString(PVA_FILE_PATH));
         this.pvkParams = new PvKParams(getString(PVK_FILE_PATH));
         this.participantFile = getString(PARTICIPANT_FILE_PATH);
         this.outputFile = getString(OUTPUT_FILE_PATH);
+    }
+
+    @Override
+    public void loadFromXml(String xmlFilePath) throws IOException, SAXException,
+            SpecificationNotMetException {
+        super.loadFromXml(xmlFilePath);
+        resolve(PVA_FILE_PATH, xmlFilePath);
+        resolve(PVK_FILE_PATH, xmlFilePath);
+        resolve(PARTICIPANT_FILE_PATH, xmlFilePath);
+        resolve(OUTPUT_FILE_PATH, xmlFilePath);
+    }
+
+    @Override
+    public void saveToXml(String xmlFilePath) throws IOException, SpecificationNotMetException {
+        relativize(PVA_FILE_PATH, xmlFilePath);
+        relativize(PVK_FILE_PATH, xmlFilePath);
+        relativize(PARTICIPANT_FILE_PATH, xmlFilePath);
+        relativize(OUTPUT_FILE_PATH, xmlFilePath);
+        super.saveToXml(xmlFilePath);
+    }
+
+    /**
+     * Replace an absolute path parameter by a path relative to the specified
+     * {@code basePath}.
+     * 
+     * @param key
+     *            The key of the parameter to relativize.
+     * @param basePath
+     *            The base path to use.
+     */
+    private void relativize(String key, String basePath) {
+        set(key, Paths.relativizeSibling(basePath, getString(key)));
+    }
+
+    /**
+     * Replace a relative path parameter by an absolute path.
+     * 
+     * @param key
+     *            The key of the parameter to relativize.
+     * @param basePath
+     *            The base path to use to resolve the relative path.
+     */
+    private void resolve(String key, String basePath) {
+        set(key, Paths.resolveSibling(basePath, getString(key)));
     }
 }

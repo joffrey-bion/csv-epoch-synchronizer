@@ -322,7 +322,7 @@ class PvAArgsPanel extends JPanel {
                     params.saveToXml(paramFilePath);
                     System.out.println("Parameters saved to '" + paramFilePath + "'.");
                 } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                    System.err.println(e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
                 }
             }
 
@@ -333,7 +333,8 @@ class PvAArgsPanel extends JPanel {
                     setParameters(params);
                     System.out.println("Parameters loaded from '" + paramFilePath + "'.");
                 } catch (Exception e) {
-                    System.err.println(e.getMessage());
+                    System.err.println(e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
+                    e.printStackTrace();
                 }
             }
         };
@@ -352,10 +353,10 @@ class PvAArgsPanel extends JPanel {
      */
     private void setParameters(PvAParams params) throws MissingParameterException {
         FilePicker[] inputs = filePickers.getInputFilePickers();
-        inputs[0].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
-        inputs[1].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
+        inputs[PhoneVSActigraphAnalyzer.INPUT_PHONE].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
+        inputs[PhoneVSActigraphAnalyzer.INPUT_ACTIGRAPH].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
         FilePicker[] outputs = filePickers.getOutputFilePickers();
-        outputs[0].setSelectedFilePath(params.getString(PvAParams.OUTPUT_FILE_PATH));
+        outputs[PhoneVSActigraphAnalyzer.OUTPUT].setSelectedFilePath(params.getString(PvAParams.OUTPUT_FILE_PATH));
         tfStartTime.setText(params.getSerialized(PvAParams.START_TIME));
         tfStopTime.setText(params.getSerialized(PvAParams.STOP_TIME));
         tfEpochWidth.setText(params.getSerialized(PvAParams.EPOCH_WIDTH_SEC));
