@@ -58,6 +58,7 @@ public class PhoneVSActigraph {
                 try {
                     PvAParams params = new PvAParams(xmlParamsFile);
                     createDataset(params);
+                    analyze(params);
                 } catch (IOException e) {
                     System.err.println("I/O error: " + e.getMessage());
                 } catch (SAXException e) {

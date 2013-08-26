@@ -53,7 +53,7 @@ public class Participant extends Parameters {
 
     public LinkedList<String> getHeaders() {
         LinkedList<String> headers = new LinkedList<>();
-        headers.add("ID");
+        headers.add("ParticipantID");
         headers.add("Gender");
         headers.add("Age");
         headers.add("Weight");

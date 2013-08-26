@@ -2,6 +2,7 @@ package com.joffrey_bion.csv_epoch_synchronizer.mains.phone_vs_k4b2;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.TreeSet;
 
 public class Accuracy {
 
@@ -12,7 +13,10 @@ public class Accuracy {
         perLvlAccuracy = new HashMap<>();
         double totalSum = 0;
         double minSum = 0;
-        for (String level : phoneDistrib.keySet()) {
+        TreeSet<String> levels = new TreeSet<>();
+        levels.addAll(phoneDistrib.keySet());
+        levels.addAll(k4b2Distrib.keySet());
+        for (String level : levels) {
             Double phone = phoneDistrib.get(level);
             Double k4b2 = k4b2Distrib.get(level);
             phone = phone == null ? 0 : phone;

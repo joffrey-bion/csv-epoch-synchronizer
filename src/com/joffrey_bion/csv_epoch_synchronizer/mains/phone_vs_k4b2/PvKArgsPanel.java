@@ -253,7 +253,7 @@ class PvKArgsPanel extends JPanel {
             panelSpikes.add(tfSpikeK4b2[i], gbc_tfSpikeK4b2);
         }
 
-        filePickers.setInputFilePickerEditable(PhoneVSK4b2Analyzer.INPUT_XML_TREE, false);
+        filePickers.setInputFilePickerEditable(PhoneVSK4b2.INPUT_XML_TREE, false);
         updateClassifierPath();
     }
 
@@ -266,15 +266,16 @@ class PvKArgsPanel extends JPanel {
      */
     private void setParameters(PvKParams params) {
         FilePicker[] inputs = filePickers.getInputFilePickers();
-        inputs[PhoneVSK4b2Analyzer.INPUT_PHONE].setSelectedFilePath(params.getString(PvKParams.PHONE_FILE));
-        inputs[PhoneVSK4b2Analyzer.INPUT_K4B2].setSelectedFilePath(params.getString(PvKParams.K4B2_FILE));
-        inputs[PhoneVSK4b2Analyzer.INPUT_XML_TREE].setSelectedFilePath(params.classifierFile);
-        inputs[PhoneVSK4b2Analyzer.INPUT_PARTICIPANT].setSelectedFilePath(params.getString(PvKParams.PARTICIPANT_FILE));
+        inputs[PhoneVSK4b2.INPUT_PHONE].setSelectedFilePath(params.getString(PvKParams.PHONE_FILE));
+        inputs[PhoneVSK4b2.INPUT_K4B2].setSelectedFilePath(params.getString(PvKParams.K4B2_FILE));
+        inputs[PhoneVSK4b2.INPUT_XML_TREE].setSelectedFilePath(params.classifierFile);
+        inputs[PhoneVSK4b2.INPUT_PARTICIPANT].setSelectedFilePath(params.getString(PvKParams.PARTICIPANT_FILE));
         FilePicker[] outputs = filePickers.getOutputFilePickers();
-        outputs[PhoneVSK4b2Analyzer.OUTPUT_VALIDATION].setSelectedFilePath(params.getString(PvKParams.VALIDATION_FILE));
+        outputs[PhoneVSK4b2.OUTPUT_VALIDATION].setSelectedFilePath(params.getString(PvKParams.VALIDATION_FILE));
         nbSyncMarkersBox.setSelectedItem(params.get(PvKParams.NB_SYNC_MARKERS));
         profileComboBox.setSelectedItem(params.get(PvKParams.PROFILE));
-        params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
+        cbGyro.setSelectedItem(params.get(PvKParams.PHONE_TYPE));
+        cbLocation.setSelectedItem(params.get(PvKParams.PHONE_LOCATION));
         String[] phoneSpikes = params.getSerializedArray(PvKParams.PHONE_SPIKES_LIST);
         for (int i = 0; i < phoneSpikes.length; i++) {
             tfSpikePhone[i].setText(phoneSpikes[i]);
@@ -295,10 +296,10 @@ class PvKArgsPanel extends JPanel {
      *             If one field could not be properly parsed.
      */
     public void getParameters(PvKParams params) throws ParseException {
-        setFileParam(params, PvKParams.PHONE_FILE, filePickers.getInputFilePaths()[PhoneVSK4b2Analyzer.INPUT_PHONE]);
-        setFileParam(params, PvKParams.K4B2_FILE, filePickers.getInputFilePaths()[PhoneVSK4b2Analyzer.INPUT_K4B2]);
-        setFileParam(params, PvKParams.PARTICIPANT_FILE, filePickers.getInputFilePaths()[PhoneVSK4b2Analyzer.INPUT_PARTICIPANT]);
-        setFileParam(params, PvKParams.VALIDATION_FILE, filePickers.getOutputFilePaths()[PhoneVSK4b2Analyzer.OUTPUT_VALIDATION]);
+        setFileParam(params, PvKParams.PHONE_FILE, filePickers.getInputFilePaths()[PhoneVSK4b2.INPUT_PHONE]);
+        setFileParam(params, PvKParams.K4B2_FILE, filePickers.getInputFilePaths()[PhoneVSK4b2.INPUT_K4B2]);
+        setFileParam(params, PvKParams.PARTICIPANT_FILE, filePickers.getInputFilePaths()[PhoneVSK4b2.INPUT_PARTICIPANT]);
+        setFileParam(params, PvKParams.VALIDATION_FILE, filePickers.getOutputFilePaths()[PhoneVSK4b2.OUTPUT_VALIDATION]);
         params.set(PvKParams.NB_SYNC_MARKERS, nbSyncMarkersBox.getSelectedItem());
         params.set(PvKParams.PROFILE, profileComboBox.getSelectedItem());
         params.set(PvKParams.PHONE_TYPE, cbGyro.getSelectedItem());
@@ -327,7 +328,7 @@ class PvKArgsPanel extends JPanel {
 
     private void updateClassifierPath() {
         FilePicker[] inputs = PvKArgsPanel.this.filePickers.getInputFilePickers();
-        inputs[PhoneVSK4b2Analyzer.INPUT_XML_TREE].setSelectedFilePath(Config.get().getClassifier(
+        inputs[PhoneVSK4b2.INPUT_XML_TREE].setSelectedFilePath(Config.get().getClassifier(
                 (Profile) profileComboBox.getSelectedItem(), (PhoneType) cbGyro.getSelectedItem()));
     }
 

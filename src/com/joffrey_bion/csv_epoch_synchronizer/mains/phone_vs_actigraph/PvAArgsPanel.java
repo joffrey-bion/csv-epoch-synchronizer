@@ -392,6 +392,9 @@ class PvAArgsPanel extends JPanel {
         setIfNotEmpty(params, PvAParams.STOP_TIME, tfStopTime.getText());
         params.set(PvAParams.ACTIG_FILE_FORMAT, cBoxActigraphFileFormat.getSelectedItem());
         setIfNotEmpty(params, PvAParams.EPOCH_WIDTH_SEC, tfEpochWidth.getText());
+        params.set(PvAParams.PROFILE, profileComboBox.getSelectedItem());
+        params.set(PvAParams.PHONE_TYPE, cbGyro.getSelectedItem());
+        params.set(PvAParams.PHONE_LOCATION, cbLocation.getSelectedItem());
         String[] phoneSpikes = new String[NB_MAX_SPIKES];
         String[] actigraphSpikes = new String[NB_MAX_SPIKES];
         int nbSpikes = 0;

@@ -22,7 +22,7 @@ import com.joffrey_bion.generic_guis.file_picker.JFilePickersPanel;
 import com.joffrey_bion.generic_guis.file_processor.JFileProcessorWindow;
 import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
-public class PhoneVSK4b2Analyzer {
+public class PhoneVSK4b2 {
     
     static final int INPUT_PHONE = 0;
     static final int INPUT_K4B2 = 1;
