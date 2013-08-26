@@ -63,10 +63,10 @@ public class DecisionSimulator {
             fp.addFileTypeFilter(".csv", "Comma Separated Value file");
         }
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Decision Simulator", "Process",
-                filePickers, null) {
+        JFileProcessorWindow frame = new JFileProcessorWindow("Decision Simulator", filePickers,
+                null, "Process") {
             @Override
-            public void process(String[] inPaths, String[] outPaths) {
+            public void process(String[] inPaths, String[] outPaths, int processBtnIndex) {
                 this.clearLog();
                 DecisionSimulator.process(inPaths[0], inPaths[1], outPaths[0]);
             }

@@ -30,11 +30,12 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
 
     private static final int DEFAULT_EPOCH_WIDTH_SEC = 1;
     private static final ActigraphFileFormat DEFAULT_ACTIG_FILE_FORMAT = ActigraphFileFormat.EXPORTED;
-    private static final String DEFAULT_OUTPUT_FILE_PATH = "dataset.csv";
-
-    static final String PHONE_FILE_PATH = "phone-raw-file";
-    static final String OUTPUT_FILE_PATH = "output-file";
-    static final String ACTIG_FILE_PATH = "actigraph-file";
+    
+    static final String INPUT_PHONE_FILE = "phone-raw-file";
+    static final String INPUT_ACTIG_EPOCH_FILE = "actigraph-file";
+    static final String INPUT_PARTICIPANT_FILE = "participant-file";
+    static final String OUTPUT_VALIDATION_FILE = "validation-results-file";
+    static final String OUTPUT_TRAINING_SET_FILE = "training-set-file";
     static final String ACTIG_FILE_FORMAT = "actigraph-file-format";
     static final String START_TIME = "start-time";
     static final String STOP_TIME = "stop-time";
@@ -58,10 +59,13 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
 
     private static final ParamsSchema SCHEMA = new ParamsSchema("parameters", 3);
     static {
-        SCHEMA.addParam(OUTPUT_FILE_PATH, SimpleSerializer.STRING, false, DEFAULT_OUTPUT_FILE_PATH,
+        SCHEMA.addParam(OUTPUT_TRAINING_SET_FILE, SimpleSerializer.STRING,
                 "Name of the output dataset file");
-        SCHEMA.addParam(PHONE_FILE_PATH, SimpleSerializer.STRING, "The phone's raw samples file");
-        SCHEMA.addParam(ACTIG_FILE_PATH, SimpleSerializer.STRING, "The actigraph's epoch file");
+        SCHEMA.addParam(OUTPUT_VALIDATION_FILE, SimpleSerializer.STRING,
+                "Name of the output validation results file");
+        SCHEMA.addParam(INPUT_PHONE_FILE, SimpleSerializer.STRING, "The phone's raw samples file");
+        SCHEMA.addParam(INPUT_ACTIG_EPOCH_FILE, SimpleSerializer.STRING, "The actigraph's epoch file");
+        SCHEMA.addParam(INPUT_PARTICIPANT_FILE, SimpleSerializer.STRING, "The participant's info file");
         SCHEMA.addParam(ACTIG_FILE_FORMAT, FORMAT_SER, false, DEFAULT_ACTIG_FILE_FORMAT,
                 "EXPORTED (via \"export all epochs\") or CONVERTED (via File > Import/Export/Convert)");
         SCHEMA.addParam(EPOCH_WIDTH_SEC, SimpleSerializer.INTEGER, false, DEFAULT_EPOCH_WIDTH_SEC,
@@ -80,13 +84,17 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
     }
 
     /** Path to the file containing the raw data from the phone. */
-    public String phoneRawFilename;
+    public String phoneRawFile;
     /** Path to the file containing the epochs from the actigraph. */
-    public String actigraphEpFilename;
+    public String actigraphEpFile;
+    /** Path to the file containing the raw data from the phone. */
+    public String participantFile;
     /** Path to the XML file containing the decision tree. */
     public String classifierFile;
-    /** Path to the output file. */
-    public String outputFilename;
+    /** Path to the output training set file. */
+    public String outputTrainingSetFile;
+    /** Path to the output validation results file. */
+    public String outputValidationFile;
     /** Start time in actigraph reference in nanoseconds. */
     public long startTime;
     /** Stop time in actigraph reference in nanoseconds. */
@@ -149,9 +157,11 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
      * efficiently through the public fields and getters.
      */
     public void populatePublicFields() {
-        this.phoneRawFilename = getString(PHONE_FILE_PATH);
-        this.actigraphEpFilename = getString(ACTIG_FILE_PATH);
-        this.outputFilename = getString(OUTPUT_FILE_PATH);
+        this.phoneRawFile = getString(INPUT_PHONE_FILE);
+        this.participantFile = getString(INPUT_PARTICIPANT_FILE);
+        this.actigraphEpFile = getString(INPUT_ACTIG_EPOCH_FILE);
+        this.outputTrainingSetFile = getString(OUTPUT_TRAINING_SET_FILE);
+        this.outputValidationFile = getString(OUTPUT_VALIDATION_FILE);
         this.startTime = get(START_TIME, TIMESTAMP_SER) * 1000000;
         this.stopTime = get(STOP_TIME, TIMESTAMP_SER) * 1000000;
         this.actigraphFileFormat = get(ACTIG_FILE_FORMAT, FORMAT_SER);
@@ -170,16 +180,20 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
     public void loadFromXml(String xmlFilePath) throws IOException, SAXException,
             SpecificationNotMetException {
         super.loadFromXml(xmlFilePath);
-        resolve(PHONE_FILE_PATH, xmlFilePath);
-        resolve(ACTIG_FILE_PATH, xmlFilePath);
-        resolve(OUTPUT_FILE_PATH, xmlFilePath);
+        resolve(INPUT_PHONE_FILE, xmlFilePath);
+        resolve(INPUT_ACTIG_EPOCH_FILE, xmlFilePath);
+        resolve(INPUT_PARTICIPANT_FILE, xmlFilePath);
+        resolve(OUTPUT_TRAINING_SET_FILE, xmlFilePath);
+        resolve(OUTPUT_VALIDATION_FILE, xmlFilePath);
     }
 
     @Override
     public void saveToXml(String xmlFilePath) throws IOException, SpecificationNotMetException {
-        relativize(PHONE_FILE_PATH, xmlFilePath);
-        relativize(ACTIG_FILE_PATH, xmlFilePath);
-        relativize(OUTPUT_FILE_PATH, xmlFilePath);
+        relativize(INPUT_PHONE_FILE, xmlFilePath);
+        relativize(INPUT_ACTIG_EPOCH_FILE, xmlFilePath);
+        relativize(INPUT_PARTICIPANT_FILE, xmlFilePath);
+        relativize(OUTPUT_TRAINING_SET_FILE, xmlFilePath);
+        relativize(OUTPUT_VALIDATION_FILE, xmlFilePath);
         super.saveToXml(xmlFilePath);
     }
 
@@ -275,12 +289,12 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
 
     @Override
     public String getInputFilePath() {
-        return phoneRawFilename;
+        return phoneRawFile;
     }
 
     @Override
     public String getPhoneEpochFilePath() {
-        return Csv.removeExtension(phoneRawFilename) + "-temp.csv";
+        return Csv.removeExtension(phoneRawFile) + "-temp.csv";
     }
 
     @Override
@@ -295,12 +309,12 @@ public class PvAParams extends Parameters implements PhoneRawToEpParams, LabelAp
 
     @Override
     public String getLabeledDatasetFilePath() {
-        return Csv.removeExtension(phoneRawFilename) + "-temp-labeled.csv";
+        return Csv.removeExtension(phoneRawFile) + "-temp-labeled.csv";
     }
 
     @Override
     public String getTwoLabeledFile() {
-        return Csv.removeExtension(phoneRawFilename) + "-temp-double-labeled.csv";
+        return Csv.removeExtension(phoneRawFile) + "-temp-double-labeled.csv";
     }
 
     @Override

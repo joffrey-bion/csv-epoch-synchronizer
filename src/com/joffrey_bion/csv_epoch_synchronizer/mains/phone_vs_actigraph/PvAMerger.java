@@ -23,7 +23,7 @@ public class PvAMerger {
     /**
      * 
      * @param phoneEpFilename
-     * @param actigraphEpFilename
+     * @param actigraphEpFile
      * @param destFilename
      * @param actigraphFileFormat
      * @throws IOException

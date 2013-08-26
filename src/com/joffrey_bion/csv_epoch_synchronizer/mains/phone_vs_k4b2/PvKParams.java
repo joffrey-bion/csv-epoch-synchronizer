@@ -20,8 +20,10 @@ import com.joffrey_bion.xml_parameters_serializer.SpecificationNotMetException;
 
 public class PvKParams extends Parameters {
 
-    static final String PHONE_FILE_PATH = "phone-raw-file";
-    static final String K4B2_FILE_PATH = "k4b2-file";
+    static final String PHONE_FILE = "phone-raw-file";
+    static final String K4B2_FILE = "k4b2-file";
+    static final String PARTICIPANT_FILE = "participant-file";
+    static final String VALIDATION_FILE = "validation-results-file";
     static final String PROFILE = "profile";
     static final String PHONE_TYPE = "phone-type";
     static final String PHONE_LOCATION = "phone-location";
@@ -42,8 +44,10 @@ public class PvKParams extends Parameters {
 
     private static final ParamsSchema SCHEMA = new ParamsSchema(3);
     static {
-        SCHEMA.addParam(PHONE_FILE_PATH, SimpleSerializer.STRING);
-        SCHEMA.addParam(K4B2_FILE_PATH, SimpleSerializer.STRING);
+        SCHEMA.addParam(PHONE_FILE, SimpleSerializer.STRING);
+        SCHEMA.addParam(K4B2_FILE, SimpleSerializer.STRING);
+        SCHEMA.addParam(PARTICIPANT_FILE, SimpleSerializer.STRING);
+        SCHEMA.addParam(VALIDATION_FILE, SimpleSerializer.STRING);
         SCHEMA.addParam(PROFILE, PROFILE_SER);
         SCHEMA.addParam(PHONE_LOCATION, PHONE_LOCATION_SER);
         SCHEMA.addParam(PHONE_TYPE, PHONE_TYPE_SER);
@@ -56,6 +60,10 @@ public class PvKParams extends Parameters {
     public String phoneRawFile;
     /** Path to the CSV file containing the epochs from the K4b2. */
     public String k4b2File;
+    /** Path to the file containing the raw data from the phone. */
+    public String participantFile;
+    /** Path to the output validation results file. */
+    public String outputValidationFile;
     /** Path to the XML file containing the decision tree. */
     public String classifierFile;
     /** Number of markers used to synchronize the phone, which have to be skipped. */
@@ -106,8 +114,10 @@ public class PvKParams extends Parameters {
      * efficiently through the public fields and getters.
      */
     public void populatePublicFields() {
-        this.phoneRawFile = getString(PHONE_FILE_PATH);
-        this.k4b2File = getString(K4B2_FILE_PATH);
+        this.phoneRawFile = getString(PHONE_FILE);
+        this.k4b2File = getString(K4B2_FILE);
+        this.participantFile = getString(PARTICIPANT_FILE);
+        this.outputValidationFile = getString(VALIDATION_FILE);
         this.classifierFile = Config.get().getClassifier(get(PROFILE, PROFILE_SER),
                 get(PHONE_TYPE, PHONE_TYPE_SER));
         this.nbSyncMarkers = getInteger(NB_SYNC_MARKERS);
@@ -127,14 +137,18 @@ public class PvKParams extends Parameters {
     public void loadFromXml(String xmlFilePath) throws IOException, SAXException,
             SpecificationNotMetException {
         super.loadFromXml(xmlFilePath);
-        resolve(PHONE_FILE_PATH, xmlFilePath);
-        resolve(K4B2_FILE_PATH, xmlFilePath);
+        resolve(PHONE_FILE, xmlFilePath);
+        resolve(K4B2_FILE, xmlFilePath);
+        resolve(PARTICIPANT_FILE, xmlFilePath);
+        resolve(VALIDATION_FILE, xmlFilePath);
     }
 
     @Override
     public void saveToXml(String xmlFilePath) throws IOException, SpecificationNotMetException {
-        relativize(PHONE_FILE_PATH, xmlFilePath);
-        relativize(K4B2_FILE_PATH, xmlFilePath);
+        relativize(PHONE_FILE, xmlFilePath);
+        relativize(K4B2_FILE, xmlFilePath);
+        relativize(PARTICIPANT_FILE, xmlFilePath);
+        relativize(VALIDATION_FILE, xmlFilePath);
         super.saveToXml(xmlFilePath);
     }
 

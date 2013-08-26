@@ -37,10 +37,10 @@ public class ConfigEditor {
         ifps[3].addFileTypeFilter(".xml", "XML Classifier file");
         final ConfigArgsPanel configArgsPanel = new ConfigArgsPanel(filePickers);
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Config Editor", "Save",
-                filePickers, configArgsPanel) {
+        JFileProcessorWindow frame = new JFileProcessorWindow("Config Editor", filePickers,
+                configArgsPanel, "Save") {
             @Override
-            public void process(String[] inPaths, String[] outPaths) {
+            public void process(String[] inPaths, String[] outPaths, int processBtnIndex) {
                 this.clearLog();
                 try {
                     configArgsPanel.updateConfig();

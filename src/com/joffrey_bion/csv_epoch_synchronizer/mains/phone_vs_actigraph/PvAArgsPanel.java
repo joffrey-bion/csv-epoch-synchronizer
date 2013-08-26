@@ -353,10 +353,12 @@ class PvAArgsPanel extends JPanel {
      */
     private void setParameters(PvAParams params) throws MissingParameterException {
         FilePicker[] inputs = filePickers.getInputFilePickers();
-        inputs[PhoneVSActigraphAnalyzer.INPUT_PHONE].setSelectedFilePath(params.getString(PvAParams.PHONE_FILE_PATH));
-        inputs[PhoneVSActigraphAnalyzer.INPUT_ACTIGRAPH].setSelectedFilePath(params.getString(PvAParams.ACTIG_FILE_PATH));
+        inputs[PhoneVSActigraph.INPUT_PHONE].setSelectedFilePath(params.getString(PvAParams.INPUT_PHONE_FILE));
+        inputs[PhoneVSActigraph.INPUT_ACTIGRAPH].setSelectedFilePath(params.getString(PvAParams.INPUT_ACTIG_EPOCH_FILE));
+        inputs[PhoneVSActigraph.INPUT_PARTICIPANT].setSelectedFilePath(params.getString(PvAParams.INPUT_PARTICIPANT_FILE));
         FilePicker[] outputs = filePickers.getOutputFilePickers();
-        outputs[PhoneVSActigraphAnalyzer.OUTPUT].setSelectedFilePath(params.getString(PvAParams.OUTPUT_FILE_PATH));
+        outputs[PhoneVSActigraph.OUTPUT_TRAINING_SET].setSelectedFilePath(params.getString(PvAParams.OUTPUT_TRAINING_SET_FILE));
+        outputs[PhoneVSActigraph.OUTPUT_VALIDATION].setSelectedFilePath(params.getString(PvAParams.OUTPUT_VALIDATION_FILE));
         tfStartTime.setText(params.getSerialized(PvAParams.START_TIME));
         tfStopTime.setText(params.getSerialized(PvAParams.STOP_TIME));
         tfEpochWidth.setText(params.getSerialized(PvAParams.EPOCH_WIDTH_SEC));
@@ -381,9 +383,11 @@ class PvAArgsPanel extends JPanel {
      *             If one field could not be properly parsed.
      */
     public void getParameters(PvAParams params) throws ParseException {
-        setFileParam(params, PvAParams.PHONE_FILE_PATH, filePickers.getInputFilePaths()[0]);
-        setFileParam(params, PvAParams.ACTIG_FILE_PATH, filePickers.getInputFilePaths()[1]);
-        setFileParam(params, PvAParams.OUTPUT_FILE_PATH, filePickers.getOutputFilePaths()[0]);
+        setFileParam(params, PvAParams.INPUT_PHONE_FILE, filePickers.getInputFilePaths()[PhoneVSActigraph.INPUT_PHONE]);
+        setFileParam(params, PvAParams.INPUT_PARTICIPANT_FILE, filePickers.getInputFilePaths()[PhoneVSActigraph.INPUT_PARTICIPANT]);
+        setFileParam(params, PvAParams.INPUT_ACTIG_EPOCH_FILE, filePickers.getInputFilePaths()[PhoneVSActigraph.INPUT_ACTIGRAPH]);
+        setFileParam(params, PvAParams.OUTPUT_VALIDATION_FILE, filePickers.getOutputFilePaths()[PhoneVSActigraph.OUTPUT_VALIDATION]);
+        setFileParam(params, PvAParams.OUTPUT_TRAINING_SET_FILE, filePickers.getOutputFilePaths()[PhoneVSActigraph.OUTPUT_TRAINING_SET]);
         setIfNotEmpty(params, PvAParams.START_TIME, tfStartTime.getText());
         setIfNotEmpty(params, PvAParams.STOP_TIME, tfStopTime.getText());
         params.set(PvAParams.ACTIG_FILE_FORMAT, cBoxActigraphFileFormat.getSelectedItem());

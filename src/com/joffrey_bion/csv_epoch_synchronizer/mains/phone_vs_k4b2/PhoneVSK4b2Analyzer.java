@@ -26,7 +26,9 @@ public class PhoneVSK4b2Analyzer {
     
     static final int INPUT_PHONE = 0;
     static final int INPUT_K4B2 = 1;
-    static final int INPUT_XML_TREE = 2;
+    static final int INPUT_PARTICIPANT = 2;
+    static final int INPUT_XML_TREE = 3;
+    static final int OUTPUT_VALIDATION = 0;
     
     public static void main(String[] args) {
         if (args.length == 0) {
@@ -49,17 +51,20 @@ public class PhoneVSK4b2Analyzer {
         LookAndFeel.setSystemLookAndFeel();
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {
-                "Phone raw file", "K4b2 test file", "XML Tree file" }, new String[]{});
+                "Phone raw file", "K4b2 test file", "Participant file", "XML Tree file" }, "Validation output file");
         FilePicker[] ifps = filePickers.getInputFilePickers();
         ifps[INPUT_PHONE].addFileTypeFilter(".csv", "Comma-Separated Values file");
         ifps[INPUT_K4B2].addFileTypeFilter(".csv", "Comma-Separated Values file");
         ifps[INPUT_XML_TREE].addFileTypeFilter(".xml", "XML Classifier file");
+        ifps[INPUT_PARTICIPANT].addFileTypeFilter(".xml", "XML Participant file");
+        FilePicker[] ofps = filePickers.getInputFilePickers();
+        ofps[OUTPUT_VALIDATION].addFileTypeFilter(".csv", "Comma-Separated Values file");
         final PvKArgsPanel pvKArgsPanel = new PvKArgsPanel(filePickers);
         @SuppressWarnings("serial")
-        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-K4b2 Analyzer", "Process",
-                filePickers, pvKArgsPanel) {
+        JFileProcessorWindow frame = new JFileProcessorWindow("Phone-VS-K4b2", filePickers,
+                pvKArgsPanel, "Validate") {
             @Override
-            public void process(String[] inPaths, String[] outPaths) {
+            public void process(String[] inPaths, String[] outPaths, int processBtnIndex) {
                 this.clearLog();
                 try {
                     PvKParams params = new PvKParams();
@@ -69,6 +74,7 @@ public class PhoneVSK4b2Analyzer {
                     System.err.println(e.getMessage());
                 } catch (Exception e) {
                     System.err.println(e.getMessage() + " (" + e.getClass().getSimpleName() + ")");
+                    e.printStackTrace();
                 }
             }
         };
@@ -128,11 +134,17 @@ public class PhoneVSK4b2Analyzer {
                 System.out.println(lvlsTimeDistrib);
                 accuracies.put(p, new Accuracy(lvlsTimeDistrib, pr.getLevelsDistribution()));
             }
+            System.out.println();
+            System.out.println("Writing results...");
+            new PrintableAccuracies(accuracies).writeResults(params.participantFile, params.outputValidationFile);
+            System.out.println("Results written in " + params.outputValidationFile);
             return accuracies;
         } catch (IOException e) {
             System.err.println("I/O error: " + e.getMessage());
         } catch (SAXException e) {
             System.err.println("Incorrect XML file: " + e.getMessage());
+        } catch (SpecificationNotMetException e) {
+            System.err.println("Incorrect participant file: " + e.getMessage());
         }
         return null;
     }

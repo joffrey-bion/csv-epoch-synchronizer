@@ -72,9 +72,9 @@ public class K4b2StatsPrinter {
         final KSPArgsPanel kSPArgsPanel = new KSPArgsPanel(filePickers);
         @SuppressWarnings("serial")
         JFileProcessorWindow frame = new JFileProcessorWindow("K4b2 Phases Stats Calculator",
-                "Calculate", filePickers, kSPArgsPanel) {
+                filePickers, kSPArgsPanel, "Calculate") {
             @Override
-            public void process(String[] inPaths, String[] outPaths) {
+            public void process(String[] inPaths, String[] outPaths, int processBtnIndex) {
                 this.clearLog();
                 try {
                     calculateStats(inPaths[0], outPaths[0], kSPArgsPanel.getNbSyncMarkers(),
