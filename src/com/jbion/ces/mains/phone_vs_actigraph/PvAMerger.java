@@ -15,13 +15,13 @@ import com.jbion.utils.dates.DateHelper;
 public class PvAMerger {
 
     public static final String APPENDED_HEADER = "ActigraphLevel";
-    
+
     private PhoneCsvReader phone;
     private ActigraphCsvReader actigraph;
     private CsvWriter writer;
 
-    public PvAMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename, ActigraphFileFormat actigraphFileFormat)
-            throws IOException, NotACsvFileException {
+    public PvAMerger(String phoneEpFilename, String actigraphEpFilename, String destFilename,
+            ActigraphFileFormat actigraphFileFormat) throws IOException, NotACsvFileException {
         phone = new PhoneCsvReader(phoneEpFilename);
         actigraph = new ActigraphCsvReader(actigraphEpFilename, actigraphFileFormat);
         writer = new CsvWriter(destFilename);
@@ -48,12 +48,19 @@ public class PvAMerger {
             timestampPhone = phone.extractTimestamp(linePhone);
             timestampActigraph = actigraph.extractTimestamp(lineActigraph);
             if (timestampPhone != timestampActigraph) {
-                DateHelper.displayTimestamp("phone time", timestampPhone);
-                DateHelper.displayTimestamp("actigraph time", timestampActigraph);
+                System.err.println("Error:");
+                System.err.println("   phone time: " + DateHelper.displayTimestamp(timestampPhone));
+                System.err.println("   actigraph time: "
+                        + DateHelper.displayTimestamp(timestampActigraph));
                 throw new RuntimeException("phone and actigraph timestamps do not correspond");
             } else if (timestampPhone > props.stopTime) {
+                System.err.println("Internal error:");
+                System.err.println("   phone stop time: "
+                        + DateHelper.displayTimestamp(props.stopTime));
+                System.err.println("   phone epoch time: "
+                        + DateHelper.displayTimestamp(timestampPhone));
                 throw new RuntimeException(
-                        "Internal error, epoch beyond stoptime in intermediate file");
+                        "epoch beyond stoptime in intermediate file");
             }
             double cpm = actigraph
                     .extractCountsPerMinutes(lineActigraph, props.getEpochWidthNano());
