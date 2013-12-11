@@ -2,6 +2,7 @@ package com.jbion.ces.mains.phone_vs_actigraph;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.text.ParseException;
 
 import javax.swing.SwingUtilities;
@@ -29,11 +30,20 @@ import com.jbion.utils.xml.serialization.parameters.Parameters.MissingParameterE
  */
 public class PhoneVSActigraph {
 
+    private static final String VALIDATE_SWITCH = "-v";
+    private static final String TRAIN_SWITCH = "-t";
+
     static final int INPUT_PHONE = 0;
     static final int INPUT_ACTIGRAPH = 1;
     static final int INPUT_PARTICIPANT = 2;
     static final int OUTPUT_TRAINING_SET = 0;
     static final int OUTPUT_VALIDATION = 1;
+
+    private static enum Mode {
+        VALIDATION,
+        TRAINING,
+        NONE;
+    }
 
     /**
      * Choose between GUI or console version according to the number of arguments.
@@ -51,8 +61,16 @@ public class PhoneVSActigraph {
                 }
             });
         } else {
+            Mode mode = getMode(args);
+            if (mode == Mode.NONE) {
+                printUsage();
+                return;
+            }
             // console version, process parameter files one by one.
             for (String xmlParamsFile : args) {
+                if (xmlParamsFile.equals(VALIDATE_SWITCH) || xmlParamsFile.equals(TRAIN_SWITCH)) {
+                    continue; // skip the switch
+                }
                 System.out.println("------[ " + xmlParamsFile + " ]---------------------");
                 System.out.println();
                 try {
@@ -70,6 +88,23 @@ public class PhoneVSActigraph {
                 System.out.println();
             }
         }
+    }
+    
+    private static void printUsage() {
+        System.out.println("Usage: java -jar PhoneVSActigraph.jar {-t|-v} <params.xml> [other-params.xml]*");
+        System.out.println("-t\tTraining mode");
+        System.out.println("-v\tValidation mode");
+    }
+
+    private static Mode getMode(String[] args) {
+        for (String arg : args) {
+            if (arg.equals(VALIDATE_SWITCH)) {
+                return Mode.VALIDATION;
+            } else if (arg.equals(TRAIN_SWITCH)) {
+                return Mode.TRAINING;
+            }
+        }
+        return Mode.NONE;
     }
 
     /**
@@ -145,11 +180,7 @@ public class PhoneVSActigraph {
             merger.createLabeledFile(params);
             System.out.println("> Dataset file created (" + params.outputTrainingSetFile + ")");
             if (Config.get().deleteTempFiles) {
-                if (new File(phoneEpFilename).delete()) {
-                    System.out.println("> Temporary epoch file deleted (" + phoneEpFilename + ")");
-                } else {
-                    System.err.println("> Temporary file couldn't be deleted.");
-                }
+                delete("Temp epoch file", phoneEpFilename);
             } else {
                 System.out.println("> Temporary file kept (" + phoneEpFilename + ")");
             }
@@ -204,23 +235,9 @@ public class PhoneVSActigraph {
             System.out.println("> Temp 2-labeled file created (" + twoLabeledFilename + ")");
             ConfusionMatrix<String> cm = PvAAnalyzer.analyzeClassification(params);
             if (Config.get().deleteTempFiles) {
-                if (new File(phoneEpFilename).delete()) {
-                    System.out.println("> Temp epoch file deleted (" + phoneEpFilename + ")");
-                } else {
-                    System.err.println("> Temp epoch file couldn't be deleted.");
-                }
-                if (new File(phoneEpLabeledFilename).delete()) {
-                    System.out.println("> Temp labeled epoch file file deleted (" + phoneEpFilename
-                            + ")");
-                } else {
-                    System.err.println("> Temp labeled epoch file couldn't be deleted.");
-                }
-                if (new File(twoLabeledFilename).delete()) {
-                    System.out
-                            .println("> Temp 2-labeled file deleted (" + twoLabeledFilename + ")");
-                } else {
-                    System.err.println("> Temp 2-labeled file couldn't be deleted.");
-                }
+                delete("Temp epoch file", phoneEpFilename);
+                delete("Temp labeled epoch file", phoneEpLabeledFilename);
+                delete("Temp double labels file", twoLabeledFilename);
             } else {
                 System.out.println("> Temporary files kept");
             }
@@ -241,5 +258,25 @@ public class PhoneVSActigraph {
             System.err.println(e.getMessage());
         }
         return null;
+    }
+
+    private static void delete(String description, String filename) {
+        File toDelete = new File(filename);
+        if (toDelete.delete()) {
+            System.out.println("> " + description + " deleted (" + filename + ")");
+        } else {
+            System.err.println("> " + description + " couldn't be deleted.");
+        }
+    }
+
+    @SuppressWarnings("unused")
+    private static void deleteNIO(String description, String filename) {
+        try {
+            java.nio.file.Files.delete(Paths.get(filename));
+            System.out.println("> " + description + " deleted (" + filename + ")");
+        } catch (IOException e) {
+            System.err
+                    .println("> " + description + " couldn't be deleted (" + e.getMessage() + ")");
+        }
     }
 }
