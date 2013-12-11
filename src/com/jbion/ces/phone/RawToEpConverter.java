@@ -12,22 +12,26 @@ public class RawToEpConverter {
     public static int createEpochsFile(PhoneRawToEpParams props) throws IOException,
             NotACsvFileException {
         PhoneCsvReader reader = new PhoneCsvReader(props.getInputFilePath());
-        CsvWriter writer = new CsvWriter(props.getPhoneEpochFilePath());
-        // read the columns headers
-        String[] line;
-        if ((line = reader.readRow()) != null) {
-            writer.writeRow(getNewHeaders(line));
-        } else {
-            System.out.println("Empty file, nothing done.");
+        try {
+            CsvWriter writer = new CsvWriter(props.getPhoneEpochFilePath());
+            try {
+                // read the columns headers
+                String[] line;
+                if ((line = reader.readRow()) != null) {
+                    writer.writeRow(getNewHeaders(line));
+                } else {
+                    System.out.println("Empty file, nothing done.");
+                    return -1;
+                }
+                // accumulate the samples in epochs and write them
+                writeSmoothEpochs(reader, writer, line.length, props);
+                return 0;
+            } finally {
+                writer.close();
+            }
+        } finally {
             reader.close();
-            writer.close();
-            return -1;
         }
-        // accumulate the samples in epochs and write them
-        writeSmoothEpochs(reader, writer, line.length, props);
-        reader.close();
-        writer.close();
-        return 0;
     }
 
     private static void writeSmoothEpochs(PhoneCsvReader reader, CsvWriter writer, int nbOfColumns,
