@@ -65,6 +65,7 @@ class TreeParser {
      *
      * @param elt
      *            The XML {@link Element} to convert into a {@link DecisionTree} object.
+     * @return the {@link DecisionTree} corresponding to the specified XML {@link Element}.
      */
     private static DecisionTree getTree(Element elt) {
         final String type = elt.getAttribute(ATT_NODE_TYPE);

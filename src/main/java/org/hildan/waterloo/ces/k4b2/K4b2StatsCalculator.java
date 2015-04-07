@@ -83,6 +83,9 @@ public class K4b2StatsCalculator {
      * Reads the next phase and put the results of the calculations in the given
      * {@link PhaseResults} object.
      *
+     * @param results
+     *            the object to fill with the results
+     *
      * @throws IOException
      *             If an error occurs while reading the file.
      */
