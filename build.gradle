@@ -1,0 +1,85 @@
+// launch4j is used to package the program in an exe file
+buildscript {
+    repositories { mavenCentral() }
+    dependencies { classpath 'edu.sc.seis.gradle:launch4j:1.0.6' }
+}
+
+// bintray plugin is used to upload artifacts to a bintray repo
+plugins { id "com.jfrog.bintray" version "1.0" }
+
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'launch4j'
+apply plugin: 'application'
+
+group = 'org.hildan.waterloo'
+version = '1.0'
+sourceCompatibility = '1.7'
+
+mainClassName = "org.hildan.tools.csvmerger.CsvFileMerger"
+
+repositories {
+    mavenCentral()
+    maven { url  "http://dl.bintray.com/joffrey-bion/maven"  }
+}
+
+dependencies {
+    compile 'org.hildan.utils:ai-utils:0.9'
+    compile 'org.hildan.utils:csv-utils:0.9'
+    compile 'org.hildan.utils:xml-utils:0.9'
+    compile 'org.hildan.utils:io-utils:0.9'
+    compile 'org.hildan.utils:stats-utils:0.9'
+    compile 'org.hildan.utils:file-processor-gui:0.9'
+    testCompile 'junit:junit:4.+'
+}
+
+// to build a fat jar with all dependencies included
+jar {
+    manifest { attributes "Main-Class": mainClassName }
+    from {
+        configurations.compile.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+}
+
+// wraps the executable jar into an exe file
+launch4j {
+    mainClassName = project.mainClassName
+    headerType = "console"
+    jar = 'lib/' + project.jar.archiveName
+    outfile = project.name + '-' + project.version + '.exe'
+    icon = '../resources/main/csv-file-merger.ico'
+    windowTitle = project.name
+}
+
+// defines what to distribute (jar and exe)
+artifacts {
+    archives jar
+    archives file(buildDir.name + '/' + launch4j.outputDir + '/' + launch4j.outfile)
+}
+
+bintrayUpload.dependsOn tasks.launch4j
+
+bintray {
+    user = project.bintrayUsername // taken from gradle.properties
+    key = project.bintrayApiKey // taken from gradle.properties
+    configurations = ['archives']
+
+    publish = true // the version should be auto published after an upload
+
+    pkg {
+        repo = project.bintrayRepoApps // taken from gradle.properties
+        name = project.name
+        desc = 'Merges together CSV files that have the same column headers.'
+        labels = ['csv', 'merge', 'merger']
+
+        String githubRepoName = project.name
+        websiteUrl = 'https://github.com/joffrey-bion/' + githubRepoName
+        issueTrackerUrl = 'https://github.com/joffrey-bion/' + githubRepoName + '/issues'
+        vcsUrl = 'https://github.com/joffrey-bion/' + githubRepoName + '.git'
+
+        licenses = ['MIT']        
+        version { gpg { sign = true } }
+    }
+}
