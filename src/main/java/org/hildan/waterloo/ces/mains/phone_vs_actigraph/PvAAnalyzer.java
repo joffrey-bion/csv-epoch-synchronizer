@@ -2,7 +2,7 @@ package org.hildan.waterloo.ces.mains.phone_vs_actigraph;
 
 import java.io.IOException;
 
-import org.hildan.utils.classification.ConfusionMatrix;
+import org.hildan.utils.ai.classification.ConfusionMatrix;
 import org.hildan.utils.csv.CsvReader;
 
 public class PvAAnalyzer {

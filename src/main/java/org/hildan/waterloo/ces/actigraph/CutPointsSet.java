@@ -1,6 +1,6 @@
 package org.hildan.waterloo.ces.actigraph;
 
-import org.hildan.utils.classification.Classifier;
+import org.hildan.utils.ai.classification.CutPointsClassifier;
 
 /**
  * An enum containing different sets of cut points to determine a level of activity from a CPM
@@ -23,7 +23,7 @@ public enum CutPointsSet {
      */
     SEDENTARY_VS_ALL(new String[] {"Sedentary", "Active"}, new double[] {150.0});
 
-    private final Classifier<String> classifier;
+    private final CutPointsClassifier<String> classifier;
 
     /**
      * Creates a set of cut points that separate different levels by different thresholds.
@@ -36,7 +36,7 @@ public enum CutPointsSet {
      *            threshold) and {@code labels[i+1]} (just above the threshold).
      */
     private CutPointsSet(String[] labels, double[] thresholds) {
-        classifier = new Classifier<>(labels, thresholds);
+        classifier = new CutPointsClassifier<>(labels, thresholds);
     }
 
     /**
@@ -48,7 +48,7 @@ public enum CutPointsSet {
      *         {@code String}.
      */
     public String countsToLevel(double countsPerMin) {
-        return classifier.valueToLevel(countsPerMin);
+        return classifier.getLevel(countsPerMin);
     }
 
     /**

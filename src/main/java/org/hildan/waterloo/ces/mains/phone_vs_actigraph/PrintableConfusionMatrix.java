@@ -2,7 +2,7 @@ package org.hildan.waterloo.ces.mains.phone_vs_actigraph;
 
 import java.util.LinkedList;
 
-import org.hildan.utils.classification.ConfusionMatrix;
+import org.hildan.utils.ai.classification.ConfusionMatrix;
 import org.hildan.waterloo.ces.validation.PrintableResults;
 
 public class PrintableConfusionMatrix extends PrintableResults {

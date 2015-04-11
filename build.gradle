@@ -24,7 +24,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.hildan.utils:ai-utils:0.9'
+    compile 'org.hildan.utils:ai-utils:1.0'
     compile 'org.hildan.utils:csv-utils:0.9'
     compile 'org.hildan.utils:xml-utils:0.9'
     compile 'org.hildan.utils:io-utils:0.9'

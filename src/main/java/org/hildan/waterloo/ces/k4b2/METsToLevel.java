@@ -1,6 +1,6 @@
 package org.hildan.waterloo.ces.k4b2;
 
-import org.hildan.utils.classification.Classifier;
+import org.hildan.utils.ai.classification.CutPointsClassifier;
 
 public enum METsToLevel {
     /**
@@ -8,7 +8,7 @@ public enum METsToLevel {
      */
     STANDARD(new String[] {"Sedentary", "Light", "Moderate", "Vigorous"}, new double[] {1.5, 2.9, 5.9});
 
-    private final Classifier<String> classifier;
+    private final CutPointsClassifier<String> classifier;
 
     /**
      * Creates a set of cut points that separate different levels by different thresholds.
@@ -21,7 +21,7 @@ public enum METsToLevel {
      *            threshold) and {@code labels[i+1]} (just above the threshold).
      */
     private METsToLevel(String[] labels, double[] thresholds) {
-        classifier = new Classifier<>(labels, thresholds);
+        classifier = new CutPointsClassifier<>(labels, thresholds);
     }
 
     /**
@@ -33,6 +33,6 @@ public enum METsToLevel {
      *         {@code String}.
      */
     public String metsToLevel(double METs) {
-        return classifier.valueToLevel(METs);
+        return classifier.getLevel(METs);
     }
 }

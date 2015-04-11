@@ -7,7 +7,7 @@ import java.text.ParseException;
 
 import javax.swing.SwingUtilities;
 
-import org.hildan.utils.classification.ConfusionMatrix;
+import org.hildan.utils.ai.classification.ConfusionMatrix;
 import org.hildan.utils.dates.DateHelper;
 import org.hildan.utils.fpgui.LookAndFeel;
 import org.hildan.utils.fpgui.fpickers.FilePicker;
@@ -119,7 +119,7 @@ public class PhoneVSActigraph {
         // file pickers source and destination
         final JFilePickersPanel filePickers = new JFilePickersPanel(new String[] {"Phone raw file",
                 "Actigraph epoch file", "Participant file"}, new String[] {"Training set output file",
-        "Validation output file"});
+                "Validation output file"});
         final FilePicker[] ifps = filePickers.getInputFilePickers();
         ifps[INPUT_PHONE].addFileTypeFilter(".csv", "Comma-Separated Values file");
         ifps[INPUT_ACTIGRAPH].addFileTypeFilter(".csv", "Comma-Separated Values file");
